@@ -40,7 +40,7 @@ Let's quickly review the equivalencies and go through some examples.
 | Read raster and vector data <br>from GRASS                 | read_RAST(),<br>read_VECT()    | gs.array.array(),<br>n/a                                |
 | Write raster and vector data<br>into GRASS                 | write_RAST(),<br>write_VECT()  | gs.array.write(),<br>n/a                                |
 | Get raster and vector info                                 | n/a,<br>vInfo()                | gs.raster_info(),<br>gs.vector_info()                   |
-| Close GRASS session                                        | unlink_.gislock()              | gs.setup.finish(),<br>gj.finish()                             |
+| Close GRASS session                                        | unlink_.gislock()              | gs.setup.finish(),<br>gj.finish()                       |
 
 : R and Python GRASS interfaces compared {.striped .hover}
 
