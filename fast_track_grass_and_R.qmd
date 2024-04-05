@@ -70,9 +70,9 @@ This is equivalent to what QGIS does when you use GRASS tools via the
 Processing Toolbox.
 
 So, the workflow goes like this: we will use `initGRASS()` to create a temporary 
-GRASS project based on the extent and CRS of a raster or vector R object, likely
-the one we want to process or one that has the extent of our study area. Hence, 
-we need to pass a reference spatial grid via the *SG* parameter. 
+GRASS project based on the extent, resolution and CRS of a raster or vector R object, 
+likely the one we want to process or one that has the extent of our study area. 
+Hence, we need to pass a reference spatial grid via the *SG* parameter. 
 Then, we'll write our R objects into the temporary GRASS project, run the desired 
 processes, export the outputs back to the R environment and done.
 
@@ -90,11 +90,19 @@ plot(r)
 
 Now, we'll load the rgrass library and start GRASS GIS with `SG = r`, so a GRASS 
 project is internally created with r's object CRS (BTW, you can check that with 
-`crs(r)`).
+`crs(r)`), extent and resolution. These latter define the GRASS GIS computational
+region that will affect all raster processing, i.e., all new raster maps generated
+within GRASS GIS will have the same extent and resolution of the map provided. 
+If you wish to change the computational region later on, you can use the 
+`g.region` GRASS tool with `execGRASS("g.region --h")`.
 
 ```{r}
 library(rgrass)
 ```
+
+Note that we also pass `tempdir()` as the folder where our GRASS temporary project
+will be created. `tempdir()` will default to whichever is the temporary folder 
+in your operative system. 
 
 ```{r}
 # path to GRASS binaries
@@ -334,7 +342,7 @@ unlink_.gislock()
 ```
 
 
-There's yet another way in which you can use GRASS and R together, and it 
+Finally, there's yet another way in which you can use GRASS and R together, and it 
 involves calling R from the GRASS terminal. In this way, *rgrass* will read all 
 GRASS GIS session environmental variables, and you won't need to use 
 initGRASS. It goes more or less like this:
