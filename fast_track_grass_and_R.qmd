@@ -13,6 +13,17 @@ The *rgrass* package is developed and maintained by Roger Bivand and can be
 found at: <https://github.com/rsbivand/rgrass/>. In this fast track tutorial, 
 we will learn how to use GRASS GIS from R.
 
+::: callout-note
+**Setup note**:
+
+To run this tutorial locally you should have GRASS GIS 8.4+, 
+[R](https://www.r-project.org/) and, optionally, 
+[RStudio](https://posit.co/download/rstudio-desktop/) installed. 
+You will also need to install *rgrass*, *terra* and *mapview*
+R packages and download the 
+[North Carolina sample dataset](https://grass.osgeo.org/sampledata/north_carolina/nc_basic_spm_grass7.zip).
+:::
+
 ## *rgrass* main funtions
 
 The main functions within **rgrass** are the following:
