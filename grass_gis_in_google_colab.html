@@ -124,14 +124,14 @@ Note
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>See Colab’s FAQ for more details: <a href="https://research.google.com/colaboratory/faq.html" class="uri">https://research.google.com/colaboratory/faq.html</a></p>
+<p>See Colab’s FAQ for more details: <a href="https://research.google.com/colaboratory/faq.html" class="uri">https://research.google.com/colaboratory/faq.html</a> and follow the Google Colab blog in Medium at <a href="https://medium.com/google-colab" class="uri">https://medium.com/google-colab</a>.</p>
 </div>
 </div>
 </section>
 <section id="why-grass-gis-in-colab" class="level1">
 <h1>Why GRASS GIS in Colab?</h1>
-<p>Since Colab offers Jupyter notebooks in a Linux environment it is really easy to install or even compile GRASS GIS there. Also, because of the integration with Google Drive, it is a great resource to run our workflows in the cloud and export the results or keep our GRASS projects and code there. This clearly facilitates teaching workshops or courses since attendants do not need to install or download anything on their own machines.</p>
-<p>There are a couple of things to consider when working with GRASS GIS within Colab though. Users will need to install GRASS GIS every time they start a new working session or notebook. Furthermore, whatever users download within Colab will last only during the current session. If the runtime gets disconnected because of inactivity, downloaded data and outputs created within Colab, will be lost. If users instead mount their own Google drive, download data and create their GRASS projects there, those will be preserved whenever the runtime is disconnected or the session closed.</p>
+<p>Since Colab offers Jupyter notebooks in a Linux environment <strong>it is really easy to install or even compile GRASS GIS there</strong>. Also, because of the integration with Google Drive, it is a great resource to run our workflows in the cloud and export the results or keep our GRASS projects and code there. This clearly facilitates teaching workshops or courses since attendants do not need to install or download anything on their own machines.</p>
+<p>There are a couple of things to consider when working with GRASS GIS within Colab though. Users will need to <em>install GRASS GIS every time they start a new working session or notebook</em>. Furthermore, whatever files users download within Colab <em>will last only during the current session</em>. If the runtime gets disconnected because of inactivity, downloaded data and outputs created within Colab, will be lost too. If users instead, mount their own Google drive, download data and create their GRASS projects there, those will be preserved even if the runtime is disconnected or the session closed.</p>
 </section>
 <section id="install-grass-gis-in-colab" class="level1">
 <h1>Install GRASS GIS in Colab</h1>
@@ -151,8 +151,8 @@ Note
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="op">!</span>grass <span class="op">--</span>config version</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
-<section id="set-working-directory-and-download-sample-data" class="level1">
-<h1>Set working directory and download sample data</h1>
+<section id="set-our-working-directory-and-download-sample-data" class="level1">
+<h1>Set our working directory and download sample data</h1>
 <p>By default we’ll have access to the <code>/root</code> folder within Colab, and any data we download will be placed there. We can change that of course, it is just a Linux file system. In any case, we should bare in mind that whatever data we download within Colab, will disappear if the runtime gets disconected because of inactivity or once we close the Colab session.</p>
 <p>Let’s get the North Carolina sample dataset into Colab to exemplify a data download workflow. We define our folders first:</p>
 <div class="cell">

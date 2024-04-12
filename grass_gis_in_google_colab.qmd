@@ -24,25 +24,28 @@ on your notebooks or even edit them.
 
 ::: {.callout-note}
 See Colab's FAQ for more details: <https://research.google.com/colaboratory/faq.html>
+and follow the Google Colab blog in Medium at <https://medium.com/google-colab>.
 :::
 
 # Why GRASS GIS in Colab?
 
-Since Colab offers Jupyter notebooks in a Linux environment it is really easy to 
-install or even compile GRASS GIS there. Also, because of the integration with 
-Google Drive, it is a great resource to run our workflows in the cloud and export
-the results or keep our GRASS projects and code there. This clearly facilitates 
-teaching workshops or courses since attendants do not need to install or 
-download anything on their own machines. 
+Since Colab offers Jupyter notebooks in a Linux environment 
+**it is really easy to install or even compile GRASS GIS there**. 
+Also, because of the integration with Google Drive, it is a great resource to 
+run our workflows in the cloud and export the results or keep our GRASS 
+projects and code there. This clearly facilitates teaching workshops or courses
+since attendants do not need to install or download anything on their own 
+machines. 
 
 There are a couple of things to consider when working with GRASS GIS within
-Colab though. Users will need to install GRASS GIS every time they start a new
-working session or notebook. Furthermore, whatever users download within Colab
-will last only during the current session. 
+Colab though. Users will need to 
+*install GRASS GIS every time they start a new working session or notebook*. 
+Furthermore, whatever files users download within Colab 
+*will last only during the current session*. 
 If the runtime gets disconnected because of inactivity, downloaded data and
-outputs created within Colab, will be lost. 
-If users instead mount their own Google drive, download data and create their 
-GRASS projects there, those will be preserved whenever the runtime is 
+outputs created within Colab, will be lost too. 
+If users instead, mount their own Google drive, download data and create their 
+GRASS projects there, those will be preserved even if the runtime is 
 disconnected or the session closed.
 
 # Install GRASS GIS in Colab
@@ -71,7 +74,7 @@ Check that GRASS GIS is installed by asking which version is there.
 !grass --config version
 ```
 
-# Set working directory and download sample data
+# Set our working directory and download sample data
 
 By default we'll have access to the `/root` folder within Colab, and any data we 
 download will be placed there. We can change that of course, it is just a Linux
