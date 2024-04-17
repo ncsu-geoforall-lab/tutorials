@@ -62,7 +62,7 @@ So we add the ppa:ubuntugis repository, update and install GRASS GIS. It might
 take a couple of minutes according to the resources available.
 
 ```{python}
-!add-apt-repository ppa:ubuntugis/ubuntugis-unstable
+!add-apt-repository -y ppa:ubuntugis/ubuntugis-unstable
 !apt update
 !apt-get install -y grass-core grass-dev
 print("INSTALLATION COMPLETE")

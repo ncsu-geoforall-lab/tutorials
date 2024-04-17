@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Veronica Andreo">
-<meta name="dcterms.date" content="2024-04-12">
+<meta name="dcterms.date" content="2024-04-17">
 
 <title>GRASS GIS in Google Colab</title>
 <style>
@@ -98,7 +98,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">April 12, 2024</p>
+      <p class="date">April 17, 2024</p>
     </div>
   </div>
   
@@ -141,7 +141,7 @@ Note
 </div>
 <p>At the time of writing this tutorial, Colab has Linux <a href="https://medium.com/google-colab/colab-updated-to-ubuntu-22-04-lts-709a91555b3c">Ubuntu 22.04.3 LTS</a>. So we add the ppa:ubuntugis repository, update and install GRASS GIS. It might take a couple of minutes according to the resources available.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="op">!</span>add<span class="op">-</span>apt<span class="op">-</span>repository ppa:ubuntugis<span class="op">/</span>ubuntugis<span class="op">-</span>unstable</span>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="op">!</span>add<span class="op">-</span>apt<span class="op">-</span>repository <span class="op">-</span>y ppa:ubuntugis<span class="op">/</span>ubuntugis<span class="op">-</span>unstable</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="op">!</span>apt update</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="op">!</span>apt<span class="op">-</span>get install <span class="op">-</span>y grass<span class="op">-</span>core grass<span class="op">-</span>dev</span>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"INSTALLATION COMPLETE"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
