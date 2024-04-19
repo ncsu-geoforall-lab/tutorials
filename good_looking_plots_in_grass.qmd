@@ -140,13 +140,17 @@ also provides an option to group by categories in a second attribute column.
 
 ```{bash}
 g.extension extension=v.histogram
+
 v.boxplot -o -r map=bridges column=WIDTH group_by=YEAR_BUILT where="YEAR_BUILT < '1920'" order=ascending plot_output=boxplot_bridges_width_per_year.png
 ```
 
 # Python
 
 ```{python}
+gs.run_command("g.extension", extension="v.histogram")
 
+gs.run_command("v.boxplot",
+map="bridges", column="WIDTH", group_by="YEAR_BUILT", where="YEAR_BUILT < '1920'", order="ascending", plot_output="boxplot_bridges_width_per_year.png", flags="or")
 ```
 :::
 
@@ -169,13 +173,16 @@ from the sampled data.
 
 ```{bash}
 g.extension extension=v.scatterplot
+
 v.scatterplot map=bridges x=YEAR_BUILT y=WIDTH trendline=polynomial degree=1 line_color=red type=density bins=10,10 file_name=scatterplot_bridges_width_vs_year.png
 ```
 
 # Python
 
 ```{python}
+gs.run_command("g.extension", extension="v.scatterplot")
 
+gs.run_command("v.scatterplot", map="bridges", x="YEAR_BUILT", y="WIDTH", trendline="polynomial", degree=1, line_color="red", type="density", bins="10,10", file_name="scatterplot_bridges_width_vs_year.png")
 ```
 :::
 
@@ -192,14 +199,16 @@ set the number of bins.
 
 ```{bash}
 g.extension extension=v.histogram
+
 v.histogram map=bridges column=WIDTH where="YEAR_BUILT < '1940'" plot_output=histogram_bridges_width.png
 ```
 
 # Python
 
 ```{python}
-g.extension extension=v.histogram
-v.histogram map=bridges column=WIDTH where="YEAR_BUILT < '1940'" plot_output=histogram_bridges_width.png
+gs.run_command("g.extension", extension="v.histogram")
+
+gs.run_command("v.histogram", map="bridges", column="WIDTH", where="YEAR_BUILT < '1940'", plot_output="histogram_bridges_width.png")
 ```
 :::
 

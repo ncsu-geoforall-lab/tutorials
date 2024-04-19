@@ -249,11 +249,17 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div id="tabset-3-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-3-1-tab">
 <div class="cell">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">g.extension</span> extension=v.histogram</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="ex">v.boxplot</span> <span class="at">-o</span> <span class="at">-r</span> map=bridges column=WIDTH group_by=YEAR_BUILT where=<span class="st">"YEAR_BUILT &lt; '1920'"</span> order=ascending plot_output=boxplot_bridges_width_per_year.png</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="ex">v.boxplot</span> <span class="at">-o</span> <span class="at">-r</span> map=bridges column=WIDTH group_by=YEAR_BUILT where=<span class="st">"YEAR_BUILT &lt; '1920'"</span> order=ascending plot_output=boxplot_bridges_width_per_year.png</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
 <div id="tabset-3-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-3-2-tab">
-
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"g.extension"</span>, extension<span class="op">=</span><span class="st">"v.histogram"</span>)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"v.boxplot"</span>,</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="bu">map</span><span class="op">=</span><span class="st">"bridges"</span>, column<span class="op">=</span><span class="st">"WIDTH"</span>, group_by<span class="op">=</span><span class="st">"YEAR_BUILT"</span>, where<span class="op">=</span><span class="st">"YEAR_BUILT &lt; '1920'"</span>, order<span class="op">=</span><span class="st">"ascending"</span>, plot_output<span class="op">=</span><span class="st">"boxplot_bridges_width_per_year.png"</span>, flags<span class="op">=</span><span class="st">"or"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 </div>
 </div>
 </div>
@@ -267,12 +273,17 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="tab-content">
 <div id="tabset-4-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-4-1-tab">
 <div class="cell">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ex">g.extension</span> extension=v.scatterplot</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="ex">v.scatterplot</span> map=bridges x=YEAR_BUILT y=WIDTH trendline=polynomial degree=1 line_color=red type=density bins=10,10 file_name=scatterplot_bridges_width_vs_year.png</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="ex">g.extension</span> extension=v.scatterplot</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="ex">v.scatterplot</span> map=bridges x=YEAR_BUILT y=WIDTH trendline=polynomial degree=1 line_color=red type=density bins=10,10 file_name=scatterplot_bridges_width_vs_year.png</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
 <div id="tabset-4-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-4-2-tab">
-
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"g.extension"</span>, extension<span class="op">=</span><span class="st">"v.scatterplot"</span>)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"v.scatterplot"</span>, <span class="bu">map</span><span class="op">=</span><span class="st">"bridges"</span>, x<span class="op">=</span><span class="st">"YEAR_BUILT"</span>, y<span class="op">=</span><span class="st">"WIDTH"</span>, trendline<span class="op">=</span><span class="st">"polynomial"</span>, degree<span class="op">=</span><span class="dv">1</span>, line_color<span class="op">=</span><span class="st">"red"</span>, <span class="bu">type</span><span class="op">=</span><span class="st">"density"</span>, bins<span class="op">=</span><span class="st">"10,10"</span>, file_name<span class="op">=</span><span class="st">"scatterplot_bridges_width_vs_year.png"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 </div>
 </div>
 </div>
@@ -286,14 +297,16 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="tab-content">
 <div id="tabset-5-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-5-1-tab">
 <div class="cell">
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="ex">g.extension</span> extension=v.histogram</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="ex">v.histogram</span> map=bridges column=WIDTH where=<span class="st">"YEAR_BUILT &lt; '1940'"</span> plot_output=histogram_bridges_width.png</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="ex">g.extension</span> extension=v.histogram</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="ex">v.histogram</span> map=bridges column=WIDTH where=<span class="st">"YEAR_BUILT &lt; '1940'"</span> plot_output=histogram_bridges_width.png</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
 <div id="tabset-5-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-5-2-tab">
 <div class="cell">
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>g.extension extension<span class="op">=</span>v.histogram</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>v.histogram <span class="bu">map</span><span class="op">=</span>bridges column<span class="op">=</span>WIDTH where<span class="op">=</span><span class="st">"YEAR_BUILT &lt; '1940'"</span> plot_output<span class="op">=</span>histogram_bridges_width.png</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"g.extension"</span>, extension<span class="op">=</span><span class="st">"v.histogram"</span>)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"v.histogram"</span>, <span class="bu">map</span><span class="op">=</span><span class="st">"bridges"</span>, column<span class="op">=</span><span class="st">"WIDTH"</span>, where<span class="op">=</span><span class="st">"YEAR_BUILT &lt; '1940'"</span>, plot_output<span class="op">=</span><span class="st">"histogram_bridges_width.png"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
 </div>
