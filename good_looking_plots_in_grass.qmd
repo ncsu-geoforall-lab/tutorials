@@ -1,0 +1,216 @@
+---
+title: "Making plots with GRASS GIS"
+author: "Veronica Andreo"
+date: today
+format: html
+engine: knitr
+execute: 
+  eval: false
+---
+
+In previous tutorials we saw examples of how to convert GRASS GIS
+raster and vector maps into Python and R objects to perform data 
+analysis and visualizations. 
+There are some GRASS GIS tools, mostly based in the well known 
+[matplotlib](https://matplotlib.org/) Python library,
+that allow us to create plots for data visualization without the
+need to explicitly convert GRASS data. 
+Here are these plotting tools for raster, vector and time series
+data within GRASS GIS:
+
+| Raster                                                                                        | Vector                                                                                  | Time series                                                                               |
+|-----------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------|
+| [r.boxplot](https://grass.osgeo.org/grass-stable/manuals/addons/r.boxplot.html)               | [v.scatterplot](https://grass.osgeo.org/grass-stable/manuals/addons/v.scatterplot.html) | [g.gui.tplot](https://grass.osgeo.org/grass-stable/manuals/g.gui.tplot.html)              |
+| [r.series.boxplot](https://grass.osgeo.org/grass-stable/manuals/addons/r.series.boxplot.html) | [v.boxplot](https://grass.osgeo.org/grass-stable/manuals/addons/v.boxplot.html)         | [t.rast.boxplot](https://grass.osgeo.org/grass-stable/manuals/addons/t.rast.boxplot.html) |
+|    | [v.histogram](https://grass.osgeo.org/grass-stable/manuals/addons/v.histogram.html)     | [t.rast.line](https://grass.osgeo.org/grass-stable/manuals/addons/t.rast.line.html)       |
+
+
+In this tutorial, we'll demonstrate their use with maps from the North Carolina
+[full dataset](https://grass.osgeo.org/sampledata/north_carolina/nc_spm_08_grass7.zip). 
+We'll also use a special 
+[mapset containing MODIS LST data products](https://grass.osgeo.org/sampledata/north_carolina/nc_spm_mapset_modis2015_2016_lst_grass8.zip)
+to exemplify tools' usage with time series data. While these tools can be invoked 
+from the GUI menu or Tools tab, we will show how the GRASS commands look like 
+so you can run them from the terminal or the Console tab of the GUI. 
+We also show the command wrapping for Python scripts using the grass.script package. 
+You can test them in the Python tab. The use of commands facilitates reproducibility 
+and quick testing of small changes and tweaks.
+
+
+## Raster plotting tools
+
+### [r.boxplot](https://grass.osgeo.org/grass-stable/manuals/addons/r.boxplot.html)
+
+`r.boxplot` is a GRASS GIS addon that allows us to make boxplots with our GRASS
+raster maps. It also allows to use a zonal map like a land cover classification 
+to draw boxplots of a certain variable per classes, i.e., land cover classes. 
+The tool then contemplates some nice features like the possibility to plot per 
+class boxplots of the same color that the class is assigned in the zonal map or 
+create a point vector map with the locations of the outliers, among other tweaks. 
+Let's see an example using a zonal map, plotting outliers and coloring boxes
+with the colors of the zonal map classes:
+
+::: {.panel-tabset}
+# GRASS
+```{bash}
+g.extension extension=r.boxplot
+r.boxplot -oc input=elevation zones=landclass96 output=r.boxplot.png
+```
+
+# Python
+```{python}
+gs.run_command("g.extension", extension="r.boxplot")
+gs.run_command("r.boxplot", 
+               input="elevation", 
+               zones="landclass96", 
+               raster_statistics="median,IQR", 
+               output="r.boxplot.png",
+               flags="oc")
+```
+:::
+
+![](img/r.boxplot.png)
+
+### [r.series.boxplot](https://grass.osgeo.org/grass-stable/manuals/addons/r.series.boxplot.html)
+
+`r.series.boxplot` draws boxplots of a series of input raster maps that might 
+represent different times, spectral bands in satellite imagery or other kind
+of variation. If users are interested in e.g., ploting the spectral signature
+of different land cover classes, they can alternatively set masks and recreate
+the boxplot series. Let's see an example for developed and forested classes.
+
+::: {.panel-tabset}
+# GRASS
+
+```{bash}
+# install the extension
+g.extension extension=r.series.boxplot
+# add landsat mapset to the list of accessible mapsets
+g.mapsets mapset=landsat operation=add
+# list of maps and labels
+bands=`g.list type=raster pattern="lsat7_2000*" exclude="*6*,*8*" sep=comma`
+labels="band1,band2,band3,band4,band5,band7"
+
+r.mask raster=landclass96 maskcats=1
+r.series.boxplot map=$bands bxcolor=grey text_labels=$labels output=r.series.boxplot_developed.png
+
+r.mask -r 
+
+r.mask raster=landclass96 maskcats=5
+r.series.boxplot map=$bands bxcolor=grey \
+  text_labels=$labels output=r.series.boxplot_forest.png
+```
+
+# Python
+
+```{python}
+gs.run_command("g.extension", extension="r.series.boxplot")
+
+gs.run_command("g.mapsets", mapset="landsat", operation="add")
+
+bands = gs.list_grouped(type="raster", pattern="lsat7_2000*", exclude="*6*,*8*")["landsat"]
+labels = ["band1", "band2", "band3", "band4", "band5", "band7", "band8"]
+
+gs.run_command("r.mask", raster="landclass96", maskcats="1")
+gs.run_command("r.series.boxplot", map=bands, bxcolor="grey", text_labels=labels, output="r.series.boxplot_developed.png")
+
+gs.run_command("r.mask", flags="r")
+
+gs.run_command("r.mask", raster="landclass96", maskcats="5")
+gs.run_command("r.series.boxplot", map=bands, bxcolor="grey", text_labels=labels, output="r.series.boxplot_forested.png")
+```
+:::
+
+::: {layout-ncol=2}
+![Class developed](img/r.series.boxplot_developed.png)
+
+![Class forest](img/r.series.boxplot_forested.png)
+:::
+
+
+## Vector plotting tools
+
+### [v.boxplot](https://grass.osgeo.org/grass-stable/manuals/addons/v.boxplot.html)
+
+`v.boxplot` draws the boxplot of values in a vector map attribute column. It 
+also provides an option to group by categories in a second attribute column.
+
+::: {.panel-tabset}
+# GRASS
+
+```{bash}
+g.extension extension=v.histogram
+v.boxplot -o -r map=bridges column=WIDTH group_by=YEAR_BUILT where="YEAR_BUILT < '1920'" order=ascending plot_output=boxplot_bridges_width_per_year.png
+```
+
+# Python
+
+```{python}
+
+```
+:::
+
+![](img/boxplot_bridges_width_per_year.png)
+
+
+### [v.scatterplot](https://grass.osgeo.org/grass-stable/manuals/addons/v.scatterplot.html)
+
+`v.scatterplot` creates a scatterplot with the values of two attribute columns 
+from a vector map. It provides many arguments to control different plot features
+and it exposes some nice matplotlib functionality to do bining, add trend lines
+and confidence ellipses. While there's
+[r.scatterplot](https://grass.osgeo.org/grass-stable/manuals/addons/r.scatterplot.html) 
+for raster data, it does not create a plot but a vector map. 
+Users can however sample raster maps with a vector and then create scatterplots 
+from the sampled data. 
+
+::: {.panel-tabset}
+# GRASS
+
+```{bash}
+g.extension extension=v.scatterplot
+v.scatterplot map=bridges x=YEAR_BUILT y=WIDTH trendline=polynomial degree=1 line_color=red type=density bins=10,10 file_name=scatterplot_bridges_width_vs_year.png
+```
+
+# Python
+
+```{python}
+
+```
+:::
+
+![](img/scatterplot_bridges_width_vs_year.png)
+
+### [v.histogram](https://grass.osgeo.org/grass-stable/manuals/addons/v.histogram.html)
+
+`v.histogram` draws a histogram of the values in a vector map attribute column.
+The tool provides basic options to select values according to a condition and 
+set the number of bins. 
+
+::: {.panel-tabset}
+# GRASS
+
+```{bash}
+g.extension extension=v.histogram
+v.histogram map=bridges column=WIDTH where="YEAR_BUILT < '1940'" plot_output=histogram_bridges_width.png
+```
+
+# Python
+
+```{python}
+g.extension extension=v.histogram
+v.histogram map=bridges column=WIDTH where="YEAR_BUILT < '1940'" plot_output=histogram_bridges_width.png
+```
+:::
+
+![](img/histogram_bridges_width.png)
+
+## Time series plotting tools
+
+### [g.gui.tplot](https://grass.osgeo.org/grass-stable/manuals/g.gui.tplot.html)
+
+
+### [t.rast.boxplot](https://grass.osgeo.org/grass-stable/manuals/addons/t.rast.boxplot.html)
+
+
+### [t.rast.line](https://grass.osgeo.org/grass-stable/manuals/addons/t.rast.line.html)
