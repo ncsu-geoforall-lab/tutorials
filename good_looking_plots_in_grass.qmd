@@ -109,7 +109,7 @@ gs.run_command("g.extension", extension="r.series.boxplot")
 gs.run_command("g.mapsets", mapset="landsat", operation="add")
 
 bands = gs.list_grouped(type="raster", pattern="lsat7_2000*", exclude="*6*,*8*")["landsat"]
-labels = ["band1", "band2", "band3", "band4", "band5", "band7", "band8"]
+labels = ["band1", "band2", "band3", "band4", "band5", "band7"]
 
 gs.run_command("r.mask", raster="landclass96", maskcats="1")
 gs.run_command("r.series.boxplot", map=bands, bxcolor="grey", text_labels=labels, output="r.series.boxplot_developed.png")
@@ -230,12 +230,14 @@ LSD DAY monthly raster time series.
 # GRASS
 
 ```{bash}
+g.region -p raster=MOD11B3.A2015001.h11v05.single_LST_Day_6km
 g.gui.tplot -l strds=LST_Day_monthly coordinates=413831,196000 xlabel="Time" ylabel="LST (K*50)" output=LST_plot.png size=1000,800
 ```
 
 # Python
 
 ```{python}
+gs.read_command("g.region", raster="MOD11B3.A2015001.h11v05.single_LST_Day_6km")
 gs.run_command("g.gui.tplot", strds="LST_Day_monthly", coordinates="413831,196000", xlabel="Time", ylabel="LST (K*50)", output="LST_plot.png", size="1000,800", flags="l")
 ```
 :::
@@ -272,8 +274,8 @@ Carolina.
 
 ```{bash}
 g.extension extension=t.rast.boxplot
-g.region -p vector=boundary_state align=MOD11B3.A2015001.h11v05.single_LST_Day_6km
-r.mask vector=boundary_state
+g.region -p vector=boundary_county align=MOD11B3.A2015001.h11v05.single_LST_Day_6km
+r.mask vector=boundary_county
 t.rast.boxplot -o input=LST_Day_monthly dpi=300 rotate_labels=90 font_size=11 date_format="%Y-%m" bx_width=0.7 bx_color=195:194:194:255 flier_color=77:77:77:255
 ```
 
@@ -281,8 +283,8 @@ t.rast.boxplot -o input=LST_Day_monthly dpi=300 rotate_labels=90 font_size=11 da
 
 ```{python}
 gs.run_command("g.extension", extension="t.rast.boxplot")
-gs.run_command("g.region", vector="boundary_state", align="MOD11B3.A2015001.h11v05.single_LST_Day_6km")
-gs.run_command("r.mask", vector="boundary_state")
+gs.read_command("g.region", vector="boundary_county", align="MOD11B3.A2015001.h11v05.single_LST_Day_6km")
+gs.run_command("r.mask", vector="boundary_county")
 gs.run_command("t.rast.boxplot", input="LST_Day_monthly", dpi="300", rotate_labels=90, font_size=11, date_format="%Y-%m", bx_width=0.7, bx_color="195:194:194:255", flier_color="77:77:77:255", flags="o")
 ```
 :::
@@ -309,13 +311,13 @@ t.rast.boxplot -o input=LST_Day_monthly dpi=300 rotate_labels=90 font_size=11 da
 # Python
 
 ```{python}
-gs.run_command("r.mask", vector="geology" where="GEO_NAME LIKE '%Zat%'")
-gs.run_command("t.rast.boxplot", input="LST_Day_monthly", dpi=300, rotate_labels=90 font_size=11, date_format="%Y-%m", bx_width=0.7, bx_color="195:194:194:255", flier_color="77:77:77:255", flags="o")
+gs.run_command("r.mask", vector="geology", where="GEO_NAME LIKE '%Zat%'")
+gs.run_command("t.rast.boxplot", input="LST_Day_monthly", dpi=300, rotate_labels=90, font_size=11, date_format="%Y-%m", bx_width=0.7, bx_color="195:194:194:255", flier_color="77:77:77:255", flags="o")
 
 gs.run_command("r.mask", flags="r")
 
 gs.run_command("r.mask", vector="geology", where="GEO_NAME LIKE '%Qp%'")
-gs.run_command("t.rast.boxplot", input="LST_Day_monthly", dpi=300, rotate_labels=90 font_size=11, date_format="%Y-%m", bx_width=0.7, bx_color="195:194:194:255", flier_color="77:77:77:255", flags="o")
+gs.run_command("t.rast.boxplot", input="LST_Day_monthly", dpi=300, rotate_labels=90, font_size=11, date_format="%Y-%m", bx_width=0.7, bx_color="195:194:194:255", flier_color="77:77:77:255", flags="o")
 ```
 :::
 

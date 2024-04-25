@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Veronica Andreo">
-<meta name="dcterms.date" content="2024-04-24">
+<meta name="dcterms.date" content="2024-04-25">
 
 <title>Making plots with GRASS GIS</title>
 <style>
@@ -98,7 +98,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">April 24, 2024</p>
+      <p class="date">April 25, 2024</p>
     </div>
   </div>
   
@@ -200,7 +200,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"g.mapsets"</span>, mapset<span class="op">=</span><span class="st">"landsat"</span>, operation<span class="op">=</span><span class="st">"add"</span>)</span>
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>bands <span class="op">=</span> gs.list_grouped(<span class="bu">type</span><span class="op">=</span><span class="st">"raster"</span>, pattern<span class="op">=</span><span class="st">"lsat7_2000*"</span>, exclude<span class="op">=</span><span class="st">"*6*,*8*"</span>)[<span class="st">"landsat"</span>]</span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>labels <span class="op">=</span> [<span class="st">"band1"</span>, <span class="st">"band2"</span>, <span class="st">"band3"</span>, <span class="st">"band4"</span>, <span class="st">"band5"</span>, <span class="st">"band7"</span>, <span class="st">"band8"</span>]</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>labels <span class="op">=</span> [<span class="st">"band1"</span>, <span class="st">"band2"</span>, <span class="st">"band3"</span>, <span class="st">"band4"</span>, <span class="st">"band5"</span>, <span class="st">"band7"</span>]</span>
 <span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"r.mask"</span>, raster<span class="op">=</span><span class="st">"landclass96"</span>, maskcats<span class="op">=</span><span class="st">"1"</span>)</span>
 <span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"r.series.boxplot"</span>, <span class="bu">map</span><span class="op">=</span>bands, bxcolor<span class="op">=</span><span class="st">"grey"</span>, text_labels<span class="op">=</span>labels, output<span class="op">=</span><span class="st">"r.series.boxplot_developed.png"</span>)</span>
@@ -324,12 +324,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="tab-content">
 <div id="tabset-6-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-6-1-tab">
 <div class="cell">
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="ex">g.gui.tplot</span> <span class="at">-l</span> strds=LST_Day_monthly coordinates=413831,196000 xlabel=<span class="st">"Time"</span> ylabel=<span class="st">"LST (K*50)"</span> output=LST_plot.png size=1000,800</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="ex">g.region</span> <span class="at">-p</span> raster=MOD11B3.A2015001.h11v05.single_LST_Day_6km</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="ex">g.gui.tplot</span> <span class="at">-l</span> strds=LST_Day_monthly coordinates=413831,196000 xlabel=<span class="st">"Time"</span> ylabel=<span class="st">"LST (K*50)"</span> output=LST_plot.png size=1000,800</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
 <div id="tabset-6-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-6-2-tab">
 <div class="cell">
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"g.gui.tplot"</span>, strds<span class="op">=</span><span class="st">"LST_Day_monthly"</span>, coordinates<span class="op">=</span><span class="st">"413831,196000"</span>, xlabel<span class="op">=</span><span class="st">"Time"</span>, ylabel<span class="op">=</span><span class="st">"LST (K*50)"</span>, output<span class="op">=</span><span class="st">"LST_plot.png"</span>, size<span class="op">=</span><span class="st">"1000,800"</span>, flags<span class="op">=</span><span class="st">"l"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>gs.read_command(<span class="st">"g.region"</span>, raster<span class="op">=</span><span class="st">"MOD11B3.A2015001.h11v05.single_LST_Day_6km"</span>)</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"g.gui.tplot"</span>, strds<span class="op">=</span><span class="st">"LST_Day_monthly"</span>, coordinates<span class="op">=</span><span class="st">"413831,196000"</span>, xlabel<span class="op">=</span><span class="st">"Time"</span>, ylabel<span class="op">=</span><span class="st">"LST (K*50)"</span>, output<span class="op">=</span><span class="st">"LST_plot.png"</span>, size<span class="op">=</span><span class="st">"1000,800"</span>, flags<span class="op">=</span><span class="st">"l"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
 </div>
@@ -354,16 +356,16 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div id="tabset-7-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-7-1-tab">
 <div class="cell">
 <div class="sourceCode cell-code" id="cb13"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="ex">g.extension</span> extension=t.rast.boxplot</span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="ex">g.region</span> <span class="at">-p</span> vector=boundary_state align=MOD11B3.A2015001.h11v05.single_LST_Day_6km</span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="ex">r.mask</span> vector=boundary_state</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="ex">g.region</span> <span class="at">-p</span> vector=boundary_county align=MOD11B3.A2015001.h11v05.single_LST_Day_6km</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="ex">r.mask</span> vector=boundary_county</span>
 <span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="ex">t.rast.boxplot</span> <span class="at">-o</span> input=LST_Day_monthly dpi=300 rotate_labels=90 font_size=11 date_format=<span class="st">"%Y-%m"</span> bx_width=0.7 bx_color=195:194:194:255 flier_color=77:77:77:255</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
 <div id="tabset-7-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-7-2-tab">
 <div class="cell">
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"g.extension"</span>, extension<span class="op">=</span><span class="st">"t.rast.boxplot"</span>)</span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"g.region"</span>, vector<span class="op">=</span><span class="st">"boundary_state"</span>, align<span class="op">=</span><span class="st">"MOD11B3.A2015001.h11v05.single_LST_Day_6km"</span>)</span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"r.mask"</span>, vector<span class="op">=</span><span class="st">"boundary_state"</span>)</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>gs.read_command(<span class="st">"g.region"</span>, vector<span class="op">=</span><span class="st">"boundary_county"</span>, align<span class="op">=</span><span class="st">"MOD11B3.A2015001.h11v05.single_LST_Day_6km"</span>)</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"r.mask"</span>, vector<span class="op">=</span><span class="st">"boundary_county"</span>)</span>
 <span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"t.rast.boxplot"</span>, <span class="bu">input</span><span class="op">=</span><span class="st">"LST_Day_monthly"</span>, dpi<span class="op">=</span><span class="st">"300"</span>, rotate_labels<span class="op">=</span><span class="dv">90</span>, font_size<span class="op">=</span><span class="dv">11</span>, date_format<span class="op">=</span><span class="st">"%Y-%m"</span>, bx_width<span class="op">=</span><span class="fl">0.7</span>, bx_color<span class="op">=</span><span class="st">"195:194:194:255"</span>, flier_color<span class="op">=</span><span class="st">"77:77:77:255"</span>, flags<span class="op">=</span><span class="st">"o"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
@@ -387,13 +389,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div id="tabset-8-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-8-2-tab">
 <div class="cell">
-<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"r.mask"</span>, vector<span class="op">=</span><span class="st">"geology"</span> where<span class="op">=</span><span class="st">"GEO_NAME LIKE '%Zat%'"</span>)</span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"t.rast.boxplot"</span>, <span class="bu">input</span><span class="op">=</span><span class="st">"LST_Day_monthly"</span>, dpi<span class="op">=</span><span class="dv">300</span>, rotate_labels<span class="op">=</span><span class="dv">90</span> font_size<span class="op">=</span><span class="dv">11</span>, date_format<span class="op">=</span><span class="st">"%Y-%m"</span>, bx_width<span class="op">=</span><span class="fl">0.7</span>, bx_color<span class="op">=</span><span class="st">"195:194:194:255"</span>, flier_color<span class="op">=</span><span class="st">"77:77:77:255"</span>, flags<span class="op">=</span><span class="st">"o"</span>)</span>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"r.mask"</span>, vector<span class="op">=</span><span class="st">"geology"</span>, where<span class="op">=</span><span class="st">"GEO_NAME LIKE '%Zat%'"</span>)</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"t.rast.boxplot"</span>, <span class="bu">input</span><span class="op">=</span><span class="st">"LST_Day_monthly"</span>, dpi<span class="op">=</span><span class="dv">300</span>, rotate_labels<span class="op">=</span><span class="dv">90</span>, font_size<span class="op">=</span><span class="dv">11</span>, date_format<span class="op">=</span><span class="st">"%Y-%m"</span>, bx_width<span class="op">=</span><span class="fl">0.7</span>, bx_color<span class="op">=</span><span class="st">"195:194:194:255"</span>, flier_color<span class="op">=</span><span class="st">"77:77:77:255"</span>, flags<span class="op">=</span><span class="st">"o"</span>)</span>
 <span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"r.mask"</span>, flags<span class="op">=</span><span class="st">"r"</span>)</span>
 <span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"r.mask"</span>, vector<span class="op">=</span><span class="st">"geology"</span>, where<span class="op">=</span><span class="st">"GEO_NAME LIKE '%Qp%'"</span>)</span>
-<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"t.rast.boxplot"</span>, <span class="bu">input</span><span class="op">=</span><span class="st">"LST_Day_monthly"</span>, dpi<span class="op">=</span><span class="dv">300</span>, rotate_labels<span class="op">=</span><span class="dv">90</span> font_size<span class="op">=</span><span class="dv">11</span>, date_format<span class="op">=</span><span class="st">"%Y-%m"</span>, bx_width<span class="op">=</span><span class="fl">0.7</span>, bx_color<span class="op">=</span><span class="st">"195:194:194:255"</span>, flier_color<span class="op">=</span><span class="st">"77:77:77:255"</span>, flags<span class="op">=</span><span class="st">"o"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"t.rast.boxplot"</span>, <span class="bu">input</span><span class="op">=</span><span class="st">"LST_Day_monthly"</span>, dpi<span class="op">=</span><span class="dv">300</span>, rotate_labels<span class="op">=</span><span class="dv">90</span>, font_size<span class="op">=</span><span class="dv">11</span>, date_format<span class="op">=</span><span class="st">"%Y-%m"</span>, bx_width<span class="op">=</span><span class="fl">0.7</span>, bx_color<span class="op">=</span><span class="st">"195:194:194:255"</span>, flier_color<span class="op">=</span><span class="st">"77:77:77:255"</span>, flags<span class="op">=</span><span class="st">"o"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
 </div>
