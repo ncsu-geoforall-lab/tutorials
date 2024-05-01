@@ -183,7 +183,7 @@ and [v.out.ogr](https://grass.osgeo.org/grass-stable/manuals/v.out.ogr.html),
 to directly save our outputs into common raster or vector files respectively.
 
 ```{r}
-execGRASS("r.out.gdal", input="slope", output="slope.tif", format="GTiff")
+execGRASS("r.out.gdal", input="slope", output="slope.tif", format="GTiff", flags="overwrite")
 ```
 
 
@@ -265,7 +265,7 @@ rast_list
 rast_list <- attributes(rast_list)$resOut
 
 # import elevation and landuse
-to_import <- rast_list[c(3,7)]
+to_import <- c("elevation", "landuse") # optionally, by position: rast_list[c(3,7)]
 
 maplist <- list()
 for (i in to_import) {
