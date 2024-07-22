@@ -187,7 +187,7 @@ drive.mount("/content/drive")
 
 We can also mount our drive directly from the Colab interface as shown below: 
 
-![](/img/colab_mount_gdrive.png)
+![](img/colab_mount_gdrive.png)
 
 Once the GDrive is mounted, we can either create a new project and start GRASS 
 GIS there as shown above or start GRASS within an existing GRASS project in 
