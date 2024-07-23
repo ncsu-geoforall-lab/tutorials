@@ -255,12 +255,15 @@ and also because we have leap years. In this case, the option `increment="8 days
 will give wrong results. The solution is to create a text file containing
 map name, start and end time, and pass it with the `file` option. 
 
-Luckily, this can be done programmatically, and tools such as 
-[i.modis.import](https://grass.osgeo.org/grass83/manuals/addons/i.modis.import.html)
-even do that for you after downloading products. Since most data file names
-come with some indication of date, we can use that to create our file. See
+Luckily, this can be done programmatically. Indeed, most data file names
+come with some indication of date that we can use to create our file. See
 for example this 
-[small python script](https://grasswiki.osgeo.org/wiki/Temporal_data_processing#Creating_a_STRDS_and_registering_maps).
+[small python script](https://grasswiki.osgeo.org/wiki/Temporal_data_processing#Creating_a_STRDS_and_registering_maps) or the shell example within 
+[t.rast.aggregate.ds](https://grass.osgeo.org/grass-stable/manuals/t.rast.aggregate.ds.html#modis-satellite-sensor-daily-data-aggregation-to-8-days)
+manual.
+Furthermore, tools such as 
+[i.modis.import](https://grass.osgeo.org/grass-stable/manuals/addons/i.modis.import.html)
+will create the registration file for you after importing products into GRASS GIS. 
 
 A somehow similar case happens when we work with imagery data. Usually, they
 represent time instances (not intervals, i.e., no end date). Hence, to register
@@ -474,3 +477,4 @@ lst.plot.line(0, [1,2,3], subplots=False);
 ```
 
 
+## References
