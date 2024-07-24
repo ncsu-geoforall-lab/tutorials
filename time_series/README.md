@@ -28,8 +28,6 @@
   - visualizations
 
 - Part 6:
-  - extractions
-  - selection & sampling: t.select, t.sample
   - querying with vectors: t.rast.what, t.vect.observe.strds, t.vect.what.strds, t.rast.whatcsv, t.rast.what.aggr, v.what.strds.timestamps
   - zonal stats: SUHI? v.strds.stats
   - visualizations
@@ -40,4 +38,7 @@
   - t.rast.out.xyz
 
 - Part 8:
-  - topology: t.topology, t.shift, t.snap, t.merge
+  - extractions
+  - topology: t.topology, t.shift, t.snap, t.merge, t.select, t.sample
+  - t.copy, t.remove, t.unregister
+  - t.support

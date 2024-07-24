@@ -272,6 +272,7 @@ names and start time only. Tools like
 [i.sentinel.import](https://grass.osgeo.org/grass-stable/manuals/addons/i.sentinel.import.html) or 
 [i.landsat.import](https://grass.osgeo.org/grass-stable/manuals/addons/i.landsat.import.html) 
 can create this file for you when you import data into GRASS GIS. 
+<!-- https://training.gismentors.eu/grass-gis-irsae-winter-course-2018/_static/scripts/sentinel-timestamp.py -->
 
 ::: {.callout-note}
 Have a look at the 
