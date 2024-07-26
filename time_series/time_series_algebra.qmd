@@ -76,15 +76,39 @@ some examples from the manual page:
 - `C = A * map(constant_value)`: C will contain all raster maps from A multiplied by the raster map 'constant_value' (a map without time stamp).
 - `B = if(A > 0.0 && A[-1] > 0.0 && A[-2] > 0.0, start_doy(A, 0), 0)`: B will have the DOY for all maps from A where conditions are met at three consecutive time intervals, otherwise put 0.
 
-
 Let's see some examples using the LST daily time series from northern Italy. We
 start with something simple to also refresh what we learnt in the previous
 tutorial about aggregations.
 
-<!-- 
-t.rast.mapcalc input=tempmean_monthly output=january_under_0 basename=january_under_0 \
-expression="if(start_month() == 1 && tempmean_monthly > 0, null(), tempmean_monthly)" 
--->
+```{python}
+#| echo: false
+
+import os
+import sys
+import subprocess
+
+# GRASS GIS database variables
+grassbin = "grass-dev"
+grassdata = os.path.join(os.path.expanduser('~'), "grassdata")
+project = "eu_laea"
+mapset = "italy_LST_daily"
+
+sys.path.append(
+    subprocess.check_output([grassbin, "--config", "python_path"], text=True).strip()
+)
+```
+
+```{python}
+#| echo: false
+
+# Import the GRASS GIS packages we need
+import grass.script as gs
+import grass.jupyter as gj
+
+# Start the GRASS GIS Session
+session = gj.init(grassdata, project, mapset);
+```
+
 
 ### Anomalies
 
