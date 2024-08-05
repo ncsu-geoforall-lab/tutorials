@@ -4,115 +4,98 @@ author: Veronica Andreo
 format: html
 ---
 
-In the same way there are Python packages that allow us to interact with GRASS GIS tools and data, there is an R package, [**rgrass**](https://cran.r-project.org/web/packages/rgrass/index.html), that serves as the interface between GRASS and R. The *rgrass* package is developed and maintained by @rgrass and can be found at: <https://github.com/rsbivand/rgrass/>. In this fast track tutorial, we'll learn how to use GRASS GIS from R.
+In the same way there are Python packages that allow us to interact with GRASS GIS tools and data, there is an R package, [**rgrass**](https://cran.r-project.org/web/packages/rgrass/index.html), that serves as the interface between GRASS GIS and R. The *rgrass* package is developed and maintained by @rgrass and can be found at: <https://github.com/rsbivand/rgrass/>. In this fast track tutorial, we will learn how to use GRASS GIS from R.
 
 ## Main funtions
 
 The main functions within **rgrass** are the following:
 
--   `initGRASS()`: it starts a GRASS GIS session from R.
--   `execGRASS()`: it executes GRASS GIS commands from R.
--   `gmeta()`: it prints GRASS GIS session metadata: database, project, mapset, computational region settings and CRS details.
--   `read_VECT()` and `read_RAST()`: they read vector and raster maps from a GRASS project into R.
--   `write_VECT()` and `write_RAST()`: they write vector and raster objects from R into a GRASS GIS project.
+-   `initGRASS()` starts a GRASS session from R.
+-   `execGRASS()` executes GRASS commands from R.
+-   `gmeta()` prints GRASS session metadata: database, project, mapset, computational region settings and CRS details.
+-   `read_VECT()` and `read_RAST()` read vector and raster maps from a GRASS project into R.
+-   `write_VECT()` and `write_RAST()` write vector and raster objects from R into a GRASS project.
 
 ::: callout-note
-For further details on *rgrass* functionality, use examples and data format coercion, see: <https://rsbivand.github.io/rgrass/>.
+For further details on *rgrass* functionality, examples and data format coercion, see: <https://rsbivand.github.io/rgrass/>.
 :::
 
-## Basic Usage: Choose your own adventure
+## Basic usage: Choose your own adventure
 
-If you already use GRASS as your geospatial data processing engine, you most likely have your spatial data within GRASS projects. You might need however to do some statistical analysis, some modelling and prediction or create publication ready visualizations in R. In such cases, similar to how it works for the GRASS Python API within Jupyter notebooks (<link to python tutorial>), you can start a GRASS session from R or RStudio.
+If you already use GRASS GIS as your geospatial data processing engine, you most likely have your spatial data within GRASS projects. You might need however to do some statistical analysis, some modelling and prediction or create publication ready visualizations in R. In such cases you can start a GRASS session from R or RStudio.
 
 If you are not a regular GRASS user, you probably don't care about GRASS projects, and you just want to use GRASS functionality **because you know it rocks!** Well, *rgrass* gets you covered in such cases, too!
 
-Let's see the general basic steps and then we'll dive into the details:
+Let's see the general basic steps and then we will dive into the details:
 
+1.  Make sure GRASS GIS is installed.
 1.  Open R (or RStudio)
-2.  Load `rgrass` library with `library(rgrass)`
-3.  Start a GRASS GIS session with `initGRASS()` in an existent or temporary project
-4.  Use GRASS GIS modules through `execGRASS()`
-5.  Use `read_VECT()`, `read_RAST()`, `write_VECT()` and `write_RAST()` to read data from and write data into GRASS database
+1.  Load `rgrass` library with `library(rgrass)`
+1.  Start a GRASS session with `initGRASS()` in an existing or temporary project
+1.  Use GRASS tools through `execGRASS()`
+1.  Use `read_VECT()`, `read_RAST()`, `write_VECT()` and `write_RAST()` to read data from and write data into GRASS database
 
 ### A. You have GRASS projects
 
-Let's see an example for the case when we do all our geospatial data processing within GRASS and hence have all the spatial data organized within projects and mapsets but we need to run some statistical analysis, modelling and prediction or visualization in R.
+Let's see an example for the case when we do all our geospatial data processing within GRASS GIS and hence have all the spatial data organized within projects and mapsets but we need to run some statistical analysis, modelling and prediction or visualization in R.
 
-We start R or Rstudio and load the `rgrass` library. It will tell us that GRASS is not running, but we know that already... and that's about to change in a moment.
+We start R or Rstudio and load the `rgrass` library. It will tell us that GRASS GIS is not running, but we know that already... and that's about to change in a moment.
 
 ```{r}
 library(rgrass)
 ```
 
-We'll next start GRASS from within R or RStudio using the `initGRASS()` function. Since we want to start GRASS in a specific project and mapset, we need to specify them. Optionally, we specify which GRASS binary to use. This might be useful in the case we have many GRASS versions in our system. If not provided, `initGRASS()` will attempt to find it in default locations depending on your operative system.
+We will next start GRASS GIS from within R or RStudio using the `initGRASS()` function. Since we want to start GRASS GIS in a specific project and mapset, we need to specify them. Optionally, we specify which GRASS binary to use with `gisBase` parameter. This might be useful in the case we have many GRASS versions in our system. If not provided, `initGRASS()` will attempt to find it in default locations depending on your operating system.
 
 ```{r}
 #| label: grass_init
 #| message: false
 #| panel: tabset
 
-# path to GRASS binaries
-grassbin <- system("grass --config path", intern = TRUE)
-# path to GRASS database
-grassdata <- path.expand("~/grassdata/")
-# project name
-project <- "nc_basic_spm_grass7"
-# mapset name
-mapset <- "PERMANENT"
-
 # start GRASS GIS from R
-initGRASS(gisBase = grassbin, 
-          gisDbase = grassdata, 
-          location = project, 
-          mapset = mapset, 
+initGRASS(gisDbase = path.expand("~/grassdata/"),
+          location = "nc_basic_spm_grass7",
+          mapset = "PERMANENT",
           override = TRUE,
-          remove_GISRC= TRUE)
+          remove_GISRC = TRUE)
 ```
 
-We can now list and read our GRASS raster and vector maps into R and do our statistical analysis, modelling and/or visualizations using other R packages. Obviously, we can also use *rgrass* as a mere interface to analyze data within GRASS, i.e., no reading from or writing to GRASS needed, we can just use GRASS from R, equivalent to what we do with the GRASS Python API (<link to the python 
-tutorial>). Here, we'll demonstrate the use of all the main rgrass functions mentioned above.
+We can now list and read our GRASS raster and vector maps into R and do our statistical analysis, modeling and/or visualizations using other R packages. Here, we will demonstrate the use of all the main rgrass functions mentioned above.
 
 Let's then list our GRASS raster and vector maps:
 
 ```{r}
-# list GRASS raster maps (equivalent to `g.list type=raster`)
-execGRASS("g.list", parameters = list(type="raster"))
+execGRASS("g.list", type="raster")
 ```
 
 ```{r}
-# list GRASS vector maps (equivalent to `g.list type=vector`)
-execGRASS("g.list", parameters = list(type="vector"))
+execGRASS("g.list", type="vector")
 ```
 
 The resulting map lists could be saved in an R object that we can subset later in case we want to import several but not all raster maps, for example. Let's see how to do that.
 
 ```{r}
 # save map list in an object
-rast_list <- execGRASS("g.list", parameters = list(type="raster"))
-rast_list
-```
+rast_list <- execGRASS("g.list", type="raster")
 
-```{r}
-# retrieve only the maps list and overwrite rast_list
+# retrieve only the map list from standard output
 rast_list <- attributes(rast_list)$resOut
 
 # import elevation and landuse
-to_import <- rast_list[c(3,7)]
+to_import <- rast_list[c(2,6)]
 
 maplist <- list()
 for (i in to_import) {
-  maplist[i] <- read_RAST(i)
+  maplist[[i]] <- read_RAST(i)
 }
 
 maplist
 ```
 
-GRASS raster and vector maps are translated into *terra*'s packege SpatRaster and SpatVector objects, respectively. These objects can then, within R, be easily coerced to other types of spatial objects such as simple features (sf), stars, etc.
-
-Remember that raster objects will always be exported from GRASS following the computational region settings. So, bear that in mind when reading into R which will hold them in memory. Vectors however will be exported in their full extent.
+GRASS raster and vector maps are translated into [*terra*](https://rspatial.github.io/terra/)'s package SpatRaster and SpatVector objects, respectively. These objects can then, within R, be easily coerced to other types of spatial objects such as simple features (sf), stars, etc.
 
 ::: callout-note
-See *terra* vignettes with further explanations and examples: <https://rspatial.github.io/terra/>.
+Remember that raster objects will always be exported from GRASS following the computational region settings. So, bear that in mind when reading into R which will hold them in memory. Vectors however will be exported in their full extent.
 :::
 
 Let's load the *terra* library to quickly display our recently imported raster maps:
@@ -157,8 +140,6 @@ library(mapview)
 mapview(rstack$elevation) + census
 ```
 
-We highly recommend you to check the [tmap](https://r-tmap.github.io/tmap/) package to make really appealing and publication ready maps.
-
 To exemplify the use of `write_*` functions, let's do a simple operation with the *landuse* raster map. We will apply a custom function that makes NULL all values less than 4.
 
 ```{r}
@@ -166,26 +147,23 @@ result <- app(rstack$landuse, fun=function(x){ x[x < 4] <- NA; return(x)} )
 plot(result)
 ```
 
+To use this new raster in GRASS, for example as an input to a GRASS tool, we need to call `write_RAST` function:
 ```{r}
 write_RAST(result, "result_from_R", overwrite = TRUE)
 ```
 
+The new raster is now written as a GRASS raster and can be listed:
 ```{r}
 execGRASS("g.list", parameters = list(type="raster", pattern="result*"))
 ```
 
-```{r}
-#| echo: false
-unlink_.gislock()
-```
-
 ### B. You don't have nor need GRASS projects
 
-In the case you don't have, need or care about GRASS projects, the `initGRASS()` function allows you to create temporary projects to use GRASS modules on R objects. This is equivalent to what QGIS does when you use GRASS tools via the Processing Toolbox.
+In the case you don't have, need or care about GRASS projects, the `initGRASS()` function allows you to create temporary projects to use GRASS tools on R objects. This is equivalent to what QGIS does when you use GRASS tools via the QGIS Processing Toolbox.
 
-So, the workflow is pretty similar to case A, except that we'll create a temporary project based on the extent and CRS of a raster or vector R object. Hence, we do not pass project or mapset names but we need to pass a reference spatial grid. Then, we'll write our R objects into the temporary GRASS project, run the desired processes, export the outputs back to R environment and done.
+The workflow is similar to case A, except that we will create a temporary project based on the extent and CRS of a raster or vector R object. Hence, we do not pass project or mapset names but we need to pass a reference spatial grid. Then, we will write our R objects into the temporary GRASS project, run the desired tools, and export the outputs back to R environment.
 
-Let's start with getting some spatial data, eg. a raster file, into R.
+Let's start with getting some spatial data, e.g., a raster file, into R.
 
 ```{r}
 library(terra)
@@ -197,8 +175,7 @@ r <- rast(f)
 plot(r)
 ```
 
-Now, we'll load the rgrass library and init GRASS with `SG = r`, so a GRASS project is internally created with r's CRS (BTW, you can check that with `crs(r)`).
-
+Now, we will load the rgrass library and init GRASS with `SG = r`, so a GRASS project is internally created with raster `r`'s CRS (BTW, you can check that with `crs(r)`).
 ```{r}
 library(rgrass)
 ```
@@ -208,10 +185,8 @@ library(rgrass)
 grassbin <- system("grass --config path", intern = TRUE)
 
 # start GRASS GIS from R
-initGRASS(gisBase = grassbin, 
-          home = tempdir(),
-          SG = r, 
-          override = TRUE)
+initGRASS(home = tempdir(),
+          SG = r)
 ```
 
 Now, we can write our SpatRaster into the GRASS temporary project.
@@ -220,7 +195,7 @@ Now, we can write our SpatRaster into the GRASS temporary project.
 write_RAST(r, "terra_elev")
 ```
 
-Let's check it is indeed within the project and run the GRASS module [`r.slope.aspect`](https://grass.osgeo.org/grass-stable/manuals/r.slope.aspect.html) on it.
+Let's check it is indeed within the project and run the GRASS tool [`r.slope.aspect`](https://grass.osgeo.org/grass-stable/manuals/r.slope.aspect.html) on it.
 
 ```{r}
 execGRASS("g.list", type = "raster")
@@ -254,13 +229,13 @@ plot(grass_maps)
 writeRaster(grass_maps, "grass_maps.tif", overwrite=TRUE)
 ```
 
-There's yet another way in which you can use GRASS and R together, and it involves calling R from the GRASS terminal. In this way, *rgrass* will read all the environmental variables of the GRASS session, and you won't need to use initGRASS. This would be similar to calling jupyter notebook within a GRASS active session. It goes more or less like this:
+There is another way in which you can use GRASS and R together, and it involves calling R from the GRASS terminal. In this way, *rgrass* will read all the environmental variables of the GRASS session, and you won't need to use initGRASS. This would be similar to calling jupyter notebook within a GRASS active session. It goes more or less like this:
 
 1.  Open GRASS GIS
-2.  Type `R` or `rstudio &` in the GRASS GIS terminal
+2.  Type `R` or `rstudio &` in the GRASS terminal
 3.  Load `rgrass` library with `library(rgrass)`
-4.  Use `read_VECT()`, `read_RAST()` to read data from GRASS into R
-5.  Access GRASS GIS modules and data through `execGRASS()`
+4.  Use `read_VECT()`, `read_RAST()` to read data from GRASS GIS into R
+5.  Access GRASS tools and data through `execGRASS()`
 6.  Write data (back) to GRASS database with `write_VECT()` and `write_RAST()`
 
 ```         
@@ -272,7 +247,7 @@ Starting GRASS GIS...
        / /_/ / _, _/ ___ |___/ /__/ /  / /_/ // / ___/ /
        \____/_/ |_/_/  |_/____/____/   \____/___//____/
 
-Welcome to GRASS GIS 8.3.0
+Welcome to GRASS GIS 8.4.0
 GRASS GIS homepage:                      https://grass.osgeo.org
 This version running through:            Bash Shell (/bin/bash)
 Help is available with the command:      g.manual -i
@@ -304,7 +279,7 @@ Type 'demo()' for some demos, 'help()' for on-line help, or
 Type 'q()' to quit R.
 
 > library(rgrass)
-GRASS GIS interface loaded with GRASS version: GRASS 8.3.0 (2023)
+GRASS GIS interface loaded with GRASS version: GRASS 8.4.0 (2024)
 and location: nc_basic_spm_grass7
 > 
 ```
