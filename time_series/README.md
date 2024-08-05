@@ -24,7 +24,7 @@
   - visualizations
 
 - Part 5:
-  - Gap filling: t.rast.gapfill, r.hants (t.rast.hants), r.series.lwr
+  - Gap filling: t.rast.gapfill, r.hants, r.series.lwr
   - visualizations
 
 - Part 6:
