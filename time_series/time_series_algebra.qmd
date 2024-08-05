@@ -1,0 +1,438 @@
+---
+title: "Time series algebra"
+author: Verónica Andreo
+date: today
+format:
+  html:
+    code-tools: true
+    code-copy: true
+    code-fold: false
+engine: knitr
+execute:
+  eval: false
+  keep-ipynb: true  
+jupyter: python3
+---
+
+In this third part of the time series tutorials, we will go through different 
+temporal algebra examples. There are five modules within the temporal framework
+that allow us to perform temporal map algebra on different types of data: 
+[t.rast.mapcalc](https://grass.osgeo.org/grass-stable/manuals/t.rast.mapcalc.html), 
+[t.rast.algebra](https://grass.osgeo.org/grass-stable/manuals/t.rast.algebra.html), 
+[t.rast3d.mapcalc](https://grass.osgeo.org/grass-stable/manuals/t.rast3d.mapcalc.html),
+[t.rast3d.algebra](https://grass.osgeo.org/grass-stable/manuals/t.rast3d.algebra.html), and 
+[t.vect.algebra](https://grass.osgeo.org/grass-stable/manuals/t.vect.algebra.html). 
+We will focus on the raster oriented tools in this tutorial. 
+
+::: {.callout-note title="Setup"}
+This tutorial can be run locally or in Google Colab. However, make sure you
+install GRASS GIS 8.3+, download the LST sample data and set up your project
+as explained in the [first part](time_series_management_and_visualization.qmd) 
+of these time series tutorials.
+:::
+
+
+## [t.rast.mapcalc](https://grass.osgeo.org/grass-stable/manuals/t.rast.mapcalc.html) vs [t.rast.algebra](https://grass.osgeo.org/grass-stable/manuals/t.rast.algebra.html)
+
+Both tools allow us to perform spatio-temporal operations on temporally sampled
+maps of raster time series (STRDS). Also, both tools support spatial and 
+temporal functions. 
+Spatial operators and functions are those used in 
+[r.mapcalc](https://grass.osgeo.org/grass-stable/manuals/r.mapcalc.html). 
+Temporal internal variables supported for both relative and absolute time 
+include: `td()` (time delta), `start_time()` and `end_time()`. 
+There are also several useful internal temporal variables supported especially 
+for absolute time, e.g.: `start_doy()`, `start_year()`, `start_month()` and
+so on.
+
+Both *t.rast.mapcalc* and *t.rast.algebra* support temporal operations. However, 
+only *t.rast.algebra* is effectively temporally aware; *t.rast.mapcalc* 
+is mostly a wrapper around *r.mapcalc*. Indeed, t.rast.algebra is able to 
+perform a wide range of temporal operations based on the temporal topology 
+of maps within STRDS. Supported operators, relations and functions in
+t.rast.algebra include:
+
+- Temporal operators: union (`u`), intersection (`i`), left reference (`l`), etc.
+- Temporal relations: `equals`, `during`, `contains`, `starts`, etc.
+- Temporal selection: `:` and `!:`.
+- Temporal functions: `td()`, `start_time()`, `start_doy()`, `#`, `tmap()`, `map()`, `t_snap()`, `buff_t()`, `t_shift()`, etc.
+- Temporal neighborhood modifier: `[x,y,t]`.
+- Spatial operators: `+`,`-`,`*`,`/`,`%`.
+- Spatial functions: `abs(x)`, `float(x)`, `int(x)`, `log(x)`, `round(x)`, `isnull(x)`,`null()`, among others.
+
+They can all be combined in nested expressions with conditions statements 
+to create spatio-temporal operators! In general, expressions have the following 
+structure:
+`{"spatial or select operator", "temporal relations", "temporal operator"}` 
+and they can be combined with conditional statements such as:
+`if(topologies, conditions, A, B)` where A and B can be either space time 
+datasets or expressions (e.g., A+B). Just for illustration purposes, let's see
+some examples from the manual page:
+
+- `C = A {+,equal,l} B`: C will have the same time stamps than A and will be A+B for all maps with equal time stamps among A and B, this is equivalent to `C = A + B`, i.e., *equal* is the default temporal relation for algebra operations and *left reference* is the default temporal operator. 
+- `C = if(start_date(A) < "2005-01-01", A + B)`: C will be A+B if the start date of A is earlier than Jan 1st, 2005 (if, then statement).
+- `C = if({equal}, A > 100 && A < 1600 {&&,equal} td(A) > 30, B)`: C will have all cells from  B with equal temporal relations to A, if the cells of A are in the range (100.0, 1600) of time intervals that have more than 30 time units. This is equivalent to `C = if(A > 100 && A < 1600 && td(A) > 30, B)`.
+- `C = A {:, during} tmap(event)`: C will contain all maps from A that are during the temporal extent of the single map 'event'.
+- `C = A * map(constant_value)`: C will contain all raster maps from A multiplied by the raster map 'constant_value' (a map without time stamp).
+- `B = if(A > 0.0 && A[-1] > 0.0 && A[-2] > 0.0, start_doy(A, 0), 0)`: B will have the DOY for all maps from A where conditions are met at three consecutive time intervals, otherwise put 0.
+
+Let's see some examples using the LST daily time series from northern Italy. We
+start with something simple to also refresh what we learnt in the previous
+tutorial about aggregations.
+
+```{python}
+#| echo: false
+
+import os
+import sys
+import subprocess
+
+# GRASS GIS database variables
+grassbin = "grass-dev"
+grassdata = os.path.join(os.path.expanduser('~'), "grassdata")
+project = "eu_laea"
+mapset = "italy_LST_daily"
+
+sys.path.append(
+    subprocess.check_output([grassbin, "--config", "python_path"], text=True).strip()
+)
+```
+
+```{python}
+#| echo: false
+
+# Import the GRASS GIS packages we need
+import grass.script as gs
+import grass.jupyter as gj
+
+# Start the GRASS GIS Session
+session = gj.init(grassdata, project, mapset);
+```
+
+
+### Anomalies
+
+To estimate annual anomalies, we need the long term average and standard 
+deviation of the whole series, and the annual averages. Then, we estimate
+the standardized anomalies as:
+
+$$
+StdAnom_i = \frac{Avg_i - Avg}{SD}
+$$
+
+Let's first obtain the average and standard deviation for the series:
+
+```{python}
+# Get general average and SD
+methods=["average","stddev"]
+
+for me in methods:
+    gs.run_command("t.rast.series",
+                   input="lst_daily",
+                   method=me,
+                   output=f"lst_{me}")
+```
+
+and then the annual LST average:
+
+```{python}
+# Get annual averages
+gs.run_command("t.rast.aggregate",
+               input="lst_daily",
+               method="average",
+               granularity="1 years",
+               output="lst_annual_average",
+               basename="lst_average",
+               suffix="gran",
+               nprocs=6)
+```
+
+We now use t.rast.algebra to estimate the anomalies.
+
+```{python}
+# Estimate annual anomalies
+expression="lst_annual_anomaly = (lst_annual_average - map(lst_average)) / map(lst_stddev)"
+
+gs.run_command("t.rast.algebra",
+               expression=expression,
+               basename="lst_annual_anomaly",
+               suffix="gran",
+               nprocs=6)
+```
+
+We set the *differences* color palette and then create an animation. 
+
+```{python}
+# Set difference color table
+gs.run_command("t.rast.colors",
+               input="lst_annual_anomaly",
+               color="difference")
+```
+
+```{python}
+# Animation of annual anomalies
+anomalies = gj.TimeSeriesMap(use_region=True)
+anomalies.add_raster_series("lst_annual_anomaly", fill_gaps=False)
+anomalies.d_legend(color="black", at=(10,40,2,6))
+anomalies.show()
+```
+
+
+### Month with maximum LST
+
+We will use `t.rast.mapcalc` to obtain the month when the maximum LST occurred
+during our study period. We already estimated the map with the maximum LST
+in the previous tutorial, but let's refresh our memories:
+
+```{python}
+gs.run_command("t.rast.series",
+               input="lst_daily",
+               output=f"lst_maximum",
+               method="maximum",
+               nprocs=4)
+```
+
+Then, we use t.rast.mapcalc to compare all maps in lst_daily with the lst_maximum
+map and save the month only when there's a match. The result will probably be a
+very sparse time series.
+
+```{python}
+# Get time series with month of maximum LST
+expression="if(lst_daily == lst_maximum, start_month(), null())"
+
+gs.run_command("t.rast.mapcalc",
+               flags="n", # register also null maps
+               inputs="lst_daily",
+               output="month_max_lst",
+               basename="month_max_lst",
+               expression=expression,
+               nprocs=6)
+```
+
+```{python}
+# Get basic info
+print(gs.read_command("t.info", 
+                      input="month_min_lst"))
+```
+
+Now we can aggregate our sparse time series to obtain the earliest month in 
+which the maximum LST occurred.
+
+```{python}
+# Get the earliest month in which the maximum appeared (method=minimum)
+gs.run_command("t.rast.series",
+               input="month_max_lst",
+               method="minimum",
+               output="max_lst_date")
+```
+
+Remover la STRDS intermedia y los mapas que contiene:
+
+```{python}
+# Remove month_max_lst strds; we were only interested in the resulting aggregated map
+gs.run_command("t.remove",
+               flags="rfd", # recursive, force, delete
+               inputs="month_max_lst")
+               
+# Check it's gone
+print(gs.read_command("t.list"))
+```
+
+Let's display the result using the `Map` class from `grass.jupyter` package:
+
+```{python}
+mm = gj.Map(width=450, use_region=True)
+mm.d_rast(map="max_lst_date")
+mm.d_vect(map="italy", type="boundary", color="#4D4D4D", width=2)
+mm.d_legend(raster="max_lst_date", title="Month", fontsize=10, at=(2,15,2,10))
+mm.d_barscale(length=50, units="kilometers", segment=4, fontsize=14, at=(73,7))
+mm.d_northarrow(at=(90,15))
+mm.d_text(text="Month of maximum LST", color="black", font="sans", size=4, bgcolor="white")
+mm.show()
+```
+
+::: {.callout-note}
+How could we have done the same in one single step? 
+Hint: `t.rast.algebra ... method=during`.
+
+```{python}
+# Get time series with month of maximum LST
+expression="month_max_lst = if({during}, lst_daily == tmap(lst_maximum), start_month(), null())"
+
+gs.run_command("t.rast.algebra",
+               basename="month_max_lst",
+               expression=expression,
+               suffix="gran",
+               nprocs=6)
+```
+
+Is it really the same?
+
+```{python}
+expression="result = max_lst_date - month_max_lst"
+gs.rast_mapcalc(exp=expression)
+gs.raster_info("result")
+```
+
+:::
+
+
+:::{.callout-caution}
+What if we are interested in knowing the week number in which the annual maximum 
+LST occurs each year? How would you do that? Can we also know if there's any 
+trend in the week number? i.e., does it tend to happen earlier or later?
+
+```{python}
+# Estimate annual max LST
+!t.rast.aggregate input=lst_daily output=lst_max_annual basename=lst_max method=maximum granularity="1 years" suffix=gran
+
+# Week number
+!t.rast.algebra expression="week_lst_max_annual = if({contains}, lst_max_annual == lst_daily, start_week(lst_daily))" basename=week_lst_max_annual suffix=gran 
+
+# Is there a trend?
+!t.rast.series input=week_lst_max_annual method=slope output=slope_week_lst_max_annual
+```
+
+:::
+
+
+### Number of days with LST >= 20 and <= 30
+
+Some plague insects tend to thrive in a certain range of temperatures. Let's 
+assume this range is from 20 to 30 °C. Here, we'll estimate the number of days 
+within this range per year, and then, we'll estimate the median along years.
+
+```{python}
+#| message: false
+#| warning: false
+#| results: hide
+
+# Keep only pixels meeting the condition
+expression="lst_higher20_lower30 = if(lst_daily >= 20.0 && lst_daily <= 30.0, 1, null())"
+
+gs.run_command("t.rast.algebra",
+               expression=expression, 
+               basename="lst_higher20_lower30",
+               suffix="gran",
+               nproc=6, 
+               flags="n")
+```
+
+```{python}
+# Count how many times per year the condition is met
+gs.run_command("t.rast.aggregate",
+               input="lst_higher20_lower30", 
+               output="count_lst_higher20_lower30",
+               basename="count_lst_higher20_lower30",
+               suffix="gran",
+               method="count",
+               granularity="1 years")
+```
+
+```{python}
+# Check raster maps in the STRDS
+gs.run_command("t.rast.list", 
+               input="count_lst_higher20_lower30", 
+               columns="name,start_time,min,max")
+```
+
+```{python}
+# Median number of days with average lst >= 20 and <= 30
+gs.run_command("t.rast.series",
+               input="count_tmean_higher20_lower30",
+               output="median_count_tmean_higher20_lower30",
+               method="median")
+```
+
+```{python}
+# Display raster map with interactive class
+h20_map = gj.InteractiveMap(width = 500, use_region=True)
+h20_map.add_raster("median_count_tmean_higher20_lower30")
+h20_map.add_layer_control(position = "bottomright")
+h20_map.show()
+```
+
+::: {.callout-note}
+How would you check if the median number of days with lst >= 20 and <= 30 
+is changing along the years?
+:::
+
+### Number of consecutive days with LST <= -10.0
+
+Likewise, there are temperature thresholds that mark a limit to insects survival.
+Here, we'll use the lower temperature threshold to survival. Most importantly, 
+we we'll count the number of consecutive days with temperatures below this 
+threshold.
+
+Here, we'll use again the temporal algebra and we'll recall the concept of 
+topology that we defined at the beginning of these tutorials. First, we need to 
+create a STRDS of annual granularity that will contain only zeroes. This annual 
+STRDS, that we call `annual_mask`, will be the base to add the value 1 each time
+the condition of less than -10 °C in consecutive days is met. Finally, we 
+estimate the median number of days with LST lower than -10 °C over the 5 years.
+
+```{python}
+# Create annual mask
+gs.run_command("t.rast.aggregate",
+               input="lst_daily",
+               output="annual_mask",
+               basename="annual_mask",
+               suffix="gran",
+               granularity="1 year",
+               method="count")
+```
+
+```{python}
+# Replace values by zero
+expression="if(annual_mask, 0)"
+
+gs.run_command("t.rast.mapcalc",
+               input="annual_mask",
+               output="annual_mask_0",
+               expression=expression,
+               basename="annual_mask_0")
+```
+
+```{python}
+#| message: false
+#| warning: false
+#| results: hide
+
+# Calculate consecutive days with LST <= -10.0
+expression="lower_m10_consec_days = annual_mask_0 {+,contains,l} if(lst_daily <= -10.0 && lst_daily[-1] <= -10.0 || lst_daily[1] <= -10.0 && lst_daily <= -10.0, 1, 0)"
+
+gs.run_command("t.rast.algebra",
+               expression=expression,
+               basename="lower_m10",
+               suffix="gran",
+               nproc=7)
+```
+
+```{python}
+# Inspect values
+gs.run_command("t.rast.list",
+               input="lower_m10_consec_days",
+               columns="name,start_time,min,max")
+```
+
+```{python}
+# Median number of consecutive days with LST <= -10
+gs.run_command("t.rast.series",
+               input="lower_m10_consec_days",
+               output="median_lower_m10_consec_days",
+               method="median")
+```
+
+```{python}
+# Display raster map with interactive class
+lt10_map = gj.InteractiveMap(width = 500, use_region=True)
+lt10_map.add_raster("median_lower_m10_consec_days")
+lt10_map.add_layer_control(position = "bottomright")
+lt10_map.show()
+```
+
+
+## References
+
+
+

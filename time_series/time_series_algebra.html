@@ -1,0 +1,1350 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.4.551">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Verónica Andreo">
+<meta name="dcterms.date" content="2024-07-24">
+
+<title>Time series algebra</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="time_series_algebra_files/libs/clipboard/clipboard.min.js"></script>
+<script src="time_series_algebra_files/libs/quarto-html/quarto.js"></script>
+<script src="time_series_algebra_files/libs/quarto-html/popper.min.js"></script>
+<script src="time_series_algebra_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="time_series_algebra_files/libs/quarto-html/anchor.min.js"></script>
+<link href="time_series_algebra_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="time_series_algebra_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="time_series_algebra_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="time_series_algebra_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="time_series_algebra_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="fullcontent">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<div class="quarto-title-block"><div><h1 class="title">Time series algebra</h1><button type="button" class="btn code-tools-button" id="quarto-code-tools-source"><i class="bi"></i> Code</button></div></div>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Verónica Andreo </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">July 24, 2024</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>In this third part of the time series tutorials, we will go through different temporal algebra examples. There are five modules within the temporal framework that allow us to perform temporal map algebra on different types of data: <a href="https://grass.osgeo.org/grass-stable/manuals/t.rast.mapcalc.html">t.rast.mapcalc</a>, <a href="https://grass.osgeo.org/grass-stable/manuals/t.rast.algebra.html">t.rast.algebra</a>, <a href="https://grass.osgeo.org/grass-stable/manuals/t.rast3d.mapcalc.html">t.rast3d.mapcalc</a>, <a href="https://grass.osgeo.org/grass-stable/manuals/t.rast3d.algebra.html">t.rast3d.algebra</a>, and <a href="https://grass.osgeo.org/grass-stable/manuals/t.vect.algebra.html">t.vect.algebra</a>. We will focus on the raster oriented tools in this tutorial.</p>
+<div class="callout callout-style-default callout-note callout-titled" title="Setup">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Setup
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>This tutorial can be run locally or in Google Colab. However, make sure you install GRASS GIS 8.3+, download the LST sample data and set up your project as explained in the <a href="time_series_management_and_visualization.qmd">first part</a> of these time series tutorials.</p>
+</div>
+</div>
+<section id="t.rast.mapcalc-vs-t.rast.algebra" class="level2">
+<h2 class="anchored" data-anchor-id="t.rast.mapcalc-vs-t.rast.algebra"><a href="https://grass.osgeo.org/grass-stable/manuals/t.rast.mapcalc.html">t.rast.mapcalc</a> vs <a href="https://grass.osgeo.org/grass-stable/manuals/t.rast.algebra.html">t.rast.algebra</a></h2>
+<p>Both tools allow us to perform spatio-temporal operations on temporally sampled maps of raster time series (STRDS). Also, both tools support spatial and temporal functions. Spatial operators and functions are those used in <a href="https://grass.osgeo.org/grass-stable/manuals/r.mapcalc.html">r.mapcalc</a>. Temporal internal variables supported for both relative and absolute time include: <code>td()</code> (time delta), <code>start_time()</code> and <code>end_time()</code>. There are also several useful internal temporal variables supported especially for absolute time, e.g.: <code>start_doy()</code>, <code>start_year()</code>, <code>start_month()</code> and so on.</p>
+<p>Both <em>t.rast.mapcalc</em> and <em>t.rast.algebra</em> support temporal operations. However, only <em>t.rast.algebra</em> is effectively temporally aware; <em>t.rast.mapcalc</em> is mostly a wrapper around <em>r.mapcalc</em>. Indeed, t.rast.algebra is able to perform a wide range of temporal operations based on the temporal topology of maps within STRDS. Supported operators, relations and functions in t.rast.algebra include:</p>
+<ul>
+<li>Temporal operators: union (<code>u</code>), intersection (<code>i</code>), left reference (<code>l</code>), etc.</li>
+<li>Temporal relations: <code>equals</code>, <code>during</code>, <code>contains</code>, <code>starts</code>, etc.</li>
+<li>Temporal selection: <code>:</code> and <code>!:</code>.</li>
+<li>Temporal functions: <code>td()</code>, <code>start_time()</code>, <code>start_doy()</code>, <code>#</code>, <code>tmap()</code>, <code>map()</code>, <code>t_snap()</code>, <code>buff_t()</code>, <code>t_shift()</code>, etc.</li>
+<li>Temporal neighborhood modifier: <code>[x,y,t]</code>.</li>
+<li>Spatial operators: <code>+</code>,<code>-</code>,<code>*</code>,<code>/</code>,<code>%</code>.</li>
+<li>Spatial functions: <code>abs(x)</code>, <code>float(x)</code>, <code>int(x)</code>, <code>log(x)</code>, <code>round(x)</code>, <code>isnull(x)</code>,<code>null()</code>, among others.</li>
+</ul>
+<p>They can all be combined in nested expressions with conditions statements to create spatio-temporal operators! In general, expressions have the following structure: <code>{"spatial or select operator", "temporal relations", "temporal operator"}</code> and they can be combined with conditional statements such as: <code>if(topologies, conditions, A, B)</code> where A and B can be either space time datasets or expressions (e.g., A+B). Just for illustration purposes, let’s see some examples from the manual page:</p>
+<ul>
+<li><code>C = A {+,equal,l} B</code>: C will have the same time stamps than A and will be A+B for all maps with equal time stamps among A and B, this is equivalent to <code>C = A + B</code>, i.e., <em>equal</em> is the default temporal relation for algebra operations and <em>left reference</em> is the default temporal operator.</li>
+<li><code>C = if(start_date(A) &lt; "2005-01-01", A + B)</code>: C will be A+B if the start date of A is earlier than Jan 1st, 2005 (if, then statement).</li>
+<li><code>C = if({equal}, A &gt; 100 &amp;&amp; A &lt; 1600 {&amp;&amp;,equal} td(A) &gt; 30, B)</code>: C will have all cells from B with equal temporal relations to A, if the cells of A are in the range (100.0, 1600) of time intervals that have more than 30 time units. This is equivalent to <code>C = if(A &gt; 100 &amp;&amp; A &lt; 1600 &amp;&amp; td(A) &gt; 30, B)</code>.</li>
+<li><code>C = A {:, during} tmap(event)</code>: C will contain all maps from A that are during the temporal extent of the single map ‘event’.</li>
+<li><code>C = A * map(constant_value)</code>: C will contain all raster maps from A multiplied by the raster map ‘constant_value’ (a map without time stamp).</li>
+<li><code>B = if(A &gt; 0.0 &amp;&amp; A[-1] &gt; 0.0 &amp;&amp; A[-2] &gt; 0.0, start_doy(A, 0), 0)</code>: B will have the DOY for all maps from A where conditions are met at three consecutive time intervals, otherwise put 0.</li>
+</ul>
+<p>Let’s see some examples using the LST daily time series from northern Italy. We start with something simple to also refresh what we learnt in the previous tutorial about aggregations.</p>
+<!-- 
+t.rast.mapcalc input=tempmean_monthly output=january_under_0 basename=january_under_0 \
+expression="if(start_month() == 1 && tempmean_monthly > 0, null(), tempmean_monthly)" 
+-->
+<section id="anomalies" class="level3">
+<h3 class="anchored" data-anchor-id="anomalies">Anomalies</h3>
+<p>To estimate annual anomalies, we need the long term average and standard deviation of the whole series, and the annual averages. Then, we estimate the standardized anomalies as:</p>
+<p><span class="math display">\[
+StdAnom_i = \frac{Avg_i - Avg}{SD}
+\]</span></p>
+<p>Let’s first obtain the average and standard deviation for the series:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Get general average and SD</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>methods<span class="op">=</span>[<span class="st">"average"</span>,<span class="st">"stddev"</span>]</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> me <span class="kw">in</span> methods:</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    gs.run_command(<span class="st">"t.rast.series"</span>,</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>                   <span class="bu">input</span><span class="op">=</span><span class="st">"lst_daily"</span>,</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>                   method<span class="op">=</span>me,</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>                   output<span class="op">=</span><span class="ss">f"lst_</span><span class="sc">{</span>me<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>and then the annual LST average:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Get annual averages</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"t.rast.aggregate"</span>,</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>               <span class="bu">input</span><span class="op">=</span><span class="st">"lst_daily"</span>,</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>               method<span class="op">=</span><span class="st">"average"</span>,</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>               granularity<span class="op">=</span><span class="st">"1 years"</span>,</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>               output<span class="op">=</span><span class="st">"lst_annual_average"</span>,</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>               basename<span class="op">=</span><span class="st">"lst_average"</span>,</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>               suffix<span class="op">=</span><span class="st">"gran"</span>,</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>               nprocs<span class="op">=</span><span class="dv">6</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>We now use t.rast.algebra to estimate the anomalies.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Estimate annual anomalies</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>expression<span class="op">=</span><span class="st">"lst_annual_anomaly = (lst_annual_average - map(lst_average)) / map(lst_stddev)"</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"t.rast.algebra"</span>,</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>               expression<span class="op">=</span>expression,</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>               basename<span class="op">=</span><span class="st">"lst_annual_anomaly"</span>,</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>               suffix<span class="op">=</span><span class="st">"gran"</span>,</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>               nprocs<span class="op">=</span><span class="dv">6</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>We set the <em>differences</em> color palette and then create an animation.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Set difference color table</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"t.rast.colors"</span>,</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>               <span class="bu">input</span><span class="op">=</span><span class="st">"lst_annual_anomaly"</span>,</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>               color<span class="op">=</span><span class="st">"difference"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Animation of annual anomalies</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>anomalies <span class="op">=</span> gj.TimeSeriesMap(use_region<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>anomalies.add_raster_series(<span class="st">"lst_annual_anomaly"</span>, fill_gaps<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>anomalies.d_legend(color<span class="op">=</span><span class="st">"black"</span>, at<span class="op">=</span>(<span class="dv">10</span>,<span class="dv">40</span>,<span class="dv">2</span>,<span class="dv">6</span>))</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>anomalies.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="month-with-maximum-lst" class="level3">
+<h3 class="anchored" data-anchor-id="month-with-maximum-lst">Month with maximum LST</h3>
+<p>We will use <code>t.rast.mapcalc</code> to obtain the month when the maximum LST occurred during our study period. We already estimated the map with the maximum LST in the previous tutorial, but let’s refresh our memories:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"t.rast.series"</span>,</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>               <span class="bu">input</span><span class="op">=</span><span class="st">"lst_daily"</span>,</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>               output<span class="op">=</span><span class="ss">f"lst_maximum"</span>,</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>               method<span class="op">=</span><span class="st">"maximum"</span>,</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>               nprocs<span class="op">=</span><span class="dv">4</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Then, we use t.rast.mapcalc to compare all maps in lst_daily with the lst_maximum map and save the month only when there’s a match. The result will probably be a very sparse time series.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Get time series with month of maximum LST</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>expression<span class="op">=</span><span class="st">"if(lst_daily == lst_maximum, start_month(), null())"</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"t.rast.mapcalc"</span>,</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>               flags<span class="op">=</span><span class="st">"n"</span>, <span class="co"># register also null maps</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>               inputs<span class="op">=</span><span class="st">"lst_daily"</span>,</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>               output<span class="op">=</span><span class="st">"month_max_lst"</span>,</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>               basename<span class="op">=</span><span class="st">"month_max_lst"</span>,</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>               expression<span class="op">=</span>expression,</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>               nprocs<span class="op">=</span><span class="dv">6</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Get basic info</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(gs.read_command(<span class="st">"t.info"</span>, </span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>                      <span class="bu">input</span><span class="op">=</span><span class="st">"month_min_lst"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Now we can aggregate our sparse time series to obtain the earliest month in which the maximum LST occurred.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Get the earliest month in which the maximum appeared (method=minimum)</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"t.rast.series"</span>,</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>               <span class="bu">input</span><span class="op">=</span><span class="st">"month_max_lst"</span>,</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>               method<span class="op">=</span><span class="st">"minimum"</span>,</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>               output<span class="op">=</span><span class="st">"max_lst_date"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Remover la STRDS intermedia y los mapas que contiene:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Remove month_max_lst strds; we were only interested in the resulting aggregated map</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"t.remove"</span>,</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>               flags<span class="op">=</span><span class="st">"rfd"</span>, <span class="co"># recursive, force, delete</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>               inputs<span class="op">=</span><span class="st">"month_max_lst"</span>)</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>               </span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Check it's gone</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(gs.read_command(<span class="st">"t.list"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Let’s display the result using the <code>Map</code> class from <code>grass.jupyter</code> package:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>mm <span class="op">=</span> gj.Map(width<span class="op">=</span><span class="dv">450</span>, use_region<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>mm.d_rast(<span class="bu">map</span><span class="op">=</span><span class="st">"max_lst_date"</span>)</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>mm.d_vect(<span class="bu">map</span><span class="op">=</span><span class="st">"italy"</span>, <span class="bu">type</span><span class="op">=</span><span class="st">"boundary"</span>, color<span class="op">=</span><span class="st">"#4D4D4D"</span>, width<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>mm.d_legend(raster<span class="op">=</span><span class="st">"max_lst_date"</span>, title<span class="op">=</span><span class="st">"Month"</span>, fontsize<span class="op">=</span><span class="dv">10</span>, at<span class="op">=</span>(<span class="dv">2</span>,<span class="dv">15</span>,<span class="dv">2</span>,<span class="dv">10</span>))</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>mm.d_barscale(length<span class="op">=</span><span class="dv">50</span>, units<span class="op">=</span><span class="st">"kilometers"</span>, segment<span class="op">=</span><span class="dv">4</span>, fontsize<span class="op">=</span><span class="dv">14</span>, at<span class="op">=</span>(<span class="dv">73</span>,<span class="dv">7</span>))</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>mm.d_northarrow(at<span class="op">=</span>(<span class="dv">90</span>,<span class="dv">15</span>))</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>mm.d_text(text<span class="op">=</span><span class="st">"Month of maximum LST"</span>, color<span class="op">=</span><span class="st">"black"</span>, font<span class="op">=</span><span class="st">"sans"</span>, size<span class="op">=</span><span class="dv">4</span>, bgcolor<span class="op">=</span><span class="st">"white"</span>)</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>mm.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>How could we have done the same in one single step? Hint: <code>t.rast.algebra ... method=during</code>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Get time series with month of maximum LST</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>expression<span class="op">=</span><span class="st">"month_max_lst = if(</span><span class="sc">{during}</span><span class="st">, lst_daily == tmap(lst_maximum), start_month(), null())"</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"t.rast.algebra"</span>,</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>               basename<span class="op">=</span><span class="st">"month_max_lst"</span>,</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>               expression<span class="op">=</span>expression,</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>               suffix<span class="op">=</span><span class="st">"gran"</span>,</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>               nprocs<span class="op">=</span><span class="dv">6</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Is it really the same?</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>expression<span class="op">=</span><span class="st">"result = max_lst_date - month_max_lst"</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>gs.rast_mapcalc(exp<span class="op">=</span>expression)</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>gs.raster_info(<span class="st">"result"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-caution callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Caution
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>What if we are interested in knowing the week number in which the annual maximum LST occurs each year? How would you do that? Can we also know if there’s any trend in the week number? i.e., does it tend to happen earlier or later?</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Estimate annual max LST</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="op">!</span>t.rast.aggregate <span class="bu">input</span><span class="op">=</span>lst_daily output<span class="op">=</span>lst_max_annual basename<span class="op">=</span>lst_max method<span class="op">=</span>maximum granularity<span class="op">=</span><span class="st">"1 years"</span> suffix<span class="op">=</span>gran</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Week number</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="op">!</span>t.rast.algebra expression<span class="op">=</span><span class="st">"week_lst_max_annual = if(</span><span class="sc">{contains}</span><span class="st">, lst_max_annual == lst_daily, start_week(lst_daily))"</span> basename<span class="op">=</span>week_lst_max_annual suffix<span class="op">=</span>gran </span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Is there a trend?</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a><span class="op">!</span>t.rast.series <span class="bu">input</span><span class="op">=</span>week_lst_max_annual method<span class="op">=</span>slope output<span class="op">=</span>slope_week_lst_max_annual</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="number-of-days-with-lst-20-and-30" class="level3">
+<h3 class="anchored" data-anchor-id="number-of-days-with-lst-20-and-30">Number of days with LST &gt;= 20 and &lt;= 30</h3>
+<p>Some plague insects tend to thrive in a certain range of temperatures. Let’s assume this range is from 20 to 30 °C. Here, we’ll estimate the number of days within this range per year, and then, we’ll estimate the median along years.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Keep only pixels meeting the condition</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>expression<span class="op">=</span><span class="st">"lst_higher20_lower30 = if(lst_daily &gt;= 20.0 &amp;&amp; lst_daily &lt;= 30.0, 1, null())"</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"t.rast.algebra"</span>,</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>               expression<span class="op">=</span>expression, </span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>               basename<span class="op">=</span><span class="st">"lst_higher20_lower30"</span>,</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>               suffix<span class="op">=</span><span class="st">"gran"</span>,</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>               nproc<span class="op">=</span><span class="dv">6</span>, </span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>               flags<span class="op">=</span><span class="st">"n"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Count how many times per year the condition is met</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"t.rast.aggregate"</span>,</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>               <span class="bu">input</span><span class="op">=</span><span class="st">"lst_higher20_lower30"</span>, </span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>               output<span class="op">=</span><span class="st">"count_lst_higher20_lower30"</span>,</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>               basename<span class="op">=</span><span class="st">"count_lst_higher20_lower30"</span>,</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>               suffix<span class="op">=</span><span class="st">"gran"</span>,</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>               method<span class="op">=</span><span class="st">"count"</span>,</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>               granularity<span class="op">=</span><span class="st">"1 years"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Check raster maps in the STRDS</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"t.rast.list"</span>, </span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>               <span class="bu">input</span><span class="op">=</span><span class="st">"count_lst_higher20_lower30"</span>, </span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>               columns<span class="op">=</span><span class="st">"name,start_time,min,max"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Median number of days with average lst &gt;= 20 and &lt;= 30</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"t.rast.series"</span>,</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>               <span class="bu">input</span><span class="op">=</span><span class="st">"count_tmean_higher20_lower30"</span>,</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>               output<span class="op">=</span><span class="st">"median_count_tmean_higher20_lower30"</span>,</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>               method<span class="op">=</span><span class="st">"median"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Display raster map with interactive class</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>h20_map <span class="op">=</span> gj.InteractiveMap(width <span class="op">=</span> <span class="dv">500</span>, use_region<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>h20_map.add_raster(<span class="st">"median_count_tmean_higher20_lower30"</span>)</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>h20_map.add_layer_control(position <span class="op">=</span> <span class="st">"bottomright"</span>)</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>h20_map.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>How would you check if the median number of days with lst &gt;= 20 and &lt;= 30 is changing along the years?</p>
+</div>
+</div>
+</section>
+<section id="number-of-consecutive-days-with-lst--10.0" class="level3">
+<h3 class="anchored" data-anchor-id="number-of-consecutive-days-with-lst--10.0">Number of consecutive days with LST &lt;= -10.0</h3>
+<p>Likewise, there are temperature thresholds that mark a limit to insects survival. Here, we’ll use the lower temperature threshold to survival. Most importantly, we we’ll count the number of consecutive days with temperatures below this threshold.</p>
+<p>Here, we’ll use again the temporal algebra and we’ll recall the concept of topology that we defined at the beginning of these tutorials. First, we need to create a STRDS of annual granularity that will contain only zeroes. This annual STRDS, that we call <code>annual_mask</code>, will be the base to add the value 1 each time the condition of less than -10 °C in consecutive days is met. Finally, we estimate the median number of days with LST lower than -10 °C over the 5 years.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Create annual mask</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"t.rast.aggregate"</span>,</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>               <span class="bu">input</span><span class="op">=</span><span class="st">"lst_daily"</span>,</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>               output<span class="op">=</span><span class="st">"annual_mask"</span>,</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>               basename<span class="op">=</span><span class="st">"annual_mask"</span>,</span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>               suffix<span class="op">=</span><span class="st">"gran"</span>,</span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>               granularity<span class="op">=</span><span class="st">"1 year"</span>,</span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>               method<span class="op">=</span><span class="st">"count"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Replace values by zero</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>expression<span class="op">=</span><span class="st">"if(annual_mask, 0)"</span></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"t.rast.mapcalc"</span>,</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>               <span class="bu">input</span><span class="op">=</span><span class="st">"annual_mask"</span>,</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>               output<span class="op">=</span><span class="st">"annual_mask_0"</span>,</span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>               expression<span class="op">=</span>expression,</span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>               basename<span class="op">=</span><span class="st">"annual_mask_0"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate consecutive days with LST &lt;= -10.0</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>expression<span class="op">=</span><span class="st">"lower_m10_consec_days = annual_mask_0 {+,contains,l} if(lst_daily &lt;= -10.0 &amp;&amp; lst_daily[-1] &lt;= -10.0 || lst_daily[1] &lt;= -10.0 &amp;&amp; lst_daily &lt;= -10.0, 1, 0)"</span></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"t.rast.algebra"</span>,</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>               expression<span class="op">=</span>expression,</span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>               basename<span class="op">=</span><span class="st">"lower_m10"</span>,</span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>               suffix<span class="op">=</span><span class="st">"gran"</span>,</span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>               nproc<span class="op">=</span><span class="dv">7</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Inspect values</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"t.rast.list"</span>,</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>               <span class="bu">input</span><span class="op">=</span><span class="st">"lower_m10_consec_days"</span>,</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>               columns<span class="op">=</span><span class="st">"name,start_time,min,max"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Median number of consecutive days with LST &lt;= -10</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"t.rast.series"</span>,</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>               <span class="bu">input</span><span class="op">=</span><span class="st">"lower_m10_consec_days"</span>,</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>               output<span class="op">=</span><span class="st">"median_lower_m10_consec_days"</span>,</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>               method<span class="op">=</span><span class="st">"median"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Display raster map with interactive class</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>lt10_map <span class="op">=</span> gj.InteractiveMap(width <span class="op">=</span> <span class="dv">500</span>, use_region<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>lt10_map.add_raster(<span class="st">"median_lower_m10_consec_days"</span>)</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>lt10_map.add_layer_control(position <span class="op">=</span> <span class="st">"bottomright"</span>)</span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>lt10_map.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+</section>
+<section id="references" class="level2">
+<h2 class="anchored" data-anchor-id="references">References</h2>
+<!-- -->
+
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  const viewSource = window.document.getElementById('quarto-view-source') ||
+                     window.document.getElementById('quarto-code-tools-source');
+  if (viewSource) {
+    const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+    viewSource.addEventListener("click", function(e) {
+      if (sourceUrl) {
+        // rstudio viewer pane
+        if (/\bcapabilities=\b/.test(window.location)) {
+          window.open(sourceUrl);
+        } else {
+          window.location.href = sourceUrl;
+        }
+      } else {
+        const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+        modal.show();
+      }
+      return false;
+    });
+  }
+  function toggleCodeHandler(show) {
+    return function(e) {
+      const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+      for (let i=0; i<detailsSrc.length; i++) {
+        const details = detailsSrc[i].parentElement;
+        if (show) {
+          details.open = true;
+        } else {
+          details.removeAttribute("open");
+        }
+      }
+      const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+      const fromCls = show ? "hidden" : "unhidden";
+      const toCls = show ? "unhidden" : "hidden";
+      for (let i=0; i<cellCodeDivs.length; i++) {
+        const codeDiv = cellCodeDivs[i];
+        if (codeDiv.classList.contains(fromCls)) {
+          codeDiv.classList.remove(fromCls);
+          codeDiv.classList.add(toCls);
+        } 
+      }
+      return false;
+    }
+  }
+  const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+  if (hideAllCode) {
+    hideAllCode.addEventListener("click", toggleCodeHandler(false));
+  }
+  const showAllCode = window.document.getElementById("quarto-show-all-code");
+  if (showAllCode) {
+    showAllCode.addEventListener("click", toggleCodeHandler(true));
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
+<div class="sourceCode" id="cb26" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "Time series algebra"</span></span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a><span class="an">author:</span><span class="co"> Verónica Andreo</span></span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a><span class="an">date:</span><span class="co"> today</span></span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a><span class="an">format:</span></span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a><span class="co">  html:</span></span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a><span class="co">    code-tools: true</span></span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a><span class="co">    code-copy: true</span></span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a><span class="co">    code-fold: false</span></span>
+<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a><span class="an">engine:</span><span class="co"> knitr</span></span>
+<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a><span class="an">execute:</span></span>
+<span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a><span class="co">  eval: false</span></span>
+<span id="cb26-13"><a href="#cb26-13" aria-hidden="true" tabindex="-1"></a><span class="co">  keep-ipynb: true  </span></span>
+<span id="cb26-14"><a href="#cb26-14" aria-hidden="true" tabindex="-1"></a><span class="an">jupyter:</span><span class="co"> python3</span></span>
+<span id="cb26-15"><a href="#cb26-15" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb26-16"><a href="#cb26-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-17"><a href="#cb26-17" aria-hidden="true" tabindex="-1"></a>In this third part of the time series tutorials, we will go through different </span>
+<span id="cb26-18"><a href="#cb26-18" aria-hidden="true" tabindex="-1"></a>temporal algebra examples. There are five modules within the temporal framework</span>
+<span id="cb26-19"><a href="#cb26-19" aria-hidden="true" tabindex="-1"></a>that allow us to perform temporal map algebra on different types of data: </span>
+<span id="cb26-20"><a href="#cb26-20" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">t.rast.mapcalc</span><span class="co">](https://grass.osgeo.org/grass-stable/manuals/t.rast.mapcalc.html)</span>, </span>
+<span id="cb26-21"><a href="#cb26-21" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">t.rast.algebra</span><span class="co">](https://grass.osgeo.org/grass-stable/manuals/t.rast.algebra.html)</span>, </span>
+<span id="cb26-22"><a href="#cb26-22" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">t.rast3d.mapcalc</span><span class="co">](https://grass.osgeo.org/grass-stable/manuals/t.rast3d.mapcalc.html)</span>,</span>
+<span id="cb26-23"><a href="#cb26-23" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">t.rast3d.algebra</span><span class="co">](https://grass.osgeo.org/grass-stable/manuals/t.rast3d.algebra.html)</span>, and </span>
+<span id="cb26-24"><a href="#cb26-24" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">t.vect.algebra</span><span class="co">](https://grass.osgeo.org/grass-stable/manuals/t.vect.algebra.html)</span>. </span>
+<span id="cb26-25"><a href="#cb26-25" aria-hidden="true" tabindex="-1"></a>We will focus on the raster oriented tools in this tutorial. </span>
+<span id="cb26-26"><a href="#cb26-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-27"><a href="#cb26-27" aria-hidden="true" tabindex="-1"></a>::: {.callout-note title="Setup"}</span>
+<span id="cb26-28"><a href="#cb26-28" aria-hidden="true" tabindex="-1"></a>This tutorial can be run locally or in Google Colab. However, make sure you</span>
+<span id="cb26-29"><a href="#cb26-29" aria-hidden="true" tabindex="-1"></a>install GRASS GIS 8.3+, download the LST sample data and set up your project</span>
+<span id="cb26-30"><a href="#cb26-30" aria-hidden="true" tabindex="-1"></a>as explained in the <span class="co">[</span><span class="ot">first part</span><span class="co">](time_series_management_and_visualization.qmd)</span> </span>
+<span id="cb26-31"><a href="#cb26-31" aria-hidden="true" tabindex="-1"></a>of these time series tutorials.</span>
+<span id="cb26-32"><a href="#cb26-32" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb26-33"><a href="#cb26-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-34"><a href="#cb26-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-35"><a href="#cb26-35" aria-hidden="true" tabindex="-1"></a><span class="fu">## [t.rast.mapcalc](https://grass.osgeo.org/grass-stable/manuals/t.rast.mapcalc.html) vs [t.rast.algebra](https://grass.osgeo.org/grass-stable/manuals/t.rast.algebra.html)</span></span>
+<span id="cb26-36"><a href="#cb26-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-37"><a href="#cb26-37" aria-hidden="true" tabindex="-1"></a>Both tools allow us to perform spatio-temporal operations on temporally sampled</span>
+<span id="cb26-38"><a href="#cb26-38" aria-hidden="true" tabindex="-1"></a>maps of raster time series (STRDS). Also, both tools support spatial and </span>
+<span id="cb26-39"><a href="#cb26-39" aria-hidden="true" tabindex="-1"></a>temporal functions. </span>
+<span id="cb26-40"><a href="#cb26-40" aria-hidden="true" tabindex="-1"></a>Spatial operators and functions are those used in </span>
+<span id="cb26-41"><a href="#cb26-41" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">r.mapcalc</span><span class="co">](https://grass.osgeo.org/grass-stable/manuals/r.mapcalc.html)</span>. </span>
+<span id="cb26-42"><a href="#cb26-42" aria-hidden="true" tabindex="-1"></a>Temporal internal variables supported for both relative and absolute time </span>
+<span id="cb26-43"><a href="#cb26-43" aria-hidden="true" tabindex="-1"></a>include: <span class="in">`td()`</span> (time delta), <span class="in">`start_time()`</span> and <span class="in">`end_time()`</span>. </span>
+<span id="cb26-44"><a href="#cb26-44" aria-hidden="true" tabindex="-1"></a>There are also several useful internal temporal variables supported especially </span>
+<span id="cb26-45"><a href="#cb26-45" aria-hidden="true" tabindex="-1"></a>for absolute time, e.g.: <span class="in">`start_doy()`</span>, <span class="in">`start_year()`</span>, <span class="in">`start_month()`</span> and</span>
+<span id="cb26-46"><a href="#cb26-46" aria-hidden="true" tabindex="-1"></a>so on.</span>
+<span id="cb26-47"><a href="#cb26-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-48"><a href="#cb26-48" aria-hidden="true" tabindex="-1"></a>Both *t.rast.mapcalc* and *t.rast.algebra* support temporal operations. However, </span>
+<span id="cb26-49"><a href="#cb26-49" aria-hidden="true" tabindex="-1"></a>only *t.rast.algebra* is effectively temporally aware; *t.rast.mapcalc* </span>
+<span id="cb26-50"><a href="#cb26-50" aria-hidden="true" tabindex="-1"></a>is mostly a wrapper around *r.mapcalc*. Indeed, t.rast.algebra is able to </span>
+<span id="cb26-51"><a href="#cb26-51" aria-hidden="true" tabindex="-1"></a>perform a wide range of temporal operations based on the temporal topology </span>
+<span id="cb26-52"><a href="#cb26-52" aria-hidden="true" tabindex="-1"></a>of maps within STRDS. Supported operators, relations and functions in</span>
+<span id="cb26-53"><a href="#cb26-53" aria-hidden="true" tabindex="-1"></a>t.rast.algebra include:</span>
+<span id="cb26-54"><a href="#cb26-54" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-55"><a href="#cb26-55" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Temporal operators: union (<span class="in">`u`</span>), intersection (<span class="in">`i`</span>), left reference (<span class="in">`l`</span>), etc.</span>
+<span id="cb26-56"><a href="#cb26-56" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Temporal relations: <span class="in">`equals`</span>, <span class="in">`during`</span>, <span class="in">`contains`</span>, <span class="in">`starts`</span>, etc.</span>
+<span id="cb26-57"><a href="#cb26-57" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Temporal selection: <span class="in">`:`</span> and <span class="in">`!:`</span>.</span>
+<span id="cb26-58"><a href="#cb26-58" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Temporal functions: <span class="in">`td()`</span>, <span class="in">`start_time()`</span>, <span class="in">`start_doy()`</span>, <span class="in">`#`</span>, <span class="in">`tmap()`</span>, <span class="in">`map()`</span>, <span class="in">`t_snap()`</span>, <span class="in">`buff_t()`</span>, <span class="in">`t_shift()`</span>, etc.</span>
+<span id="cb26-59"><a href="#cb26-59" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Temporal neighborhood modifier: <span class="in">`[x,y,t]`</span>.</span>
+<span id="cb26-60"><a href="#cb26-60" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Spatial operators: <span class="in">`+`</span>,<span class="in">`-`</span>,<span class="in">`*`</span>,<span class="in">`/`</span>,<span class="in">`%`</span>.</span>
+<span id="cb26-61"><a href="#cb26-61" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Spatial functions: <span class="in">`abs(x)`</span>, <span class="in">`float(x)`</span>, <span class="in">`int(x)`</span>, <span class="in">`log(x)`</span>, <span class="in">`round(x)`</span>, <span class="in">`isnull(x)`</span>,<span class="in">`null()`</span>, among others.</span>
+<span id="cb26-62"><a href="#cb26-62" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-63"><a href="#cb26-63" aria-hidden="true" tabindex="-1"></a>They can all be combined in nested expressions with conditions statements </span>
+<span id="cb26-64"><a href="#cb26-64" aria-hidden="true" tabindex="-1"></a>to create spatio-temporal operators! In general, expressions have the following </span>
+<span id="cb26-65"><a href="#cb26-65" aria-hidden="true" tabindex="-1"></a>structure:</span>
+<span id="cb26-66"><a href="#cb26-66" aria-hidden="true" tabindex="-1"></a><span class="in">`{"spatial or select operator", "temporal relations", "temporal operator"}`</span> </span>
+<span id="cb26-67"><a href="#cb26-67" aria-hidden="true" tabindex="-1"></a>and they can be combined with conditional statements such as:</span>
+<span id="cb26-68"><a href="#cb26-68" aria-hidden="true" tabindex="-1"></a><span class="in">`if(topologies, conditions, A, B)`</span> where A and B can be either space time </span>
+<span id="cb26-69"><a href="#cb26-69" aria-hidden="true" tabindex="-1"></a>datasets or expressions (e.g., A+B). Just for illustration purposes, let's see</span>
+<span id="cb26-70"><a href="#cb26-70" aria-hidden="true" tabindex="-1"></a>some examples from the manual page:</span>
+<span id="cb26-71"><a href="#cb26-71" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-72"><a href="#cb26-72" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`C = A {+,equal,l} B`</span>: C will have the same time stamps than A and will be A+B for all maps with equal time stamps among A and B, this is equivalent to <span class="in">`C = A + B`</span>, i.e., *equal* is the default temporal relation for algebra operations and *left reference* is the default temporal operator. </span>
+<span id="cb26-73"><a href="#cb26-73" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`C = if(start_date(A) &lt; "2005-01-01", A + B)`</span>: C will be A+B if the start date of A is earlier than Jan 1st, 2005 (if, then statement).</span>
+<span id="cb26-74"><a href="#cb26-74" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`C = if({equal}, A &gt; 100 &amp;&amp; A &lt; 1600 {&amp;&amp;,equal} td(A) &gt; 30, B)`</span>: C will have all cells from  B with equal temporal relations to A, if the cells of A are in the range (100.0, 1600) of time intervals that have more than 30 time units. This is equivalent to <span class="in">`C = if(A &gt; 100 &amp;&amp; A &lt; 1600 &amp;&amp; td(A) &gt; 30, B)`</span>.</span>
+<span id="cb26-75"><a href="#cb26-75" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`C = A {:, during} tmap(event)`</span>: C will contain all maps from A that are during the temporal extent of the single map 'event'.</span>
+<span id="cb26-76"><a href="#cb26-76" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`C = A * map(constant_value)`</span>: C will contain all raster maps from A multiplied by the raster map 'constant_value' (a map without time stamp).</span>
+<span id="cb26-77"><a href="#cb26-77" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`B = if(A &gt; 0.0 &amp;&amp; A[-1] &gt; 0.0 &amp;&amp; A[-2] &gt; 0.0, start_doy(A, 0), 0)`</span>: B will have the DOY for all maps from A where conditions are met at three consecutive time intervals, otherwise put 0.</span>
+<span id="cb26-78"><a href="#cb26-78" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-79"><a href="#cb26-79" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-80"><a href="#cb26-80" aria-hidden="true" tabindex="-1"></a>Let's see some examples using the LST daily time series from northern Italy. We</span>
+<span id="cb26-81"><a href="#cb26-81" aria-hidden="true" tabindex="-1"></a>start with something simple to also refresh what we learnt in the previous</span>
+<span id="cb26-82"><a href="#cb26-82" aria-hidden="true" tabindex="-1"></a>tutorial about aggregations.</span>
+<span id="cb26-83"><a href="#cb26-83" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-84"><a href="#cb26-84" aria-hidden="true" tabindex="-1"></a><span class="co">&lt;!-- </span></span>
+<span id="cb26-85"><a href="#cb26-85" aria-hidden="true" tabindex="-1"></a><span class="co">t.rast.mapcalc input=tempmean_monthly output=january_under_0 basename=january_under_0 \</span></span>
+<span id="cb26-86"><a href="#cb26-86" aria-hidden="true" tabindex="-1"></a><span class="co">expression="if(start_month() == 1 &amp;&amp; tempmean_monthly &gt; 0, null(), tempmean_monthly)" </span></span>
+<span id="cb26-87"><a href="#cb26-87" aria-hidden="true" tabindex="-1"></a><span class="co">--&gt;</span></span>
+<span id="cb26-88"><a href="#cb26-88" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-89"><a href="#cb26-89" aria-hidden="true" tabindex="-1"></a><span class="fu">### Anomalies</span></span>
+<span id="cb26-90"><a href="#cb26-90" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-91"><a href="#cb26-91" aria-hidden="true" tabindex="-1"></a>To estimate annual anomalies, we need the long term average and standard </span>
+<span id="cb26-92"><a href="#cb26-92" aria-hidden="true" tabindex="-1"></a>deviation of the whole series, and the annual averages. Then, we estimate</span>
+<span id="cb26-93"><a href="#cb26-93" aria-hidden="true" tabindex="-1"></a>the standardized anomalies as:</span>
+<span id="cb26-94"><a href="#cb26-94" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-95"><a href="#cb26-95" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb26-96"><a href="#cb26-96" aria-hidden="true" tabindex="-1"></a>StdAnom_i = \frac{Avg_i - Avg}{SD}</span>
+<span id="cb26-97"><a href="#cb26-97" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb26-98"><a href="#cb26-98" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-99"><a href="#cb26-99" aria-hidden="true" tabindex="-1"></a>Let's first obtain the average and standard deviation for the series:</span>
+<span id="cb26-100"><a href="#cb26-100" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-103"><a href="#cb26-103" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb26-104"><a href="#cb26-104" aria-hidden="true" tabindex="-1"></a><span class="co"># Get general average and SD</span></span>
+<span id="cb26-105"><a href="#cb26-105" aria-hidden="true" tabindex="-1"></a>methods<span class="op">=</span>[<span class="st">"average"</span>,<span class="st">"stddev"</span>]</span>
+<span id="cb26-106"><a href="#cb26-106" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-107"><a href="#cb26-107" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> me <span class="kw">in</span> methods:</span>
+<span id="cb26-108"><a href="#cb26-108" aria-hidden="true" tabindex="-1"></a>    gs.run_command(<span class="st">"t.rast.series"</span>,</span>
+<span id="cb26-109"><a href="#cb26-109" aria-hidden="true" tabindex="-1"></a>                   <span class="bu">input</span><span class="op">=</span><span class="st">"lst_daily"</span>,</span>
+<span id="cb26-110"><a href="#cb26-110" aria-hidden="true" tabindex="-1"></a>                   method<span class="op">=</span>me,</span>
+<span id="cb26-111"><a href="#cb26-111" aria-hidden="true" tabindex="-1"></a>                   output<span class="op">=</span><span class="ss">f"lst_</span><span class="sc">{</span>me<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb26-112"><a href="#cb26-112" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb26-113"><a href="#cb26-113" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-114"><a href="#cb26-114" aria-hidden="true" tabindex="-1"></a>and then the annual LST average:</span>
+<span id="cb26-115"><a href="#cb26-115" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-118"><a href="#cb26-118" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb26-119"><a href="#cb26-119" aria-hidden="true" tabindex="-1"></a><span class="co"># Get annual averages</span></span>
+<span id="cb26-120"><a href="#cb26-120" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"t.rast.aggregate"</span>,</span>
+<span id="cb26-121"><a href="#cb26-121" aria-hidden="true" tabindex="-1"></a>               <span class="bu">input</span><span class="op">=</span><span class="st">"lst_daily"</span>,</span>
+<span id="cb26-122"><a href="#cb26-122" aria-hidden="true" tabindex="-1"></a>               method<span class="op">=</span><span class="st">"average"</span>,</span>
+<span id="cb26-123"><a href="#cb26-123" aria-hidden="true" tabindex="-1"></a>               granularity<span class="op">=</span><span class="st">"1 years"</span>,</span>
+<span id="cb26-124"><a href="#cb26-124" aria-hidden="true" tabindex="-1"></a>               output<span class="op">=</span><span class="st">"lst_annual_average"</span>,</span>
+<span id="cb26-125"><a href="#cb26-125" aria-hidden="true" tabindex="-1"></a>               basename<span class="op">=</span><span class="st">"lst_average"</span>,</span>
+<span id="cb26-126"><a href="#cb26-126" aria-hidden="true" tabindex="-1"></a>               suffix<span class="op">=</span><span class="st">"gran"</span>,</span>
+<span id="cb26-127"><a href="#cb26-127" aria-hidden="true" tabindex="-1"></a>               nprocs<span class="op">=</span><span class="dv">6</span>)</span>
+<span id="cb26-128"><a href="#cb26-128" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb26-129"><a href="#cb26-129" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-130"><a href="#cb26-130" aria-hidden="true" tabindex="-1"></a>We now use t.rast.algebra to estimate the anomalies.</span>
+<span id="cb26-131"><a href="#cb26-131" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-134"><a href="#cb26-134" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb26-135"><a href="#cb26-135" aria-hidden="true" tabindex="-1"></a><span class="co"># Estimate annual anomalies</span></span>
+<span id="cb26-136"><a href="#cb26-136" aria-hidden="true" tabindex="-1"></a>expression<span class="op">=</span><span class="st">"lst_annual_anomaly = (lst_annual_average - map(lst_average)) / map(lst_stddev)"</span></span>
+<span id="cb26-137"><a href="#cb26-137" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-138"><a href="#cb26-138" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"t.rast.algebra"</span>,</span>
+<span id="cb26-139"><a href="#cb26-139" aria-hidden="true" tabindex="-1"></a>               expression<span class="op">=</span>expression,</span>
+<span id="cb26-140"><a href="#cb26-140" aria-hidden="true" tabindex="-1"></a>               basename<span class="op">=</span><span class="st">"lst_annual_anomaly"</span>,</span>
+<span id="cb26-141"><a href="#cb26-141" aria-hidden="true" tabindex="-1"></a>               suffix<span class="op">=</span><span class="st">"gran"</span>,</span>
+<span id="cb26-142"><a href="#cb26-142" aria-hidden="true" tabindex="-1"></a>               nprocs<span class="op">=</span><span class="dv">6</span>)</span>
+<span id="cb26-143"><a href="#cb26-143" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb26-144"><a href="#cb26-144" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-145"><a href="#cb26-145" aria-hidden="true" tabindex="-1"></a>We set the *differences* color palette and then create an animation. </span>
+<span id="cb26-146"><a href="#cb26-146" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-149"><a href="#cb26-149" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb26-150"><a href="#cb26-150" aria-hidden="true" tabindex="-1"></a><span class="co"># Set difference color table</span></span>
+<span id="cb26-151"><a href="#cb26-151" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"t.rast.colors"</span>,</span>
+<span id="cb26-152"><a href="#cb26-152" aria-hidden="true" tabindex="-1"></a>               <span class="bu">input</span><span class="op">=</span><span class="st">"lst_annual_anomaly"</span>,</span>
+<span id="cb26-153"><a href="#cb26-153" aria-hidden="true" tabindex="-1"></a>               color<span class="op">=</span><span class="st">"difference"</span>)</span>
+<span id="cb26-154"><a href="#cb26-154" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb26-155"><a href="#cb26-155" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-158"><a href="#cb26-158" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb26-159"><a href="#cb26-159" aria-hidden="true" tabindex="-1"></a><span class="co"># Animation of annual anomalies</span></span>
+<span id="cb26-160"><a href="#cb26-160" aria-hidden="true" tabindex="-1"></a>anomalies <span class="op">=</span> gj.TimeSeriesMap(use_region<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb26-161"><a href="#cb26-161" aria-hidden="true" tabindex="-1"></a>anomalies.add_raster_series(<span class="st">"lst_annual_anomaly"</span>, fill_gaps<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb26-162"><a href="#cb26-162" aria-hidden="true" tabindex="-1"></a>anomalies.d_legend(color<span class="op">=</span><span class="st">"black"</span>, at<span class="op">=</span>(<span class="dv">10</span>,<span class="dv">40</span>,<span class="dv">2</span>,<span class="dv">6</span>))</span>
+<span id="cb26-163"><a href="#cb26-163" aria-hidden="true" tabindex="-1"></a>anomalies.show()</span>
+<span id="cb26-164"><a href="#cb26-164" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb26-165"><a href="#cb26-165" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-166"><a href="#cb26-166" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-167"><a href="#cb26-167" aria-hidden="true" tabindex="-1"></a><span class="fu">### Month with maximum LST</span></span>
+<span id="cb26-168"><a href="#cb26-168" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-169"><a href="#cb26-169" aria-hidden="true" tabindex="-1"></a>We will use <span class="in">`t.rast.mapcalc`</span> to obtain the month when the maximum LST occurred</span>
+<span id="cb26-170"><a href="#cb26-170" aria-hidden="true" tabindex="-1"></a>during our study period. We already estimated the map with the maximum LST</span>
+<span id="cb26-171"><a href="#cb26-171" aria-hidden="true" tabindex="-1"></a>in the previous tutorial, but let's refresh our memories:</span>
+<span id="cb26-172"><a href="#cb26-172" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-175"><a href="#cb26-175" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb26-176"><a href="#cb26-176" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"t.rast.series"</span>,</span>
+<span id="cb26-177"><a href="#cb26-177" aria-hidden="true" tabindex="-1"></a>               <span class="bu">input</span><span class="op">=</span><span class="st">"lst_daily"</span>,</span>
+<span id="cb26-178"><a href="#cb26-178" aria-hidden="true" tabindex="-1"></a>               output<span class="op">=</span><span class="ss">f"lst_maximum"</span>,</span>
+<span id="cb26-179"><a href="#cb26-179" aria-hidden="true" tabindex="-1"></a>               method<span class="op">=</span><span class="st">"maximum"</span>,</span>
+<span id="cb26-180"><a href="#cb26-180" aria-hidden="true" tabindex="-1"></a>               nprocs<span class="op">=</span><span class="dv">4</span>)</span>
+<span id="cb26-181"><a href="#cb26-181" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb26-182"><a href="#cb26-182" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-183"><a href="#cb26-183" aria-hidden="true" tabindex="-1"></a>Then, we use t.rast.mapcalc to compare all maps in lst_daily with the lst_maximum</span>
+<span id="cb26-184"><a href="#cb26-184" aria-hidden="true" tabindex="-1"></a>map and save the month only when there's a match. The result will probably be a</span>
+<span id="cb26-185"><a href="#cb26-185" aria-hidden="true" tabindex="-1"></a>very sparse time series.</span>
+<span id="cb26-186"><a href="#cb26-186" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-189"><a href="#cb26-189" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb26-190"><a href="#cb26-190" aria-hidden="true" tabindex="-1"></a><span class="co"># Get time series with month of maximum LST</span></span>
+<span id="cb26-191"><a href="#cb26-191" aria-hidden="true" tabindex="-1"></a>expression<span class="op">=</span><span class="st">"if(lst_daily == lst_maximum, start_month(), null())"</span></span>
+<span id="cb26-192"><a href="#cb26-192" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-193"><a href="#cb26-193" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"t.rast.mapcalc"</span>,</span>
+<span id="cb26-194"><a href="#cb26-194" aria-hidden="true" tabindex="-1"></a>               flags<span class="op">=</span><span class="st">"n"</span>, <span class="co"># register also null maps</span></span>
+<span id="cb26-195"><a href="#cb26-195" aria-hidden="true" tabindex="-1"></a>               inputs<span class="op">=</span><span class="st">"lst_daily"</span>,</span>
+<span id="cb26-196"><a href="#cb26-196" aria-hidden="true" tabindex="-1"></a>               output<span class="op">=</span><span class="st">"month_max_lst"</span>,</span>
+<span id="cb26-197"><a href="#cb26-197" aria-hidden="true" tabindex="-1"></a>               basename<span class="op">=</span><span class="st">"month_max_lst"</span>,</span>
+<span id="cb26-198"><a href="#cb26-198" aria-hidden="true" tabindex="-1"></a>               expression<span class="op">=</span>expression,</span>
+<span id="cb26-199"><a href="#cb26-199" aria-hidden="true" tabindex="-1"></a>               nprocs<span class="op">=</span><span class="dv">6</span>)</span>
+<span id="cb26-200"><a href="#cb26-200" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb26-201"><a href="#cb26-201" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-204"><a href="#cb26-204" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb26-205"><a href="#cb26-205" aria-hidden="true" tabindex="-1"></a><span class="co"># Get basic info</span></span>
+<span id="cb26-206"><a href="#cb26-206" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(gs.read_command(<span class="st">"t.info"</span>, </span>
+<span id="cb26-207"><a href="#cb26-207" aria-hidden="true" tabindex="-1"></a>                      <span class="bu">input</span><span class="op">=</span><span class="st">"month_min_lst"</span>))</span>
+<span id="cb26-208"><a href="#cb26-208" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb26-209"><a href="#cb26-209" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-210"><a href="#cb26-210" aria-hidden="true" tabindex="-1"></a>Now we can aggregate our sparse time series to obtain the earliest month in </span>
+<span id="cb26-211"><a href="#cb26-211" aria-hidden="true" tabindex="-1"></a>which the maximum LST occurred.</span>
+<span id="cb26-212"><a href="#cb26-212" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-215"><a href="#cb26-215" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb26-216"><a href="#cb26-216" aria-hidden="true" tabindex="-1"></a><span class="co"># Get the earliest month in which the maximum appeared (method=minimum)</span></span>
+<span id="cb26-217"><a href="#cb26-217" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"t.rast.series"</span>,</span>
+<span id="cb26-218"><a href="#cb26-218" aria-hidden="true" tabindex="-1"></a>               <span class="bu">input</span><span class="op">=</span><span class="st">"month_max_lst"</span>,</span>
+<span id="cb26-219"><a href="#cb26-219" aria-hidden="true" tabindex="-1"></a>               method<span class="op">=</span><span class="st">"minimum"</span>,</span>
+<span id="cb26-220"><a href="#cb26-220" aria-hidden="true" tabindex="-1"></a>               output<span class="op">=</span><span class="st">"max_lst_date"</span>)</span>
+<span id="cb26-221"><a href="#cb26-221" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb26-222"><a href="#cb26-222" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-223"><a href="#cb26-223" aria-hidden="true" tabindex="-1"></a>Remover la STRDS intermedia y los mapas que contiene:</span>
+<span id="cb26-224"><a href="#cb26-224" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-227"><a href="#cb26-227" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb26-228"><a href="#cb26-228" aria-hidden="true" tabindex="-1"></a><span class="co"># Remove month_max_lst strds; we were only interested in the resulting aggregated map</span></span>
+<span id="cb26-229"><a href="#cb26-229" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"t.remove"</span>,</span>
+<span id="cb26-230"><a href="#cb26-230" aria-hidden="true" tabindex="-1"></a>               flags<span class="op">=</span><span class="st">"rfd"</span>, <span class="co"># recursive, force, delete</span></span>
+<span id="cb26-231"><a href="#cb26-231" aria-hidden="true" tabindex="-1"></a>               inputs<span class="op">=</span><span class="st">"month_max_lst"</span>)</span>
+<span id="cb26-232"><a href="#cb26-232" aria-hidden="true" tabindex="-1"></a>               </span>
+<span id="cb26-233"><a href="#cb26-233" aria-hidden="true" tabindex="-1"></a><span class="co"># Check it's gone</span></span>
+<span id="cb26-234"><a href="#cb26-234" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(gs.read_command(<span class="st">"t.list"</span>))</span>
+<span id="cb26-235"><a href="#cb26-235" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb26-236"><a href="#cb26-236" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-237"><a href="#cb26-237" aria-hidden="true" tabindex="-1"></a>Let's display the result using the <span class="in">`Map`</span> class from <span class="in">`grass.jupyter`</span> package:</span>
+<span id="cb26-238"><a href="#cb26-238" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-241"><a href="#cb26-241" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb26-242"><a href="#cb26-242" aria-hidden="true" tabindex="-1"></a>mm <span class="op">=</span> gj.Map(width<span class="op">=</span><span class="dv">450</span>, use_region<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb26-243"><a href="#cb26-243" aria-hidden="true" tabindex="-1"></a>mm.d_rast(<span class="bu">map</span><span class="op">=</span><span class="st">"max_lst_date"</span>)</span>
+<span id="cb26-244"><a href="#cb26-244" aria-hidden="true" tabindex="-1"></a>mm.d_vect(<span class="bu">map</span><span class="op">=</span><span class="st">"italy"</span>, <span class="bu">type</span><span class="op">=</span><span class="st">"boundary"</span>, color<span class="op">=</span><span class="st">"#4D4D4D"</span>, width<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb26-245"><a href="#cb26-245" aria-hidden="true" tabindex="-1"></a>mm.d_legend(raster<span class="op">=</span><span class="st">"max_lst_date"</span>, title<span class="op">=</span><span class="st">"Month"</span>, fontsize<span class="op">=</span><span class="dv">10</span>, at<span class="op">=</span>(<span class="dv">2</span>,<span class="dv">15</span>,<span class="dv">2</span>,<span class="dv">10</span>))</span>
+<span id="cb26-246"><a href="#cb26-246" aria-hidden="true" tabindex="-1"></a>mm.d_barscale(length<span class="op">=</span><span class="dv">50</span>, units<span class="op">=</span><span class="st">"kilometers"</span>, segment<span class="op">=</span><span class="dv">4</span>, fontsize<span class="op">=</span><span class="dv">14</span>, at<span class="op">=</span>(<span class="dv">73</span>,<span class="dv">7</span>))</span>
+<span id="cb26-247"><a href="#cb26-247" aria-hidden="true" tabindex="-1"></a>mm.d_northarrow(at<span class="op">=</span>(<span class="dv">90</span>,<span class="dv">15</span>))</span>
+<span id="cb26-248"><a href="#cb26-248" aria-hidden="true" tabindex="-1"></a>mm.d_text(text<span class="op">=</span><span class="st">"Month of maximum LST"</span>, color<span class="op">=</span><span class="st">"black"</span>, font<span class="op">=</span><span class="st">"sans"</span>, size<span class="op">=</span><span class="dv">4</span>, bgcolor<span class="op">=</span><span class="st">"white"</span>)</span>
+<span id="cb26-249"><a href="#cb26-249" aria-hidden="true" tabindex="-1"></a>mm.show()</span>
+<span id="cb26-250"><a href="#cb26-250" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb26-251"><a href="#cb26-251" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-252"><a href="#cb26-252" aria-hidden="true" tabindex="-1"></a>::: {.callout-note}</span>
+<span id="cb26-253"><a href="#cb26-253" aria-hidden="true" tabindex="-1"></a>How could we have done the same in one single step? </span>
+<span id="cb26-254"><a href="#cb26-254" aria-hidden="true" tabindex="-1"></a>Hint: <span class="in">`t.rast.algebra ... method=during`</span>.</span>
+<span id="cb26-255"><a href="#cb26-255" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-258"><a href="#cb26-258" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb26-259"><a href="#cb26-259" aria-hidden="true" tabindex="-1"></a><span class="co"># Get time series with month of maximum LST</span></span>
+<span id="cb26-260"><a href="#cb26-260" aria-hidden="true" tabindex="-1"></a>expression<span class="op">=</span><span class="st">"month_max_lst = if(</span><span class="sc">{during}</span><span class="st">, lst_daily == tmap(lst_maximum), start_month(), null())"</span></span>
+<span id="cb26-261"><a href="#cb26-261" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-262"><a href="#cb26-262" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"t.rast.algebra"</span>,</span>
+<span id="cb26-263"><a href="#cb26-263" aria-hidden="true" tabindex="-1"></a>               basename<span class="op">=</span><span class="st">"month_max_lst"</span>,</span>
+<span id="cb26-264"><a href="#cb26-264" aria-hidden="true" tabindex="-1"></a>               expression<span class="op">=</span>expression,</span>
+<span id="cb26-265"><a href="#cb26-265" aria-hidden="true" tabindex="-1"></a>               suffix<span class="op">=</span><span class="st">"gran"</span>,</span>
+<span id="cb26-266"><a href="#cb26-266" aria-hidden="true" tabindex="-1"></a>               nprocs<span class="op">=</span><span class="dv">6</span>)</span>
+<span id="cb26-267"><a href="#cb26-267" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb26-268"><a href="#cb26-268" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-269"><a href="#cb26-269" aria-hidden="true" tabindex="-1"></a>Is it really the same?</span>
+<span id="cb26-270"><a href="#cb26-270" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-273"><a href="#cb26-273" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb26-274"><a href="#cb26-274" aria-hidden="true" tabindex="-1"></a>expression<span class="op">=</span><span class="st">"result = max_lst_date - month_max_lst"</span></span>
+<span id="cb26-275"><a href="#cb26-275" aria-hidden="true" tabindex="-1"></a>gs.rast_mapcalc(exp<span class="op">=</span>expression)</span>
+<span id="cb26-276"><a href="#cb26-276" aria-hidden="true" tabindex="-1"></a>gs.raster_info(<span class="st">"result"</span>)</span>
+<span id="cb26-277"><a href="#cb26-277" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb26-278"><a href="#cb26-278" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-279"><a href="#cb26-279" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb26-280"><a href="#cb26-280" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-281"><a href="#cb26-281" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-282"><a href="#cb26-282" aria-hidden="true" tabindex="-1"></a>:::{.callout-caution}</span>
+<span id="cb26-283"><a href="#cb26-283" aria-hidden="true" tabindex="-1"></a>What if we are interested in knowing the week number in which the annual maximum </span>
+<span id="cb26-284"><a href="#cb26-284" aria-hidden="true" tabindex="-1"></a>LST occurs each year? How would you do that? Can we also know if there's any </span>
+<span id="cb26-285"><a href="#cb26-285" aria-hidden="true" tabindex="-1"></a>trend in the week number? i.e., does it tend to happen earlier or later?</span>
+<span id="cb26-286"><a href="#cb26-286" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-289"><a href="#cb26-289" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb26-290"><a href="#cb26-290" aria-hidden="true" tabindex="-1"></a><span class="co"># Estimate annual max LST</span></span>
+<span id="cb26-291"><a href="#cb26-291" aria-hidden="true" tabindex="-1"></a><span class="op">!</span>t.rast.aggregate <span class="bu">input</span><span class="op">=</span>lst_daily output<span class="op">=</span>lst_max_annual basename<span class="op">=</span>lst_max method<span class="op">=</span>maximum granularity<span class="op">=</span><span class="st">"1 years"</span> suffix<span class="op">=</span>gran</span>
+<span id="cb26-292"><a href="#cb26-292" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-293"><a href="#cb26-293" aria-hidden="true" tabindex="-1"></a><span class="co"># Week number</span></span>
+<span id="cb26-294"><a href="#cb26-294" aria-hidden="true" tabindex="-1"></a><span class="op">!</span>t.rast.algebra expression<span class="op">=</span><span class="st">"week_lst_max_annual = if(</span><span class="sc">{contains}</span><span class="st">, lst_max_annual == lst_daily, start_week(lst_daily))"</span> basename<span class="op">=</span>week_lst_max_annual suffix<span class="op">=</span>gran </span>
+<span id="cb26-295"><a href="#cb26-295" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-296"><a href="#cb26-296" aria-hidden="true" tabindex="-1"></a><span class="co"># Is there a trend?</span></span>
+<span id="cb26-297"><a href="#cb26-297" aria-hidden="true" tabindex="-1"></a><span class="op">!</span>t.rast.series <span class="bu">input</span><span class="op">=</span>week_lst_max_annual method<span class="op">=</span>slope output<span class="op">=</span>slope_week_lst_max_annual</span>
+<span id="cb26-298"><a href="#cb26-298" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb26-299"><a href="#cb26-299" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-300"><a href="#cb26-300" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb26-301"><a href="#cb26-301" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-302"><a href="#cb26-302" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-303"><a href="#cb26-303" aria-hidden="true" tabindex="-1"></a><span class="fu">### Number of days with LST &gt;= 20 and &lt;= 30</span></span>
+<span id="cb26-304"><a href="#cb26-304" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-305"><a href="#cb26-305" aria-hidden="true" tabindex="-1"></a>Some plague insects tend to thrive in a certain range of temperatures. Let's </span>
+<span id="cb26-306"><a href="#cb26-306" aria-hidden="true" tabindex="-1"></a>assume this range is from 20 to 30 °C. Here, we'll estimate the number of days </span>
+<span id="cb26-307"><a href="#cb26-307" aria-hidden="true" tabindex="-1"></a>within this range per year, and then, we'll estimate the median along years.</span>
+<span id="cb26-308"><a href="#cb26-308" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-311"><a href="#cb26-311" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb26-312"><a href="#cb26-312" aria-hidden="true" tabindex="-1"></a><span class="co">#| message: false</span></span>
+<span id="cb26-313"><a href="#cb26-313" aria-hidden="true" tabindex="-1"></a><span class="co">#| warning: false</span></span>
+<span id="cb26-314"><a href="#cb26-314" aria-hidden="true" tabindex="-1"></a><span class="co">#| results: hide</span></span>
+<span id="cb26-315"><a href="#cb26-315" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-316"><a href="#cb26-316" aria-hidden="true" tabindex="-1"></a><span class="co"># Keep only pixels meeting the condition</span></span>
+<span id="cb26-317"><a href="#cb26-317" aria-hidden="true" tabindex="-1"></a>expression<span class="op">=</span><span class="st">"lst_higher20_lower30 = if(lst_daily &gt;= 20.0 &amp;&amp; lst_daily &lt;= 30.0, 1, null())"</span></span>
+<span id="cb26-318"><a href="#cb26-318" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-319"><a href="#cb26-319" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"t.rast.algebra"</span>,</span>
+<span id="cb26-320"><a href="#cb26-320" aria-hidden="true" tabindex="-1"></a>               expression<span class="op">=</span>expression, </span>
+<span id="cb26-321"><a href="#cb26-321" aria-hidden="true" tabindex="-1"></a>               basename<span class="op">=</span><span class="st">"lst_higher20_lower30"</span>,</span>
+<span id="cb26-322"><a href="#cb26-322" aria-hidden="true" tabindex="-1"></a>               suffix<span class="op">=</span><span class="st">"gran"</span>,</span>
+<span id="cb26-323"><a href="#cb26-323" aria-hidden="true" tabindex="-1"></a>               nproc<span class="op">=</span><span class="dv">6</span>, </span>
+<span id="cb26-324"><a href="#cb26-324" aria-hidden="true" tabindex="-1"></a>               flags<span class="op">=</span><span class="st">"n"</span>)</span>
+<span id="cb26-325"><a href="#cb26-325" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb26-326"><a href="#cb26-326" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-329"><a href="#cb26-329" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb26-330"><a href="#cb26-330" aria-hidden="true" tabindex="-1"></a><span class="co"># Count how many times per year the condition is met</span></span>
+<span id="cb26-331"><a href="#cb26-331" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"t.rast.aggregate"</span>,</span>
+<span id="cb26-332"><a href="#cb26-332" aria-hidden="true" tabindex="-1"></a>               <span class="bu">input</span><span class="op">=</span><span class="st">"lst_higher20_lower30"</span>, </span>
+<span id="cb26-333"><a href="#cb26-333" aria-hidden="true" tabindex="-1"></a>               output<span class="op">=</span><span class="st">"count_lst_higher20_lower30"</span>,</span>
+<span id="cb26-334"><a href="#cb26-334" aria-hidden="true" tabindex="-1"></a>               basename<span class="op">=</span><span class="st">"count_lst_higher20_lower30"</span>,</span>
+<span id="cb26-335"><a href="#cb26-335" aria-hidden="true" tabindex="-1"></a>               suffix<span class="op">=</span><span class="st">"gran"</span>,</span>
+<span id="cb26-336"><a href="#cb26-336" aria-hidden="true" tabindex="-1"></a>               method<span class="op">=</span><span class="st">"count"</span>,</span>
+<span id="cb26-337"><a href="#cb26-337" aria-hidden="true" tabindex="-1"></a>               granularity<span class="op">=</span><span class="st">"1 years"</span>)</span>
+<span id="cb26-338"><a href="#cb26-338" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb26-339"><a href="#cb26-339" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-342"><a href="#cb26-342" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb26-343"><a href="#cb26-343" aria-hidden="true" tabindex="-1"></a><span class="co"># Check raster maps in the STRDS</span></span>
+<span id="cb26-344"><a href="#cb26-344" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"t.rast.list"</span>, </span>
+<span id="cb26-345"><a href="#cb26-345" aria-hidden="true" tabindex="-1"></a>               <span class="bu">input</span><span class="op">=</span><span class="st">"count_lst_higher20_lower30"</span>, </span>
+<span id="cb26-346"><a href="#cb26-346" aria-hidden="true" tabindex="-1"></a>               columns<span class="op">=</span><span class="st">"name,start_time,min,max"</span>)</span>
+<span id="cb26-347"><a href="#cb26-347" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb26-348"><a href="#cb26-348" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-351"><a href="#cb26-351" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb26-352"><a href="#cb26-352" aria-hidden="true" tabindex="-1"></a><span class="co"># Median number of days with average lst &gt;= 20 and &lt;= 30</span></span>
+<span id="cb26-353"><a href="#cb26-353" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"t.rast.series"</span>,</span>
+<span id="cb26-354"><a href="#cb26-354" aria-hidden="true" tabindex="-1"></a>               <span class="bu">input</span><span class="op">=</span><span class="st">"count_tmean_higher20_lower30"</span>,</span>
+<span id="cb26-355"><a href="#cb26-355" aria-hidden="true" tabindex="-1"></a>               output<span class="op">=</span><span class="st">"median_count_tmean_higher20_lower30"</span>,</span>
+<span id="cb26-356"><a href="#cb26-356" aria-hidden="true" tabindex="-1"></a>               method<span class="op">=</span><span class="st">"median"</span>)</span>
+<span id="cb26-357"><a href="#cb26-357" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb26-358"><a href="#cb26-358" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-361"><a href="#cb26-361" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb26-362"><a href="#cb26-362" aria-hidden="true" tabindex="-1"></a><span class="co"># Display raster map with interactive class</span></span>
+<span id="cb26-363"><a href="#cb26-363" aria-hidden="true" tabindex="-1"></a>h20_map <span class="op">=</span> gj.InteractiveMap(width <span class="op">=</span> <span class="dv">500</span>, use_region<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb26-364"><a href="#cb26-364" aria-hidden="true" tabindex="-1"></a>h20_map.add_raster(<span class="st">"median_count_tmean_higher20_lower30"</span>)</span>
+<span id="cb26-365"><a href="#cb26-365" aria-hidden="true" tabindex="-1"></a>h20_map.add_layer_control(position <span class="op">=</span> <span class="st">"bottomright"</span>)</span>
+<span id="cb26-366"><a href="#cb26-366" aria-hidden="true" tabindex="-1"></a>h20_map.show()</span>
+<span id="cb26-367"><a href="#cb26-367" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb26-368"><a href="#cb26-368" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-369"><a href="#cb26-369" aria-hidden="true" tabindex="-1"></a>::: {.callout-note}</span>
+<span id="cb26-370"><a href="#cb26-370" aria-hidden="true" tabindex="-1"></a>How would you check if the median number of days with lst &gt;= 20 and &lt;= 30 </span>
+<span id="cb26-371"><a href="#cb26-371" aria-hidden="true" tabindex="-1"></a>is changing along the years?</span>
+<span id="cb26-372"><a href="#cb26-372" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb26-373"><a href="#cb26-373" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-374"><a href="#cb26-374" aria-hidden="true" tabindex="-1"></a><span class="fu">### Number of consecutive days with LST &lt;= -10.0</span></span>
+<span id="cb26-375"><a href="#cb26-375" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-376"><a href="#cb26-376" aria-hidden="true" tabindex="-1"></a>Likewise, there are temperature thresholds that mark a limit to insects survival.</span>
+<span id="cb26-377"><a href="#cb26-377" aria-hidden="true" tabindex="-1"></a>Here, we'll use the lower temperature threshold to survival. Most importantly, </span>
+<span id="cb26-378"><a href="#cb26-378" aria-hidden="true" tabindex="-1"></a>we we'll count the number of consecutive days with temperatures below this </span>
+<span id="cb26-379"><a href="#cb26-379" aria-hidden="true" tabindex="-1"></a>threshold.</span>
+<span id="cb26-380"><a href="#cb26-380" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-381"><a href="#cb26-381" aria-hidden="true" tabindex="-1"></a>Here, we'll use again the temporal algebra and we'll recall the concept of </span>
+<span id="cb26-382"><a href="#cb26-382" aria-hidden="true" tabindex="-1"></a>topology that we defined at the beginning of these tutorials. First, we need to </span>
+<span id="cb26-383"><a href="#cb26-383" aria-hidden="true" tabindex="-1"></a>create a STRDS of annual granularity that will contain only zeroes. This annual </span>
+<span id="cb26-384"><a href="#cb26-384" aria-hidden="true" tabindex="-1"></a>STRDS, that we call <span class="in">`annual_mask`</span>, will be the base to add the value 1 each time</span>
+<span id="cb26-385"><a href="#cb26-385" aria-hidden="true" tabindex="-1"></a>the condition of less than -10 °C in consecutive days is met. Finally, we </span>
+<span id="cb26-386"><a href="#cb26-386" aria-hidden="true" tabindex="-1"></a>estimate the median number of days with LST lower than -10 °C over the 5 years.</span>
+<span id="cb26-387"><a href="#cb26-387" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-390"><a href="#cb26-390" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb26-391"><a href="#cb26-391" aria-hidden="true" tabindex="-1"></a><span class="co"># Create annual mask</span></span>
+<span id="cb26-392"><a href="#cb26-392" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"t.rast.aggregate"</span>,</span>
+<span id="cb26-393"><a href="#cb26-393" aria-hidden="true" tabindex="-1"></a>               <span class="bu">input</span><span class="op">=</span><span class="st">"lst_daily"</span>,</span>
+<span id="cb26-394"><a href="#cb26-394" aria-hidden="true" tabindex="-1"></a>               output<span class="op">=</span><span class="st">"annual_mask"</span>,</span>
+<span id="cb26-395"><a href="#cb26-395" aria-hidden="true" tabindex="-1"></a>               basename<span class="op">=</span><span class="st">"annual_mask"</span>,</span>
+<span id="cb26-396"><a href="#cb26-396" aria-hidden="true" tabindex="-1"></a>               suffix<span class="op">=</span><span class="st">"gran"</span>,</span>
+<span id="cb26-397"><a href="#cb26-397" aria-hidden="true" tabindex="-1"></a>               granularity<span class="op">=</span><span class="st">"1 year"</span>,</span>
+<span id="cb26-398"><a href="#cb26-398" aria-hidden="true" tabindex="-1"></a>               method<span class="op">=</span><span class="st">"count"</span>)</span>
+<span id="cb26-399"><a href="#cb26-399" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb26-400"><a href="#cb26-400" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-403"><a href="#cb26-403" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb26-404"><a href="#cb26-404" aria-hidden="true" tabindex="-1"></a><span class="co"># Replace values by zero</span></span>
+<span id="cb26-405"><a href="#cb26-405" aria-hidden="true" tabindex="-1"></a>expression<span class="op">=</span><span class="st">"if(annual_mask, 0)"</span></span>
+<span id="cb26-406"><a href="#cb26-406" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-407"><a href="#cb26-407" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"t.rast.mapcalc"</span>,</span>
+<span id="cb26-408"><a href="#cb26-408" aria-hidden="true" tabindex="-1"></a>               <span class="bu">input</span><span class="op">=</span><span class="st">"annual_mask"</span>,</span>
+<span id="cb26-409"><a href="#cb26-409" aria-hidden="true" tabindex="-1"></a>               output<span class="op">=</span><span class="st">"annual_mask_0"</span>,</span>
+<span id="cb26-410"><a href="#cb26-410" aria-hidden="true" tabindex="-1"></a>               expression<span class="op">=</span>expression,</span>
+<span id="cb26-411"><a href="#cb26-411" aria-hidden="true" tabindex="-1"></a>               basename<span class="op">=</span><span class="st">"annual_mask_0"</span>)</span>
+<span id="cb26-412"><a href="#cb26-412" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb26-413"><a href="#cb26-413" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-416"><a href="#cb26-416" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb26-417"><a href="#cb26-417" aria-hidden="true" tabindex="-1"></a><span class="co">#| message: false</span></span>
+<span id="cb26-418"><a href="#cb26-418" aria-hidden="true" tabindex="-1"></a><span class="co">#| warning: false</span></span>
+<span id="cb26-419"><a href="#cb26-419" aria-hidden="true" tabindex="-1"></a><span class="co">#| results: hide</span></span>
+<span id="cb26-420"><a href="#cb26-420" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-421"><a href="#cb26-421" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate consecutive days with LST &lt;= -10.0</span></span>
+<span id="cb26-422"><a href="#cb26-422" aria-hidden="true" tabindex="-1"></a>expression<span class="op">=</span><span class="st">"lower_m10_consec_days = annual_mask_0 {+,contains,l} if(lst_daily &lt;= -10.0 &amp;&amp; lst_daily[-1] &lt;= -10.0 || lst_daily[1] &lt;= -10.0 &amp;&amp; lst_daily &lt;= -10.0, 1, 0)"</span></span>
+<span id="cb26-423"><a href="#cb26-423" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-424"><a href="#cb26-424" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"t.rast.algebra"</span>,</span>
+<span id="cb26-425"><a href="#cb26-425" aria-hidden="true" tabindex="-1"></a>               expression<span class="op">=</span>expression,</span>
+<span id="cb26-426"><a href="#cb26-426" aria-hidden="true" tabindex="-1"></a>               basename<span class="op">=</span><span class="st">"lower_m10"</span>,</span>
+<span id="cb26-427"><a href="#cb26-427" aria-hidden="true" tabindex="-1"></a>               suffix<span class="op">=</span><span class="st">"gran"</span>,</span>
+<span id="cb26-428"><a href="#cb26-428" aria-hidden="true" tabindex="-1"></a>               nproc<span class="op">=</span><span class="dv">7</span>)</span>
+<span id="cb26-429"><a href="#cb26-429" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb26-430"><a href="#cb26-430" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-433"><a href="#cb26-433" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb26-434"><a href="#cb26-434" aria-hidden="true" tabindex="-1"></a><span class="co"># Inspect values</span></span>
+<span id="cb26-435"><a href="#cb26-435" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"t.rast.list"</span>,</span>
+<span id="cb26-436"><a href="#cb26-436" aria-hidden="true" tabindex="-1"></a>               <span class="bu">input</span><span class="op">=</span><span class="st">"lower_m10_consec_days"</span>,</span>
+<span id="cb26-437"><a href="#cb26-437" aria-hidden="true" tabindex="-1"></a>               columns<span class="op">=</span><span class="st">"name,start_time,min,max"</span>)</span>
+<span id="cb26-438"><a href="#cb26-438" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb26-439"><a href="#cb26-439" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-442"><a href="#cb26-442" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb26-443"><a href="#cb26-443" aria-hidden="true" tabindex="-1"></a><span class="co"># Median number of consecutive days with LST &lt;= -10</span></span>
+<span id="cb26-444"><a href="#cb26-444" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"t.rast.series"</span>,</span>
+<span id="cb26-445"><a href="#cb26-445" aria-hidden="true" tabindex="-1"></a>               <span class="bu">input</span><span class="op">=</span><span class="st">"lower_m10_consec_days"</span>,</span>
+<span id="cb26-446"><a href="#cb26-446" aria-hidden="true" tabindex="-1"></a>               output<span class="op">=</span><span class="st">"median_lower_m10_consec_days"</span>,</span>
+<span id="cb26-447"><a href="#cb26-447" aria-hidden="true" tabindex="-1"></a>               method<span class="op">=</span><span class="st">"median"</span>)</span>
+<span id="cb26-448"><a href="#cb26-448" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb26-449"><a href="#cb26-449" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-452"><a href="#cb26-452" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb26-453"><a href="#cb26-453" aria-hidden="true" tabindex="-1"></a><span class="co"># Display raster map with interactive class</span></span>
+<span id="cb26-454"><a href="#cb26-454" aria-hidden="true" tabindex="-1"></a>lt10_map <span class="op">=</span> gj.InteractiveMap(width <span class="op">=</span> <span class="dv">500</span>, use_region<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb26-455"><a href="#cb26-455" aria-hidden="true" tabindex="-1"></a>lt10_map.add_raster(<span class="st">"median_lower_m10_consec_days"</span>)</span>
+<span id="cb26-456"><a href="#cb26-456" aria-hidden="true" tabindex="-1"></a>lt10_map.add_layer_control(position <span class="op">=</span> <span class="st">"bottomright"</span>)</span>
+<span id="cb26-457"><a href="#cb26-457" aria-hidden="true" tabindex="-1"></a>lt10_map.show()</span>
+<span id="cb26-458"><a href="#cb26-458" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb26-459"><a href="#cb26-459" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-460"><a href="#cb26-460" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-461"><a href="#cb26-461" aria-hidden="true" tabindex="-1"></a><span class="fu">## References</span></span>
+<span id="cb26-462"><a href="#cb26-462" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-463"><a href="#cb26-463" aria-hidden="true" tabindex="-1"></a></span>
+</code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div></div></div></div></div>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

@@ -9,19 +9,22 @@ execute:
   eval: false
 ---
 
-In previous tutorials we have gone through some of the basics of working 
-with GRASS GIS through R and Python. As you might recall then, there's
-an R package called [rgrass]() that provides basic functionality to read and write
-data from and into GRASS database as well as to execute GRASS tools in either
-existing or temporary GRASS projects. The GRASS Python API on the other hand
-is composed of various packages including classes and functions for low and high
-level tasks. In a previous tutorial we explored the basic functionality of 
-[grass.script](https://grass.osgeo.org/grass-stable/manuals/libpython/script.html) 
-and [grass.jupyter](https://grass.osgeo.org/grass-stable/manuals/libpython/grass.jupyter.html), 
-but there are other Python packages like 
-[pygrass](https://grass.osgeo.org/grass-stable/manuals/libpython/pygrass_index.html), 
-[temporal](https://grass.osgeo.org/grass-stable/manuals/libpython/temporal_framework.html), 
-[gunittest](https://grass.osgeo.org/grass-stable/manuals/libpython/gunittest_testing.html).
+In previous tutorials we have gone through some of the basics of using 
+GRASS GIS through/with R and Python. As you might recall then, there's
+an R package called [rgrass](https://github.com/rsbivand/rgrass/) that provides 
+basic functionality to read and write data from and into GRASS database as well 
+as to execute GRASS tools in either existing or temporary GRASS projects. 
+The [GRASS Python API](https://grass.osgeo.org/grass-stable/manuals/libpython/index.html) 
+on the other hand is composed of various packages that provide classes and 
+functions for low and high level tasks, including those that can be executed with rgrass.
+<!-- In a previous tutorial we explored the basic functionality of  -->
+<!-- [grass.script](https://grass.osgeo.org/grass-stable/manuals/libpython/script.html)  -->
+<!-- and [grass.jupyter](https://grass.osgeo.org/grass-stable/manuals/libpython/grass.jupyter.html),  -->
+<!-- but there are other Python packages like  -->
+<!-- [pygrass](https://grass.osgeo.org/grass-stable/manuals/libpython/pygrass_index.html),  -->
+<!-- [temporal](https://grass.osgeo.org/grass-stable/manuals/libpython/temporal_framework.html),  -->
+<!-- [gunittest](https://grass.osgeo.org/grass-stable/manuals/libpython/gunittest_testing.html), -->
+<!-- that will be addressed in upcoming tutorials. -->
 
 As you might have noticed there are some parallelisms between the **rgrass** and 
 **grass.script**/**grass.jupyter** packages, i.e., R and Python interfaces to 
@@ -40,7 +43,7 @@ Let's quickly review the equivalencies and go through some examples.
 | Read raster and vector data <br>from GRASS                 | read_RAST(),<br>read_VECT()    | gs.array.array(),<br>n/a                                |
 | Write raster and vector data<br>into GRASS                 | write_RAST(),<br>write_VECT()  | gs.array.write(),<br>n/a                                |
 | Get raster and vector info                                 | n/a,<br>vInfo()                | gs.raster_info(),<br>gs.vector_info()                   |
-| Close GRASS session                                        | unlink_.gislock()              | gs.setup.finish(),<br>gj.finish()                             |
+| Close GRASS session                                        | unlink_.gislock()              | gs.setup.finish(),<br>gj.finish()                       |
 
 : R and Python GRASS interfaces compared {.striped .hover}
 
@@ -48,10 +51,10 @@ Let's quickly review the equivalencies and go through some examples.
 
 Let's see how usage examples would look like. 
 
-1. **Load the library**: Either if we are working in R or in Python, we need to load the
-libraries that will, in this case, allow us to interface with GRASS GIS 
-functionality and data. For the Python case, we first need to add the GRASS
-python path to our system's path.
+1. **Load the library**: Either if we are working in R or in Python, we need to 
+load the libraries that will, in this case, allow us to interface with GRASS GIS 
+functionality and (optionally) data. For the Python case, we first need to add 
+the GRASS python package path to our system's path.
 
 ::: {.panel-tabset}
 
@@ -69,7 +72,7 @@ import sys
 import subprocess
 
 sys.path.append(
-    subprocess.check_output([grassbin, "--config", "python_path"], text=True).strip()
+    subprocess.check_output(["grass", "--config", "python_path"], text=True).strip()
 )
 
 import grass.script as gs
@@ -78,14 +81,15 @@ import grass.jupyter as gj
 
 :::
 
-2. **Start GRASS GIS session**: Once we loaded or imported the packages, we start a 
-GRASS session. In both cases we need to pass the path to GRASS database, 
-a project and a mapset name. In the case of R, we are also required to pass
-the path to GRASS binaries, that in the Python case was needed for library 
-import above. Here, it is worth noting that while grass.scrip and grass.jupyter
-init functions take the same arguments, `gj.init` also sets other environmental 
-variables to streamline work within Jupyter Notebooks, eg., overwrite is set to
-true.
+2. **Start GRASS GIS session**: Once we loaded or imported the packages, we 
+start a GRASS GIS session. In both cases we need to somehow pass the path to a 
+temporary or existing GRASS project. 
+In the case of R, we are also required to pass the path to GRASS GIS binaries, 
+that in the Python case was needed for library import above. 
+Here, it is worth noting that while grass.scrip and grass.jupyter init functions
+take the same arguments, `gj.init` also sets other environmental variables to 
+streamline work within Jupyter Notebooks, e.g., overwrite is set to true so cells
+can be executed multiple times.
 
 ::: {.panel-tabset}
 
@@ -122,15 +126,16 @@ gj.init("/home/user/grassdata/nc_basic_spm_grass7/PERMANENT")
 
 3. **Execute GRASS commands**: Both interfaces work pretty similarly, the 
 first argument is always the GRASS module name and then we pass the parameters
-and flags. While in R we basically use `execGRASS()`, in the Python case, we have 
-different wrappers for GRASS commands depending on the nature of their output.
+and flags. While in R we basically use `execGRASS()` for all GRASS commands, in 
+the Python API, we have different wrappers to execute GRASS commands depending
+on the nature of their output.
 
 ::: {.panel-tabset}
 
 ## R
 
 ```{r}
-# map output(s)
+# map output
 execGRASS("r.slope.aspect", 
           elevation = "terra_elev", 
           slope = "slope",
@@ -163,19 +168,23 @@ gs.parse_command("g.region",
 
 :::
 
-4. **Read raster and vector data into other R or Python formats**: As explained
-in previous tutorials, *rgrass* functions `read_RAST()` and `read_VECT()` convert
-GRASS raster and vector maps into terra's SpatRaster and SpatVector objects 
-within R. In the case of Python, we only have such a functionality for GRASS 
-raster maps that can be read converted into numpy arrays through 
-`gs.array.array()`.
+4. **Read raster and vector data into other R or Python formats**:
+*rgrass* functions `read_RAST()` and `read_VECT()` convert GRASS raster and 
+vector maps into terra's SpatRaster and SpatVector objects within R. 
+In the case of Python, we only have such a functionality for GRASS 
+raster maps that can be converted into numpy arrays through 
+`gs.array.array()`. Vector attribute data however can be converted into 
+pandas data frames using `StringIO` function within pandas `read_csv`.
 
 ::: {.panel-tabset}
 
 ## R
 
 ```{r}
+# raster
 elevr <- read_RAST("elevation")
+
+# vector
 schoolsr <- read_VECT("schools")
 ```
 
@@ -183,9 +192,15 @@ schoolsr <- read_VECT("schools")
 
 ```{python}
 #| python.reticulate: FALSE
+# raster
 import numpy as np
-
 elev = gs.array.array("elevation")
+
+# vector
+import pandas as pd
+from io import StringIO
+schoolsp = gs.read_command("v.db.select", map="schools").strip()
+df = pd.read_csv(StringIO(schoolsp), sep="|")
 ```
 
 :::
@@ -204,6 +219,7 @@ numpy arrays can also be written (back) into GRASS raster maps with the
 ```{r}
 # raster
 write_RAST(elevr, "elevation_r")
+
 # vector
 write_VECT(schoolsr, "schools_r")
 ```
@@ -222,7 +238,7 @@ elev.write(mapname="elev_np", overwrite=True)
 6. **Close GRASS GIS session**: In general, just closing R or Rstudio, as well
 as shutting down Jupyter notebook, will clean up and close the GRASS session 
 properly. Sometimes, however, especially if the user changed mapset within the 
-workflow, is better to clean up explicitely.
+workflow, is better to clean up explicitly before closing.
 
 ::: {.panel-tabset}
 
@@ -241,4 +257,9 @@ session.finish()
 
 :::
 
+### Final remarks
 
+The examples and comparisons presented here are intended to facilitate the
+combination of tools and languages as well as the exchange of data and format
+conversions. We hope that's useful as starting point for the implementation
+of different use cases and workflows that suit the needs of different users.
