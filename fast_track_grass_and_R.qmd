@@ -24,7 +24,7 @@ R packages and download the
 [North Carolina sample dataset](https://grass.osgeo.org/sampledata/north_carolina/nc_basic_spm_grass7.zip).
 :::
 
-## *rgrass* main funtions
+## *rgrass* main functions
 
 The main functions within **rgrass** are the following:
 
