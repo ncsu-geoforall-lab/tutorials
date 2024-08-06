@@ -13,8 +13,7 @@ The *rgrass* package is developed and maintained by Roger Bivand and can be
 found at: <https://github.com/rsbivand/rgrass/>. In this fast track tutorial, 
 we will learn how to use GRASS GIS from R.
 
-::: callout-note
-**Setup note**:
+::: {.callout-note title="Setup note"}
 
 To run this tutorial locally you should have GRASS GIS 8.4+, 
 [R](https://www.r-project.org/) and, optionally, 
