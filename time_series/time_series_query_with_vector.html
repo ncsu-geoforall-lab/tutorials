@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Veronica Andreo">
-<meta name="dcterms.date" content="2024-08-12">
+<meta name="dcterms.date" content="2024-08-14">
 
 <title>Time series querying</title>
 <style>
@@ -98,7 +98,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">August 12, 2024</p>
+      <p class="date">August 14, 2024</p>
     </div>
   </div>
   
@@ -110,10 +110,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p>In this sixth part of the time series tutorials, we will go through time series querying and compare and contrast the different tools available according to input, output and other options. We will split tools into two groups according to their name to facilitate comparisons:</p>
+<p>In this sixth part of the time series tutorials, we will go through time series querying and compare and contrast the different tools available according to their inputs, outputs and other options. We will split tools into two groups according to their name to facilitate comparisons:</p>
 <ul>
-<li>temporal tools: <a href="">t.rast.what</a>, <a href="">t.rast.what.aggr</a>, <a href="https://grass.osgeo.org/grass-stable/manuals/t.vect.observe.strds.html">t.vect.observe.strds</a>, <a href="">t.vect.what.strds</a>, and</li>
-<li>vector tools: <a href="">v.what.strds</a>, <a href="">v.what.strds.timestamps</a>, <a href="">v.strds.stats</a>.</li>
+<li>temporal tools: <a href="https://grass.osgeo.org/grass-stable/manuals/t.rast.what.html">t.rast.what</a>, <a href="https://grass.osgeo.org/grass-stable/manuals/addons/t.rast.what.aggr.html">t.rast.what.aggr</a>,<a href="https://grass.osgeo.org/grass-stable/manuals/t.vect.observe.strds.html">t.vect.observe.strds</a>, <a href="https://grass.osgeo.org/grass-stable/manuals/t.vect.what.strds.html">t.vect.what.strds</a> and,</li>
+<li>vector tools: <a href="https://grass.osgeo.org/grass-stable/manuals/v.what.strds.html">v.what.strds</a>, <a href="https://grass.osgeo.org/grass-stable/manuals/addons/v.what.strds.timestamp.html">v.what.strds.timestamp</a>, <a href="https://grass.osgeo.org/grass-stable/manuals/addons/v.strds.stats.html">v.strds.stats</a>.</li>
 </ul>
 <div class="callout callout-style-default callout-note callout-titled" title="Setup">
 <div class="callout-header d-flex align-content-center">
@@ -125,12 +125,12 @@ Setup
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>This tutorial can be run locally or in Google Colab. However, make sure you install GRASS GIS 8.4+, download the LST sample data and set up your project as explained in the <a href="time_series_management_and_visualization.qmd">first part</a> of these time series tutorials.</p>
+<p>This tutorial can be run locally or in Google Colab. However, make sure you install GRASS GIS 8.4+, download the <a href="">LST sample project</a> and set up your project as explained in the <a href="time_series_management_and_visualization.qmd">first part</a> of these time series tutorials.</p>
 </div>
 </div>
 <section id="temporal-tools" class="level2">
 <h2 class="anchored" data-anchor-id="temporal-tools">Temporal tools</h2>
-<p>All the temporal tools that allow to query raster time series take either coordinates or a point vector map to sample one or various STRDS. Regarding outputs, the <em>t.rast.*</em> tools retrieve values to stdout, write them in plain text files or update the vector attribute table. In contrast, the <em>t.vect.*</em> tools output vector time series. Only two of these tools allow to do queries with temporal aggregation of the raster data according to a fixed date or a date column in the case of <a href="https://grass.osgeo.org/grass-stable/manuals/addons/t.rast.what.aggr.html">t.rast.what.aggr</a> and with temporal topology relations in the case of <a href="https://grass.osgeo.org/grass-stable/manuals/t.vect.what.strds.html">t.vect.what.strds</a>.</p>
+<p>All the temporal tools that allow to query raster time series take either coordinates or a point vector map as inputs to sample one or various STRDS. Regarding outputs, the <em>t.rast.*</em> tools retrieve values to stdout, write them in plain text files or update the vector attribute table. In contrast, the <em>t.vect.*</em> tools output vector time series. Only two of these tools allow to do queries with temporal aggregation of the raster data either according to a fixed date or a date column in the case of <em>t.rast.what.aggr</em> or with temporal topology relations in the case of <em>t.vect.what.strds</em>.</p>
 <table class="table">
 <caption>Comparison of temporal tools that allow to query space time raster datasets.</caption>
 <thead>
@@ -146,8 +146,8 @@ Setup
 <tr class="odd">
 <td>Purpose</td>
 <td>Samples a STRDS at vector points and writes the output to stdout or text file with different layouts</td>
-<td>Samples a STRDS at vector points and returns <strong>aggregated</strong> values to stdout or in the attribute table</td>
-<td>Samples STRDSs at points from a vector map and outputs a <strong>STVDS</strong></td>
+<td>Samples a STRDS at vector points and returns aggregated values to stdout or in the attribute table</td>
+<td>Samples STRDSs at points from a vector map and outputs a STVDS</td>
 <td>Samples a STRDS at the spatio-temporal locations of a STVDS</td>
 </tr>
 <tr class="even">
@@ -195,15 +195,15 @@ Setup
 <tr class="even">
 <td>example</td>
 <td>t.rast.what -n strds=A points=points output=result.txt layout=row</td>
-<td>t.rast.what.aggr input=stations strds=ndvi date=“2015-05-01” granularity=“2 months”</td>
-<td>t.vect.observe.strds input=stations strds=tempmean output=stations vector_output=stations columns=month</td>
-<td>t.vect.what.strds input=stations strds=tempmean column=temp method=average</td>
+<td>t.rast.what.aggr input=points strds=A date=“2015-05-01” granularity=“2 months”</td>
+<td>t.vect.observe.strds input=points strds=A output=points_stvds vector_output=points_vector columns=A_values</td>
+<td>t.vect.what.strds input=points strds=A column=A_values method=average</td>
 </tr>
 </tbody>
 </table>
-<p>Let’s see some examples. We will first randomly extract the centroids of 15 Italian regions in our study area and save them as a points vector map to query the raster time series.</p>
+<p>Let’s see some examples. We will first randomly extract the centroids of 15 Italian regions in our study area and save them as a point vector map to query the raster time series afterwards.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Extract centroids</span></span>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Extract 15 random centroids</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"v.extract"</span>, </span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>               <span class="bu">input</span><span class="op">=</span><span class="st">"italy_borders_2_clip"</span>,</span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>               <span class="bu">type</span><span class="op">=</span><span class="st">"centroid"</span>,</span>
@@ -225,12 +225,22 @@ Setup
 <span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>centroids.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Get LST monthly values for the points</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"t.rast.what"</span>,</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>               points<span class="op">=</span><span class="st">"sampling_points"</span>,</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>               strds<span class="op">=</span><span class="st">"lst_monthly"</span>,</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>               layout<span class="op">=</span><span class="st">"row"</span>,</span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>               flags<span class="op">=</span><span class="st">"n"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate monthly LST time series</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"t.rast.aggregate"</span>, </span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>               <span class="bu">input</span><span class="op">=</span><span class="st">"lst_daily"</span>, </span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>               output<span class="op">=</span><span class="st">"lst_monthly"</span>,</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>               basename<span class="op">=</span><span class="st">"lst_monthly"</span>,</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>               suffix<span class="op">=</span><span class="st">"gran"</span>,</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>               method<span class="op">=</span><span class="st">"average"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Let’s start by using <em>t.rast.what</em> that will output the result in the standard output, i.e., the terminal, the GUI console or the Jupyter cell.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Get LST monthly values for the points</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"t.rast.what"</span>,</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>               points<span class="op">=</span><span class="st">"sampling_points"</span>,</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>               strds<span class="op">=</span><span class="st">"lst_monthly"</span>,</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>               layout<span class="op">=</span><span class="st">"row"</span>,</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>               flags<span class="op">=</span><span class="st">"n"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled" title="Layouts">
 <div class="callout-header d-flex align-content-center">
@@ -242,53 +252,52 @@ Layouts
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>You can then play around with the different output layouts, i.e., <em>row, column, timerow</em>, to find the one that better suits your data pipelines.</p>
+<p>Users can then play around with the different output layouts, i.e., <em>row, column, timerow</em>, to find the one that better suits their data pipelines.</p>
 </div>
 </div>
-<p>Now, to exemplify the use of t.rast.what.aggr imagine we did some mosquito trappings in two different dates and we need to know which was the average LST the two months before the trappings. Since the dates are different, we actually need to aggregate different days. This is done on the fly (i.e., without the need to aggregate the whole raster time series) by t.rast.what.aggr. Let’s install the extension and add dates to our point vector map.</p>
+<p>Now, to exemplify the use of <em>t.rast.what.aggr</em> imagine we did some mosquito trappings in two different dates and we need to know which was the average LST the two months before the trappings. Since the dates are different, we actually need to aggregate different days. This is done on the fly (i.e., without the need to aggregate the whole raster time series) by the extension <em>t.rast.what.aggr</em>. Let’s install it and add dates to our point vector map.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Install t.rast.what.aggr extension</span></span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"g.extension"</span>, extension<span class="op">=</span><span class="st">"t.rast.what.aggr"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Install t.rast.what.aggr extension</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"g.extension"</span>, extension<span class="op">=</span><span class="st">"t.rast.what.aggr"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"v.db.addcolumn"</span>, </span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>               <span class="bu">map</span><span class="op">=</span><span class="st">"sampling_points"</span>,</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>               column<span class="op">=</span><span class="st">"sampling_date date"</span>)</span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"v.db.update"</span>, </span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>               <span class="bu">map</span><span class="op">=</span><span class="st">"sampling_points"</span>, </span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>               column<span class="op">=</span><span class="st">"sampling_date"</span>,</span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>               value<span class="op">=</span><span class="st">"2018-08-27"</span>)</span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"v.db.update"</span>,</span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>               <span class="bu">map</span><span class="op">=</span><span class="st">"sampling_points"</span>,</span>
-<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>               column<span class="op">=</span><span class="st">"sampling_date"</span>,</span>
-<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>               value<span class="op">=</span><span class="st">"2018-07-01"</span>,</span>
-<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>               where<span class="op">=</span><span class="st">"cat &gt;= '68'"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Add a new date type column</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"v.db.addcolumn"</span>, </span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>               <span class="bu">map</span><span class="op">=</span><span class="st">"sampling_points"</span>,</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>               column<span class="op">=</span><span class="st">"sampling_date date"</span>)</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>               </span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Add values to the date column</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"v.db.update"</span>, </span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>               <span class="bu">map</span><span class="op">=</span><span class="st">"sampling_points"</span>, </span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>               column<span class="op">=</span><span class="st">"sampling_date"</span>,</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>               value<span class="op">=</span><span class="st">"2018-08-27"</span>)</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"v.db.update"</span>,</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>               <span class="bu">map</span><span class="op">=</span><span class="st">"sampling_points"</span>,</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>               column<span class="op">=</span><span class="st">"sampling_date"</span>,</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>               value<span class="op">=</span><span class="st">"2018-07-01"</span>,</span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>               where<span class="op">=</span><span class="st">"cat &gt;= '68'"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>We will use the daily time series in this case to get the aggregation period right.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Get aggregated LST values</span></span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"t.rast.what.aggr"</span>, </span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>               <span class="bu">input</span><span class="op">=</span><span class="st">"sampling_points"</span>, </span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>               strds<span class="op">=</span><span class="st">"lst_daily"</span>, </span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>               date_column<span class="op">=</span><span class="st">"sampling_date"</span>,</span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>               granularity<span class="op">=</span><span class="st">"2 months"</span>,</span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>               method<span class="op">=</span><span class="st">"average"</span>,</span>
-<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>               flags<span class="op">=</span><span class="st">"c"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Get aggregated LST values</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"t.rast.what.aggr"</span>, </span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>               <span class="bu">input</span><span class="op">=</span><span class="st">"sampling_points"</span>, </span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>               strds<span class="op">=</span><span class="st">"lst_daily"</span>, </span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>               date_column<span class="op">=</span><span class="st">"sampling_date"</span>,</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>               granularity<span class="op">=</span><span class="st">"2 months"</span>,</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>               method<span class="op">=</span><span class="st">"average"</span>,</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>               flags<span class="op">=</span><span class="st">"c"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>gs.vector_db_select(<span class="st">"sampling_points"</span>)[<span class="st">"values"</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
+<p>Let’s display the result by converting the attribute table into a Pandas DataFrame.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>table <span class="op">=</span> pd.DataFrame.from_dict(gs.vector_db_select(<span class="st">"sampling_points"</span>)[<span class="st">"values"</span>], </span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>                               orient<span class="op">=</span><span class="st">"index"</span>, </span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>                               columns<span class="op">=</span>gs.vector_db_select(<span class="st">"sampling_points"</span>)[<span class="st">"columns"</span>])</span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>table</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> gs.parse_command(<span class="st">"v.db.select"</span>, </span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>                        <span class="bu">map</span><span class="op">=</span><span class="st">"sampling_points"</span>, </span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>                        <span class="bu">format</span><span class="op">=</span><span class="st">"json"</span>)</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>                        </span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>pd.DataFrame(data[<span class="st">'records'</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<!-- this above does not work anymore but I do not understand why, 
-there are indeed 16 columns and 16 values per row... boh  -->
 <div class="callout callout-style-default callout-note callout-titled" title="Question">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -302,7 +311,8 @@ Question
 <p>What would be the result if we use the monthly time series?</p>
 </div>
 </div>
-<p>Let’s demonstrate now the use of t.vect.observe.strds and t.vect.what.strds. These tools as mentioned above output a vector time series.</p>
+<p>Let’s demonstrate now the use of <em>t.vect.observe.strds</em> and <em>t.vect.what.strds</em>. These tools, as mentioned above, output a vector time series or stvds. Vector time series in GRASS GIS can be created either from a series of vector maps (especially if features/geometries vary in time) or from layers added to a single vector map (i.e., features are always the same, as in the case of meteorological stations).</p>
+<p>We start with <em>t.vect.observe.strds</em>. It will create a new vector map with as many layers as raster maps there are in the strds we are querying and it will register these in a stvds.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"t.vect.observe.strds"</span>,</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>               <span class="bu">input</span><span class="op">=</span><span class="st">"sampling_points"</span>,</span>
@@ -312,12 +322,14 @@ Question
 <span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>               columns<span class="op">=</span><span class="st">"lst"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"t.info"</span>,</span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>               <span class="bu">input</span><span class="op">=</span><span class="st">"sp_lst_monthly"</span>,</span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>               <span class="bu">type</span><span class="op">=</span><span class="st">"stvds"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Check the stvds is created</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"t.info"</span>,</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>               <span class="bu">input</span><span class="op">=</span><span class="st">"sp_lst_monthly"</span>,</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>               <span class="bu">type</span><span class="op">=</span><span class="st">"stvds"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>gs.vector_info(<span class="st">"sp_lst_monthly"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Check number of layers in the vector map</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>gs.vector_info(<span class="st">"sp_lst_monthly"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Check one layer</span></span>
@@ -328,7 +340,8 @@ Question
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"t.vect.db.select"</span>,</span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>               <span class="bu">input</span><span class="op">=</span><span class="st">"sp_lst_monthly"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>Let’s compare the values obtained by querying the monthly LST time series with those resulting from aggregating the daily LST time series. They should be the same. For that we need to specify the sampling relation.</p>
+<p>Let’s now compare the values obtained by querying the monthly LST time series with those resulting from aggregating the daily LST time series. They should be the same. For that we need to specify the sampling relation. The temporal tool that allows to specify sampling relations and do temporal aggregation is <em>t.vect.what.strds</em>. It requires a stvds as input, so we’ll use the one we just obtained above. We also specify the <em>start</em> relation, so all maps in the strds which start time matches the stvds will be aggregated. Let’s see this graphically before running the tool.</p>
+<p><img src="img/comparison_of_granularities.png" class="img-fluid"></p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"t.vect.what.strds"</span>, </span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>               <span class="bu">input</span><span class="op">=</span><span class="st">"sp_lst_monthly"</span>, </span>
@@ -341,12 +354,11 @@ Question
 <div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"t.vect.db.select"</span>,</span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>               <span class="bu">input</span><span class="op">=</span><span class="st">"sp_lst_monthly"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<!-- create a stvds by adding layers to a points map and then registering 
-them and query a strds with a different sampling - contain does not work, so it seems the ref is the strds, not the stvds -->
+<p>As expected, results are exactly the same! So, if you are constrained by disk space for example, you don’t need to aggregate your entire strds if you only need aggregated values for a set of points.</p>
 </section>
 <section id="vector-tools" class="level2">
 <h2 class="anchored" data-anchor-id="vector-tools">Vector tools</h2>
-<!-- add summary here -->
+<p>The main difference between temporal and vector tools to query raster time series is that vector tools can update the attribute table of the input vector without creating more layers. Regarding inputs, both <em>v.what.strds</em> and <em>v.what.strds.timestamp</em> take a point vector map as input, while <em>v.strds.stats</em> takes a line or polygon vector map and performs spatial aggregation, i.e.&nbsp;zonal stats over the full or a part of the strds. The extension <em>v.what.strds.timestamp</em>, somehow similar to <em>t.rast.what.aggr</em>, offers the possibility of reading input points’ date information from a column in the attribute table and only performs the query for the dates that match. It also offers spatial interpolation of the four nearest pixels.</p>
 <table class="table">
 <caption>Comparison of vector tools that allow to query space time raster datasets.</caption>
 <thead>
@@ -401,58 +413,71 @@ them and query a strds with a different sampling - contain does not work, so it 
 <td></td>
 </tr>
 <tr class="even">
+<td>spatial interp</td>
+<td></td>
+<td>yes</td>
+<td></td>
+</tr>
+<tr class="odd">
 <td>example</td>
-<td>v.what.strds input=mypoints strds=mystrds output=newvector</td>
-<td>v.what.strds.timestamp input=sampling_points timestamp_column=sampling_time column=lst_at_sampling_time strds=LST_Day_monthly</td>
-<td>v.strds.stats input=myvector strds=mystrds output=newvector method=average</td>
+<td>v.what.strds -u input=points strds=A</td>
+<td>v.what.strds.timestamp input=points timestamp_column=sampling_time column=A_at_sampling_time strds=A</td>
+<td>v.strds.stats input=areas strds=A output=areas_new method=average</td>
 </tr>
 </tbody>
 </table>
-<!-- adapt examples to general names/objects -->
+<p>Let’s go through the usage of the vector tools to query raster time series now. When we run <em>v.what.strds</em> to query strds we can either save the results in a new vector map or update the input vector attribute table by setting the <code>u</code> flag. In this case, we’ll create a new vector map and do a temporal selection.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"v.what.strds"</span>,</span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>               <span class="bu">input</span><span class="op">=</span><span class="st">"sampling_points"</span>,</span>
-<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>               strds<span class="op">=</span><span class="st">"lst_monthly"</span>,</span>
-<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>               output<span class="op">=</span><span class="st">"sp_lst_monthly_2014"</span>,</span>
-<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>               t_where<span class="op">=</span><span class="st">"start_time &lt;= '2015-01-01'"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Run v.what.strds with temporal selection</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"v.what.strds"</span>,</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>               <span class="bu">input</span><span class="op">=</span><span class="st">"sampling_points"</span>,</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>               strds<span class="op">=</span><span class="st">"lst_monthly"</span>,</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>               output<span class="op">=</span><span class="st">"sp_lst_monthly_2014"</span>,</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>               t_where<span class="op">=</span><span class="st">"start_time &lt;= '2015-01-01'"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+<p>Let’s check the new vector created. It contains a new column per map in the queried strds.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Check the attr table of the new vector</span></span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>gs.vector_db_select(<span class="st">"sp_lst_monthly_2014"</span>)[<span class="st">"values"</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> gs.parse_command(<span class="st">"v.db.select"</span>, </span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>                        <span class="bu">map</span><span class="op">=</span><span class="st">"sp_lst_monthly_2014"</span>, </span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>                        <span class="bu">format</span><span class="op">=</span><span class="st">"json"</span>)</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>                        </span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>pd.DataFrame(data[<span class="st">'records'</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<!-- need help with using json output and get a nice pandas table displayed here, from dict does not seem to work (see above) -->
-<div class="callout callout-style-default callout-note callout-titled" title="Update vector attr table">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Update vector attr table
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>Instead of creating a new vector map, it is also possible to update the attribute table of the input vector map by setting the <code>u</code> flag.</p>
-</div>
-</div>
+<p>The tool <em>v.what.strds.timestamp</em> is an extension so we need to install it first. It will by default update the input vector attribute table with a column that needs to be specified by the user. Furthermore, it offers spatial interpolation of the four nearest cells via the <code>i</code> flag. Let’s compare the results with and without it.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"g.extension"</span>, extension<span class="op">=</span><span class="st">"v.what.strds.timestamp"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"v.what.strds.timestamp"</span>,</span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>               <span class="bu">input</span><span class="op">=</span><span class="st">"sampling_points"</span>,</span>
-<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>               timestamp_column<span class="op">=</span><span class="st">"sampling_date"</span>,</span>
-<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>               column<span class="op">=</span><span class="st">"lst_sampling_date"</span>,</span>
-<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>               strds<span class="op">=</span><span class="st">"lst_daily"</span>,</span>
-<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>               flags<span class="op">=</span><span class="st">"i"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co"># with spatial interp of neighbor cells</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"v.what.strds.timestamp"</span>,</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>               <span class="bu">input</span><span class="op">=</span><span class="st">"sampling_points"</span>,</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>               timestamp_column<span class="op">=</span><span class="st">"sampling_date"</span>,</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>               column<span class="op">=</span><span class="st">"lst_sampling_date_i"</span>,</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>               strds<span class="op">=</span><span class="st">"lst_daily"</span>,</span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>               flags<span class="op">=</span><span class="st">"i"</span>)</span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>               </span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a><span class="co"># without spatial interp of neighbor cells</span></span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"v.what.strds.timestamp"</span>,</span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>               <span class="bu">input</span><span class="op">=</span><span class="st">"sampling_points"</span>,</span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>               timestamp_column<span class="op">=</span><span class="st">"sampling_date"</span>,</span>
+<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a>               column<span class="op">=</span><span class="st">"lst_sampling_date_no_i"</span>,</span>
+<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a>               strds<span class="op">=</span><span class="st">"lst_daily"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Let’s check the results.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> gs.parse_command(<span class="st">"v.db.select"</span>, </span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>                        <span class="bu">map</span><span class="op">=</span><span class="st">"sampling_points"</span>, </span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>                        <span class="bu">format</span><span class="op">=</span><span class="st">"json"</span>)</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>                        </span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>pd.DataFrame(data[<span class="st">'records'</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Finally, we’ll extract zonal statistics of a raster time series. For this, we need either a line or polygon vector map as input. We’ll use the map of italian municipalities and demonstrate the use of spatial (<code>where</code>) and temporal (<code>t_where</code>) selection.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Install v.strds.stats extension</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"g.extension"</span>, extension<span class="op">=</span><span class="st">"v.strds.stats"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>gs.vector_db_select(<span class="st">"sampling_points"</span>)[<span class="st">"values"</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"g.extension"</span>, extension<span class="op">=</span><span class="st">"v.strds.stats"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Extract August average LST for Milano</span></span>
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Extract August average LST for Milano municipality</span></span>
 <span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"v.strds.stats"</span>,</span>
 <span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>               <span class="bu">input</span><span class="op">=</span><span class="st">"italy_borders_3"</span>,</span>
 <span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>               strds<span class="op">=</span><span class="st">"lst_monthly"</span>,</span>
@@ -464,10 +489,13 @@ Update vector attr table
 <div class="cell">
 <div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>gs.vector_db_select(<span class="st">"milano_lst_august"</span>)[<span class="st">"values"</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>Which municipality in northern Italy had the highest August average temperature each year?</p>
+<p>Let’s now try to find out which municipality in northern Italy had the highest August average temperature each year?</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Clip municipalities to comp reg</span></span>
-<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"v.clip"</span>, <span class="bu">input</span><span class="op">=</span><span class="st">"italy_borders_3"</span>, output<span class="op">=</span><span class="st">"italy_borders_3_clip"</span>, flags<span class="op">=</span><span class="st">"r"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Clip municipalities to computational region</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"v.clip"</span>, </span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>               <span class="bu">input</span><span class="op">=</span><span class="st">"italy_borders_3"</span>, </span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>               output<span class="op">=</span><span class="st">"italy_borders_3_clip"</span>, </span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>               flags<span class="op">=</span><span class="st">"r"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Extract summer average LST municipalities</span></span>
@@ -479,10 +507,21 @@ Update vector attr table
 <span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>               method<span class="op">=</span><span class="st">"average"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>gs.vector_db_select(<span class="st">"municip_lst_august"</span>)[<span class="st">"values"</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Check the output table</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> gs.parse_command(<span class="st">"v.db.select"</span>, </span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>                        <span class="bu">map</span><span class="op">=</span><span class="st">"sampling_points"</span>, </span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>                        <span class="bu">format</span><span class="op">=</span><span class="st">"json"</span>)</span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>                        </span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>pd.DataFrame(data[<span class="st">'records'</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<!-- how to get the resulting attr table into something useful to answer the 
-question? -->
+<!-- how to get the max of each new col -->
+<!-- write the result -->
+</section>
+<section id="references" class="level2">
+<h2 class="anchored" data-anchor-id="references">References</h2>
+<div class="smaller">
+<p>Development of this tutorial was funded by the US <a href="https://www.nsf.gov/">National Science Foundation (NSF)</a>, award <a href="https://www.nsf.gov/awardsearch/showAward?AWD_ID=2303651">2303651</a>.</p>
+</div>
 <!-- -->
 
 </section>
@@ -969,346 +1008,430 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb27-18"><a href="#cb27-18" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
 <span id="cb27-19"><a href="#cb27-19" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb27-20"><a href="#cb27-20" aria-hidden="true" tabindex="-1"></a>In this sixth part of the time series tutorials, we will go through time series</span>
-<span id="cb27-21"><a href="#cb27-21" aria-hidden="true" tabindex="-1"></a>querying and compare and contrast the different tools available according to</span>
-<span id="cb27-22"><a href="#cb27-22" aria-hidden="true" tabindex="-1"></a>input, output and other options. We will split tools into two groups according to their name to facilitate comparisons:</span>
-<span id="cb27-23"><a href="#cb27-23" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-24"><a href="#cb27-24" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>temporal tools: <span class="co">[</span><span class="ot">t.rast.what</span><span class="co">]()</span>, <span class="co">[</span><span class="ot">t.rast.what.aggr</span><span class="co">]()</span>, <span class="co">[</span><span class="ot">t.vect.observe.strds</span><span class="co">](https://grass.osgeo.org/grass-stable/manuals/t.vect.observe.strds.html)</span>, <span class="co">[</span><span class="ot">t.vect.what.strds</span><span class="co">]()</span>, and </span>
-<span id="cb27-25"><a href="#cb27-25" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>vector tools: <span class="co">[</span><span class="ot">v.what.strds</span><span class="co">]()</span>, <span class="co">[</span><span class="ot">v.what.strds.timestamps</span><span class="co">]()</span>, <span class="co">[</span><span class="ot">v.strds.stats</span><span class="co">]()</span>.</span>
-<span id="cb27-26"><a href="#cb27-26" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-27"><a href="#cb27-27" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-28"><a href="#cb27-28" aria-hidden="true" tabindex="-1"></a>::: {.callout-note title="Setup"}</span>
-<span id="cb27-29"><a href="#cb27-29" aria-hidden="true" tabindex="-1"></a>This tutorial can be run locally or in Google Colab. However, make sure you</span>
-<span id="cb27-30"><a href="#cb27-30" aria-hidden="true" tabindex="-1"></a>install GRASS GIS 8.4+, download the LST sample data and set up your</span>
-<span id="cb27-31"><a href="#cb27-31" aria-hidden="true" tabindex="-1"></a>project as explained in the </span>
-<span id="cb27-32"><a href="#cb27-32" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">first part</span><span class="co">](time_series_management_and_visualization.qmd)</span> of these time</span>
-<span id="cb27-33"><a href="#cb27-33" aria-hidden="true" tabindex="-1"></a>series tutorials.</span>
-<span id="cb27-34"><a href="#cb27-34" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb27-35"><a href="#cb27-35" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-38"><a href="#cb27-38" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb27-39"><a href="#cb27-39" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: false</span></span>
-<span id="cb27-40"><a href="#cb27-40" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-41"><a href="#cb27-41" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
-<span id="cb27-42"><a href="#cb27-42" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> sys</span>
-<span id="cb27-43"><a href="#cb27-43" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> subprocess</span>
-<span id="cb27-44"><a href="#cb27-44" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-45"><a href="#cb27-45" aria-hidden="true" tabindex="-1"></a><span class="co"># GRASS GIS database variables</span></span>
-<span id="cb27-46"><a href="#cb27-46" aria-hidden="true" tabindex="-1"></a>grassbin <span class="op">=</span> <span class="st">"grass-dev"</span></span>
-<span id="cb27-47"><a href="#cb27-47" aria-hidden="true" tabindex="-1"></a>grassdata <span class="op">=</span> os.path.join(os.path.expanduser(<span class="st">'~'</span>), <span class="st">"grassdata"</span>)</span>
-<span id="cb27-48"><a href="#cb27-48" aria-hidden="true" tabindex="-1"></a>project <span class="op">=</span> <span class="st">"eu_laea"</span></span>
-<span id="cb27-49"><a href="#cb27-49" aria-hidden="true" tabindex="-1"></a>mapset <span class="op">=</span> <span class="st">"italy_LST_daily"</span></span>
-<span id="cb27-50"><a href="#cb27-50" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-51"><a href="#cb27-51" aria-hidden="true" tabindex="-1"></a>sys.path.append(</span>
-<span id="cb27-52"><a href="#cb27-52" aria-hidden="true" tabindex="-1"></a>    subprocess.check_output([grassbin, <span class="st">"--config"</span>, <span class="st">"python_path"</span>], text<span class="op">=</span><span class="va">True</span>).strip()</span>
-<span id="cb27-53"><a href="#cb27-53" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb27-54"><a href="#cb27-54" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb27-55"><a href="#cb27-55" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-58"><a href="#cb27-58" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb27-59"><a href="#cb27-59" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: false</span></span>
-<span id="cb27-60"><a href="#cb27-60" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-61"><a href="#cb27-61" aria-hidden="true" tabindex="-1"></a><span class="co"># Import the GRASS GIS packages we need</span></span>
-<span id="cb27-62"><a href="#cb27-62" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> grass.script <span class="im">as</span> gs</span>
-<span id="cb27-63"><a href="#cb27-63" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> grass.jupyter <span class="im">as</span> gj</span>
-<span id="cb27-64"><a href="#cb27-64" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-65"><a href="#cb27-65" aria-hidden="true" tabindex="-1"></a><span class="co"># Start the GRASS GIS Session</span></span>
-<span id="cb27-66"><a href="#cb27-66" aria-hidden="true" tabindex="-1"></a>session <span class="op">=</span> gj.init(grassdata, project, mapset)<span class="op">;</span></span>
-<span id="cb27-67"><a href="#cb27-67" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb27-68"><a href="#cb27-68" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-69"><a href="#cb27-69" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-70"><a href="#cb27-70" aria-hidden="true" tabindex="-1"></a><span class="fu">## Temporal tools</span></span>
+<span id="cb27-21"><a href="#cb27-21" aria-hidden="true" tabindex="-1"></a>querying and compare and contrast the different tools available according to </span>
+<span id="cb27-22"><a href="#cb27-22" aria-hidden="true" tabindex="-1"></a>their inputs, outputs and other options. </span>
+<span id="cb27-23"><a href="#cb27-23" aria-hidden="true" tabindex="-1"></a>We will split tools into two groups according to their name to facilitate </span>
+<span id="cb27-24"><a href="#cb27-24" aria-hidden="true" tabindex="-1"></a>comparisons:</span>
+<span id="cb27-25"><a href="#cb27-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-26"><a href="#cb27-26" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>temporal tools: <span class="co">[</span><span class="ot">t.rast.what</span><span class="co">](https://grass.osgeo.org/grass-stable/manuals/t.rast.what.html)</span>, <span class="co">[</span><span class="ot">t.rast.what.aggr</span><span class="co">](https://grass.osgeo.org/grass-stable/manuals/addons/t.rast.what.aggr.html)</span>,<span class="co">[</span><span class="ot">t.vect.observe.strds</span><span class="co">](https://grass.osgeo.org/grass-stable/manuals/t.vect.observe.strds.html)</span>, <span class="co">[</span><span class="ot">t.vect.what.strds</span><span class="co">](https://grass.osgeo.org/grass-stable/manuals/t.vect.what.strds.html)</span> and, </span>
+<span id="cb27-27"><a href="#cb27-27" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>vector tools: <span class="co">[</span><span class="ot">v.what.strds</span><span class="co">](https://grass.osgeo.org/grass-stable/manuals/v.what.strds.html)</span>, <span class="co">[</span><span class="ot">v.what.strds.timestamp</span><span class="co">](https://grass.osgeo.org/grass-stable/manuals/addons/v.what.strds.timestamp.html)</span>, <span class="co">[</span><span class="ot">v.strds.stats</span><span class="co">](https://grass.osgeo.org/grass-stable/manuals/addons/v.strds.stats.html)</span>.</span>
+<span id="cb27-28"><a href="#cb27-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-29"><a href="#cb27-29" aria-hidden="true" tabindex="-1"></a>::: {.callout-note title="Setup"}</span>
+<span id="cb27-30"><a href="#cb27-30" aria-hidden="true" tabindex="-1"></a>This tutorial can be run locally or in Google Colab. However, make sure you</span>
+<span id="cb27-31"><a href="#cb27-31" aria-hidden="true" tabindex="-1"></a>install GRASS GIS 8.4+, download the </span>
+<span id="cb27-32"><a href="#cb27-32" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">LST sample project</span><span class="co">]()</span> </span>
+<span id="cb27-33"><a href="#cb27-33" aria-hidden="true" tabindex="-1"></a>and set up your project as explained in the </span>
+<span id="cb27-34"><a href="#cb27-34" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">first part</span><span class="co">](time_series_management_and_visualization.qmd)</span> of these time</span>
+<span id="cb27-35"><a href="#cb27-35" aria-hidden="true" tabindex="-1"></a>series tutorials.</span>
+<span id="cb27-36"><a href="#cb27-36" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb27-37"><a href="#cb27-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-40"><a href="#cb27-40" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb27-41"><a href="#cb27-41" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: false</span></span>
+<span id="cb27-42"><a href="#cb27-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-43"><a href="#cb27-43" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
+<span id="cb27-44"><a href="#cb27-44" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> sys</span>
+<span id="cb27-45"><a href="#cb27-45" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> subprocess</span>
+<span id="cb27-46"><a href="#cb27-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-47"><a href="#cb27-47" aria-hidden="true" tabindex="-1"></a><span class="co"># GRASS GIS database variables</span></span>
+<span id="cb27-48"><a href="#cb27-48" aria-hidden="true" tabindex="-1"></a>grassbin <span class="op">=</span> <span class="st">"grass-dev"</span></span>
+<span id="cb27-49"><a href="#cb27-49" aria-hidden="true" tabindex="-1"></a>grassdata <span class="op">=</span> os.path.join(os.path.expanduser(<span class="st">'~'</span>), <span class="st">"grassdata"</span>)</span>
+<span id="cb27-50"><a href="#cb27-50" aria-hidden="true" tabindex="-1"></a>project <span class="op">=</span> <span class="st">"eu_laea"</span></span>
+<span id="cb27-51"><a href="#cb27-51" aria-hidden="true" tabindex="-1"></a>mapset <span class="op">=</span> <span class="st">"italy_LST_daily"</span></span>
+<span id="cb27-52"><a href="#cb27-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-53"><a href="#cb27-53" aria-hidden="true" tabindex="-1"></a>sys.path.append(</span>
+<span id="cb27-54"><a href="#cb27-54" aria-hidden="true" tabindex="-1"></a>    subprocess.check_output([grassbin, <span class="st">"--config"</span>, <span class="st">"python_path"</span>], text<span class="op">=</span><span class="va">True</span>).strip()</span>
+<span id="cb27-55"><a href="#cb27-55" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb27-56"><a href="#cb27-56" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb27-57"><a href="#cb27-57" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-60"><a href="#cb27-60" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb27-61"><a href="#cb27-61" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: false</span></span>
+<span id="cb27-62"><a href="#cb27-62" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-63"><a href="#cb27-63" aria-hidden="true" tabindex="-1"></a><span class="co"># Import the GRASS GIS packages we need</span></span>
+<span id="cb27-64"><a href="#cb27-64" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> grass.script <span class="im">as</span> gs</span>
+<span id="cb27-65"><a href="#cb27-65" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> grass.jupyter <span class="im">as</span> gj</span>
+<span id="cb27-66"><a href="#cb27-66" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-67"><a href="#cb27-67" aria-hidden="true" tabindex="-1"></a><span class="co"># Start the GRASS GIS Session</span></span>
+<span id="cb27-68"><a href="#cb27-68" aria-hidden="true" tabindex="-1"></a>session <span class="op">=</span> gj.init(grassdata, project, mapset)<span class="op">;</span></span>
+<span id="cb27-69"><a href="#cb27-69" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb27-70"><a href="#cb27-70" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb27-71"><a href="#cb27-71" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-72"><a href="#cb27-72" aria-hidden="true" tabindex="-1"></a>All the temporal tools that allow to query raster time series take either </span>
-<span id="cb27-73"><a href="#cb27-73" aria-hidden="true" tabindex="-1"></a>coordinates or a point vector map to sample one or various STRDS. </span>
-<span id="cb27-74"><a href="#cb27-74" aria-hidden="true" tabindex="-1"></a>Regarding outputs, the *t.rast.\** tools retrieve values to stdout, write</span>
-<span id="cb27-75"><a href="#cb27-75" aria-hidden="true" tabindex="-1"></a>them in plain text files or update the vector attribute table. In contrast, </span>
-<span id="cb27-76"><a href="#cb27-76" aria-hidden="true" tabindex="-1"></a>the *t.vect.\** tools output vector time series. Only two of these tools</span>
-<span id="cb27-77"><a href="#cb27-77" aria-hidden="true" tabindex="-1"></a>allow to do queries with temporal aggregation of the raster data according </span>
-<span id="cb27-78"><a href="#cb27-78" aria-hidden="true" tabindex="-1"></a>to a fixed date or a date column in the case of</span>
-<span id="cb27-79"><a href="#cb27-79" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">t.rast.what.aggr</span><span class="co">](https://grass.osgeo.org/grass-stable/manuals/addons/t.rast.what.aggr.html)</span></span>
-<span id="cb27-80"><a href="#cb27-80" aria-hidden="true" tabindex="-1"></a>and with temporal topology relations in the case of </span>
-<span id="cb27-81"><a href="#cb27-81" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">t.vect.what.strds</span><span class="co">](https://grass.osgeo.org/grass-stable/manuals/t.vect.what.strds.html)</span>.</span>
-<span id="cb27-82"><a href="#cb27-82" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-72"><a href="#cb27-72" aria-hidden="true" tabindex="-1"></a><span class="fu">## Temporal tools</span></span>
+<span id="cb27-73"><a href="#cb27-73" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-74"><a href="#cb27-74" aria-hidden="true" tabindex="-1"></a>All the temporal tools that allow to query raster time series take either </span>
+<span id="cb27-75"><a href="#cb27-75" aria-hidden="true" tabindex="-1"></a>coordinates or a point vector map as inputs to sample one or various STRDS. </span>
+<span id="cb27-76"><a href="#cb27-76" aria-hidden="true" tabindex="-1"></a>Regarding outputs, the *t.rast.\** tools retrieve values to stdout, write</span>
+<span id="cb27-77"><a href="#cb27-77" aria-hidden="true" tabindex="-1"></a>them in plain text files or update the vector attribute table. In contrast, </span>
+<span id="cb27-78"><a href="#cb27-78" aria-hidden="true" tabindex="-1"></a>the *t.vect.\** tools output vector time series. Only two of these tools</span>
+<span id="cb27-79"><a href="#cb27-79" aria-hidden="true" tabindex="-1"></a>allow to do queries with temporal aggregation of the raster data either </span>
+<span id="cb27-80"><a href="#cb27-80" aria-hidden="true" tabindex="-1"></a>according to a fixed date or a date column in the case of</span>
+<span id="cb27-81"><a href="#cb27-81" aria-hidden="true" tabindex="-1"></a>*t.rast.what.aggr* or with temporal topology relations in the case of </span>
+<span id="cb27-82"><a href="#cb27-82" aria-hidden="true" tabindex="-1"></a>*t.vect.what.strds*.</span>
 <span id="cb27-83"><a href="#cb27-83" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-84"><a href="#cb27-84" aria-hidden="true" tabindex="-1"></a>: Comparison of temporal tools that allow to query space time raster datasets.</span>
-<span id="cb27-85"><a href="#cb27-85" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-86"><a href="#cb27-86" aria-hidden="true" tabindex="-1"></a>| Tools/&lt;br&gt;options | <span class="co">[</span><span class="ot">t.rast.what</span><span class="co">](https://grass.osgeo.org/grass-stable/manuals/t.rast.what.html)</span> | <span class="co">[</span><span class="ot">t.rast.what.aggr</span><span class="co">](https://grass.osgeo.org/grass-stable/manuals/addons/t.rast.what.aggr.html)</span> | <span class="co">[</span><span class="ot">t.vect.observe.strds</span><span class="co">](https://grass.osgeo.org/grass-stable/manuals/t.vect.observe.strds.html)</span> | <span class="co">[</span><span class="ot">t.vect.what.strds</span><span class="co">](https://grass.osgeo.org/grass-stable/manuals/t.vect.what.strds.html)</span> |</span>
-<span id="cb27-87"><a href="#cb27-87" aria-hidden="true" tabindex="-1"></a>|---|---|---|---|---|</span>
-<span id="cb27-88"><a href="#cb27-88" aria-hidden="true" tabindex="-1"></a>| Purpose | Samples a STRDS at vector points and writes the output to stdout or text file with different layouts | Samples a STRDS at vector points and returns **aggregated** values  to stdout or in the attribute table | Samples STRDSs at points from a vector map and outputs a **STVDS** | Samples a STRDS at the spatio-temporal locations of a STVDS |</span>
-<span id="cb27-89"><a href="#cb27-89" aria-hidden="true" tabindex="-1"></a>| input | vector (points) or coordinates and strds | vector (points) and strds | vector (points) and strds(s) | stvds (points) and strds |</span>
-<span id="cb27-90"><a href="#cb27-90" aria-hidden="true" tabindex="-1"></a>| output | stdout or plain text file | vector, plain text or stdout | stvds | stvds |</span>
-<span id="cb27-91"><a href="#cb27-91" aria-hidden="true" tabindex="-1"></a>| where | yes |  | yes | yes |</span>
-<span id="cb27-92"><a href="#cb27-92" aria-hidden="true" tabindex="-1"></a>| t_where |  |  |  | yes |</span>
-<span id="cb27-93"><a href="#cb27-93" aria-hidden="true" tabindex="-1"></a>| spatial aggr |  |  |  |  |</span>
-<span id="cb27-94"><a href="#cb27-94" aria-hidden="true" tabindex="-1"></a>| temporal aggr |  | yes |  | yes |</span>
-<span id="cb27-95"><a href="#cb27-95" aria-hidden="true" tabindex="-1"></a>| example | t.rast.what -n strds=A points=points output=result.txt layout=row | t.rast.what.aggr input=stations strds=ndvi date="2015-05-01" granularity="2 months" | t.vect.observe.strds input=stations strds=tempmean output=stations vector_output=stations columns=month | t.vect.what.strds input=stations strds=tempmean column=temp method=average |</span>
-<span id="cb27-96"><a href="#cb27-96" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-97"><a href="#cb27-97" aria-hidden="true" tabindex="-1"></a>Let's see some examples. We will first randomly extract the centroids of 15 </span>
-<span id="cb27-98"><a href="#cb27-98" aria-hidden="true" tabindex="-1"></a>Italian regions in our study area and save them as a points vector map to</span>
-<span id="cb27-99"><a href="#cb27-99" aria-hidden="true" tabindex="-1"></a>query the raster time series.</span>
-<span id="cb27-100"><a href="#cb27-100" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-103"><a href="#cb27-103" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb27-104"><a href="#cb27-104" aria-hidden="true" tabindex="-1"></a><span class="co"># Extract centroids</span></span>
-<span id="cb27-105"><a href="#cb27-105" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"v.extract"</span>, </span>
-<span id="cb27-106"><a href="#cb27-106" aria-hidden="true" tabindex="-1"></a>               <span class="bu">input</span><span class="op">=</span><span class="st">"italy_borders_2_clip"</span>,</span>
-<span id="cb27-107"><a href="#cb27-107" aria-hidden="true" tabindex="-1"></a>               <span class="bu">type</span><span class="op">=</span><span class="st">"centroid"</span>,</span>
-<span id="cb27-108"><a href="#cb27-108" aria-hidden="true" tabindex="-1"></a>               output<span class="op">=</span><span class="st">"regions_centroids"</span>,</span>
-<span id="cb27-109"><a href="#cb27-109" aria-hidden="true" tabindex="-1"></a>               random<span class="op">=</span><span class="dv">15</span>)</span>
-<span id="cb27-110"><a href="#cb27-110" aria-hidden="true" tabindex="-1"></a>               </span>
-<span id="cb27-111"><a href="#cb27-111" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert centroids to points</span></span>
-<span id="cb27-112"><a href="#cb27-112" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"v.type"</span>, </span>
-<span id="cb27-113"><a href="#cb27-113" aria-hidden="true" tabindex="-1"></a>               <span class="bu">input</span><span class="op">=</span><span class="st">"regions_centroids"</span>, </span>
-<span id="cb27-114"><a href="#cb27-114" aria-hidden="true" tabindex="-1"></a>               output<span class="op">=</span><span class="st">"sampling_points"</span>, </span>
-<span id="cb27-115"><a href="#cb27-115" aria-hidden="true" tabindex="-1"></a>               from_type<span class="op">=</span><span class="st">"centroids"</span>, </span>
-<span id="cb27-116"><a href="#cb27-116" aria-hidden="true" tabindex="-1"></a>               to_type<span class="op">=</span><span class="st">"points"</span>)</span>
-<span id="cb27-117"><a href="#cb27-117" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb27-118"><a href="#cb27-118" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-121"><a href="#cb27-121" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb27-122"><a href="#cb27-122" aria-hidden="true" tabindex="-1"></a><span class="co"># Display polygons and points</span></span>
-<span id="cb27-123"><a href="#cb27-123" aria-hidden="true" tabindex="-1"></a>centroids <span class="op">=</span> gj.Map(height <span class="op">=</span> <span class="dv">500</span>)</span>
-<span id="cb27-124"><a href="#cb27-124" aria-hidden="true" tabindex="-1"></a>centroids.d_vect(<span class="bu">map</span><span class="op">=</span><span class="st">"italy_borders_2_clip"</span>)</span>
-<span id="cb27-125"><a href="#cb27-125" aria-hidden="true" tabindex="-1"></a>centroids.d_vect(<span class="bu">map</span><span class="op">=</span><span class="st">"sampling_points"</span>)</span>
-<span id="cb27-126"><a href="#cb27-126" aria-hidden="true" tabindex="-1"></a>centroids.show()</span>
-<span id="cb27-127"><a href="#cb27-127" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb27-128"><a href="#cb27-128" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-131"><a href="#cb27-131" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb27-132"><a href="#cb27-132" aria-hidden="true" tabindex="-1"></a><span class="co"># Get LST monthly values for the points</span></span>
-<span id="cb27-133"><a href="#cb27-133" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"t.rast.what"</span>,</span>
-<span id="cb27-134"><a href="#cb27-134" aria-hidden="true" tabindex="-1"></a>               points<span class="op">=</span><span class="st">"sampling_points"</span>,</span>
-<span id="cb27-135"><a href="#cb27-135" aria-hidden="true" tabindex="-1"></a>               strds<span class="op">=</span><span class="st">"lst_monthly"</span>,</span>
-<span id="cb27-136"><a href="#cb27-136" aria-hidden="true" tabindex="-1"></a>               layout<span class="op">=</span><span class="st">"row"</span>,</span>
-<span id="cb27-137"><a href="#cb27-137" aria-hidden="true" tabindex="-1"></a>               flags<span class="op">=</span><span class="st">"n"</span>)</span>
-<span id="cb27-138"><a href="#cb27-138" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb27-139"><a href="#cb27-139" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-140"><a href="#cb27-140" aria-hidden="true" tabindex="-1"></a>::: {.callout-note title="Layouts"}</span>
-<span id="cb27-141"><a href="#cb27-141" aria-hidden="true" tabindex="-1"></a>You can then play around with the different output layouts, i.e., </span>
-<span id="cb27-142"><a href="#cb27-142" aria-hidden="true" tabindex="-1"></a>*row, column, timerow*, to find the one that better suits your data</span>
-<span id="cb27-143"><a href="#cb27-143" aria-hidden="true" tabindex="-1"></a>pipelines. </span>
-<span id="cb27-144"><a href="#cb27-144" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb27-145"><a href="#cb27-145" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-146"><a href="#cb27-146" aria-hidden="true" tabindex="-1"></a>Now, to exemplify the use of t.rast.what.aggr imagine we did some mosquito</span>
-<span id="cb27-147"><a href="#cb27-147" aria-hidden="true" tabindex="-1"></a>trappings in two different dates and we need to know which was the average</span>
-<span id="cb27-148"><a href="#cb27-148" aria-hidden="true" tabindex="-1"></a>LST the two months before the trappings. Since the dates are different, we</span>
-<span id="cb27-149"><a href="#cb27-149" aria-hidden="true" tabindex="-1"></a>actually need to aggregate different days. This is done on the fly (i.e., </span>
-<span id="cb27-150"><a href="#cb27-150" aria-hidden="true" tabindex="-1"></a>without the need to aggregate the whole raster time series) by</span>
-<span id="cb27-151"><a href="#cb27-151" aria-hidden="true" tabindex="-1"></a>t.rast.what.aggr.</span>
-<span id="cb27-152"><a href="#cb27-152" aria-hidden="true" tabindex="-1"></a>Let's install the extension and add dates to our point vector map.</span>
-<span id="cb27-153"><a href="#cb27-153" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-156"><a href="#cb27-156" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb27-157"><a href="#cb27-157" aria-hidden="true" tabindex="-1"></a><span class="co"># Install t.rast.what.aggr extension</span></span>
-<span id="cb27-158"><a href="#cb27-158" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"g.extension"</span>, extension<span class="op">=</span><span class="st">"t.rast.what.aggr"</span>)</span>
-<span id="cb27-159"><a href="#cb27-159" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb27-160"><a href="#cb27-160" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-163"><a href="#cb27-163" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb27-164"><a href="#cb27-164" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"v.db.addcolumn"</span>, </span>
-<span id="cb27-165"><a href="#cb27-165" aria-hidden="true" tabindex="-1"></a>               <span class="bu">map</span><span class="op">=</span><span class="st">"sampling_points"</span>,</span>
-<span id="cb27-166"><a href="#cb27-166" aria-hidden="true" tabindex="-1"></a>               column<span class="op">=</span><span class="st">"sampling_date date"</span>)</span>
-<span id="cb27-167"><a href="#cb27-167" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"v.db.update"</span>, </span>
-<span id="cb27-168"><a href="#cb27-168" aria-hidden="true" tabindex="-1"></a>               <span class="bu">map</span><span class="op">=</span><span class="st">"sampling_points"</span>, </span>
-<span id="cb27-169"><a href="#cb27-169" aria-hidden="true" tabindex="-1"></a>               column<span class="op">=</span><span class="st">"sampling_date"</span>,</span>
-<span id="cb27-170"><a href="#cb27-170" aria-hidden="true" tabindex="-1"></a>               value<span class="op">=</span><span class="st">"2018-08-27"</span>)</span>
-<span id="cb27-171"><a href="#cb27-171" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"v.db.update"</span>,</span>
-<span id="cb27-172"><a href="#cb27-172" aria-hidden="true" tabindex="-1"></a>               <span class="bu">map</span><span class="op">=</span><span class="st">"sampling_points"</span>,</span>
-<span id="cb27-173"><a href="#cb27-173" aria-hidden="true" tabindex="-1"></a>               column<span class="op">=</span><span class="st">"sampling_date"</span>,</span>
-<span id="cb27-174"><a href="#cb27-174" aria-hidden="true" tabindex="-1"></a>               value<span class="op">=</span><span class="st">"2018-07-01"</span>,</span>
-<span id="cb27-175"><a href="#cb27-175" aria-hidden="true" tabindex="-1"></a>               where<span class="op">=</span><span class="st">"cat &gt;= '68'"</span>)</span>
-<span id="cb27-176"><a href="#cb27-176" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb27-177"><a href="#cb27-177" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-178"><a href="#cb27-178" aria-hidden="true" tabindex="-1"></a>We will use the daily time series in this case to get the aggregation </span>
-<span id="cb27-179"><a href="#cb27-179" aria-hidden="true" tabindex="-1"></a>period right.</span>
-<span id="cb27-180"><a href="#cb27-180" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-183"><a href="#cb27-183" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb27-184"><a href="#cb27-184" aria-hidden="true" tabindex="-1"></a><span class="co"># Get aggregated LST values</span></span>
-<span id="cb27-185"><a href="#cb27-185" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"t.rast.what.aggr"</span>, </span>
-<span id="cb27-186"><a href="#cb27-186" aria-hidden="true" tabindex="-1"></a>               <span class="bu">input</span><span class="op">=</span><span class="st">"sampling_points"</span>, </span>
-<span id="cb27-187"><a href="#cb27-187" aria-hidden="true" tabindex="-1"></a>               strds<span class="op">=</span><span class="st">"lst_daily"</span>, </span>
-<span id="cb27-188"><a href="#cb27-188" aria-hidden="true" tabindex="-1"></a>               date_column<span class="op">=</span><span class="st">"sampling_date"</span>,</span>
-<span id="cb27-189"><a href="#cb27-189" aria-hidden="true" tabindex="-1"></a>               granularity<span class="op">=</span><span class="st">"2 months"</span>,</span>
-<span id="cb27-190"><a href="#cb27-190" aria-hidden="true" tabindex="-1"></a>               method<span class="op">=</span><span class="st">"average"</span>,</span>
-<span id="cb27-191"><a href="#cb27-191" aria-hidden="true" tabindex="-1"></a>               flags<span class="op">=</span><span class="st">"c"</span>)</span>
-<span id="cb27-192"><a href="#cb27-192" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb27-193"><a href="#cb27-193" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-196"><a href="#cb27-196" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb27-197"><a href="#cb27-197" aria-hidden="true" tabindex="-1"></a>gs.vector_db_select(<span class="st">"sampling_points"</span>)[<span class="st">"values"</span>]</span>
-<span id="cb27-198"><a href="#cb27-198" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb27-84"><a href="#cb27-84" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-85"><a href="#cb27-85" aria-hidden="true" tabindex="-1"></a>: Comparison of temporal tools that allow to query space time raster datasets.</span>
+<span id="cb27-86"><a href="#cb27-86" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-87"><a href="#cb27-87" aria-hidden="true" tabindex="-1"></a>| Tools/&lt;br&gt;options | <span class="co">[</span><span class="ot">t.rast.what</span><span class="co">](https://grass.osgeo.org/grass-stable/manuals/t.rast.what.html)</span> | <span class="co">[</span><span class="ot">t.rast.what.aggr</span><span class="co">](https://grass.osgeo.org/grass-stable/manuals/addons/t.rast.what.aggr.html)</span> | <span class="co">[</span><span class="ot">t.vect.observe.strds</span><span class="co">](https://grass.osgeo.org/grass-stable/manuals/t.vect.observe.strds.html)</span> | <span class="co">[</span><span class="ot">t.vect.what.strds</span><span class="co">](https://grass.osgeo.org/grass-stable/manuals/t.vect.what.strds.html)</span> |</span>
+<span id="cb27-88"><a href="#cb27-88" aria-hidden="true" tabindex="-1"></a>|---|---|---|---|---|</span>
+<span id="cb27-89"><a href="#cb27-89" aria-hidden="true" tabindex="-1"></a>| Purpose | Samples a STRDS at vector points and writes the output to stdout or text file with different layouts | Samples a STRDS at vector points and returns aggregated values  to stdout or in the attribute table | Samples STRDSs at points from a vector map and outputs a STVDS | Samples a STRDS at the spatio-temporal locations of a STVDS |</span>
+<span id="cb27-90"><a href="#cb27-90" aria-hidden="true" tabindex="-1"></a>| input | vector (points) or coordinates and strds | vector (points) and strds | vector (points) and strds(s) | stvds (points) and strds |</span>
+<span id="cb27-91"><a href="#cb27-91" aria-hidden="true" tabindex="-1"></a>| output | stdout or plain text file | vector, plain text or stdout | stvds | stvds |</span>
+<span id="cb27-92"><a href="#cb27-92" aria-hidden="true" tabindex="-1"></a>| where | yes |  | yes | yes |</span>
+<span id="cb27-93"><a href="#cb27-93" aria-hidden="true" tabindex="-1"></a>| t_where |  |  |  | yes |</span>
+<span id="cb27-94"><a href="#cb27-94" aria-hidden="true" tabindex="-1"></a>| spatial aggr |  |  |  |  |</span>
+<span id="cb27-95"><a href="#cb27-95" aria-hidden="true" tabindex="-1"></a>| temporal aggr |  | yes |  | yes |</span>
+<span id="cb27-96"><a href="#cb27-96" aria-hidden="true" tabindex="-1"></a>| example | t.rast.what -n strds=A points=points output=result.txt layout=row | t.rast.what.aggr input=points strds=A date="2015-05-01" granularity="2 months" | t.vect.observe.strds input=points strds=A output=points_stvds vector_output=points_vector columns=A_values | t.vect.what.strds input=points strds=A column=A_values method=average |</span>
+<span id="cb27-97"><a href="#cb27-97" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-98"><a href="#cb27-98" aria-hidden="true" tabindex="-1"></a>Let's see some examples. We will first randomly extract the centroids of 15 </span>
+<span id="cb27-99"><a href="#cb27-99" aria-hidden="true" tabindex="-1"></a>Italian regions in our study area and save them as a point vector map to</span>
+<span id="cb27-100"><a href="#cb27-100" aria-hidden="true" tabindex="-1"></a>query the raster time series afterwards.</span>
+<span id="cb27-101"><a href="#cb27-101" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-104"><a href="#cb27-104" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb27-105"><a href="#cb27-105" aria-hidden="true" tabindex="-1"></a><span class="co"># Extract 15 random centroids</span></span>
+<span id="cb27-106"><a href="#cb27-106" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"v.extract"</span>, </span>
+<span id="cb27-107"><a href="#cb27-107" aria-hidden="true" tabindex="-1"></a>               <span class="bu">input</span><span class="op">=</span><span class="st">"italy_borders_2_clip"</span>,</span>
+<span id="cb27-108"><a href="#cb27-108" aria-hidden="true" tabindex="-1"></a>               <span class="bu">type</span><span class="op">=</span><span class="st">"centroid"</span>,</span>
+<span id="cb27-109"><a href="#cb27-109" aria-hidden="true" tabindex="-1"></a>               output<span class="op">=</span><span class="st">"regions_centroids"</span>,</span>
+<span id="cb27-110"><a href="#cb27-110" aria-hidden="true" tabindex="-1"></a>               random<span class="op">=</span><span class="dv">15</span>)</span>
+<span id="cb27-111"><a href="#cb27-111" aria-hidden="true" tabindex="-1"></a>               </span>
+<span id="cb27-112"><a href="#cb27-112" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert centroids to points</span></span>
+<span id="cb27-113"><a href="#cb27-113" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"v.type"</span>, </span>
+<span id="cb27-114"><a href="#cb27-114" aria-hidden="true" tabindex="-1"></a>               <span class="bu">input</span><span class="op">=</span><span class="st">"regions_centroids"</span>, </span>
+<span id="cb27-115"><a href="#cb27-115" aria-hidden="true" tabindex="-1"></a>               output<span class="op">=</span><span class="st">"sampling_points"</span>, </span>
+<span id="cb27-116"><a href="#cb27-116" aria-hidden="true" tabindex="-1"></a>               from_type<span class="op">=</span><span class="st">"centroids"</span>, </span>
+<span id="cb27-117"><a href="#cb27-117" aria-hidden="true" tabindex="-1"></a>               to_type<span class="op">=</span><span class="st">"points"</span>)</span>
+<span id="cb27-118"><a href="#cb27-118" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb27-119"><a href="#cb27-119" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-122"><a href="#cb27-122" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb27-123"><a href="#cb27-123" aria-hidden="true" tabindex="-1"></a><span class="co"># Display polygons and points</span></span>
+<span id="cb27-124"><a href="#cb27-124" aria-hidden="true" tabindex="-1"></a>centroids <span class="op">=</span> gj.Map(height <span class="op">=</span> <span class="dv">500</span>)</span>
+<span id="cb27-125"><a href="#cb27-125" aria-hidden="true" tabindex="-1"></a>centroids.d_vect(<span class="bu">map</span><span class="op">=</span><span class="st">"italy_borders_2_clip"</span>)</span>
+<span id="cb27-126"><a href="#cb27-126" aria-hidden="true" tabindex="-1"></a>centroids.d_vect(<span class="bu">map</span><span class="op">=</span><span class="st">"sampling_points"</span>)</span>
+<span id="cb27-127"><a href="#cb27-127" aria-hidden="true" tabindex="-1"></a>centroids.show()</span>
+<span id="cb27-128"><a href="#cb27-128" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb27-129"><a href="#cb27-129" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-132"><a href="#cb27-132" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb27-133"><a href="#cb27-133" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate monthly LST time series</span></span>
+<span id="cb27-134"><a href="#cb27-134" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"t.rast.aggregate"</span>, </span>
+<span id="cb27-135"><a href="#cb27-135" aria-hidden="true" tabindex="-1"></a>               <span class="bu">input</span><span class="op">=</span><span class="st">"lst_daily"</span>, </span>
+<span id="cb27-136"><a href="#cb27-136" aria-hidden="true" tabindex="-1"></a>               output<span class="op">=</span><span class="st">"lst_monthly"</span>,</span>
+<span id="cb27-137"><a href="#cb27-137" aria-hidden="true" tabindex="-1"></a>               basename<span class="op">=</span><span class="st">"lst_monthly"</span>,</span>
+<span id="cb27-138"><a href="#cb27-138" aria-hidden="true" tabindex="-1"></a>               suffix<span class="op">=</span><span class="st">"gran"</span>,</span>
+<span id="cb27-139"><a href="#cb27-139" aria-hidden="true" tabindex="-1"></a>               method<span class="op">=</span><span class="st">"average"</span>)</span>
+<span id="cb27-140"><a href="#cb27-140" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb27-141"><a href="#cb27-141" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-142"><a href="#cb27-142" aria-hidden="true" tabindex="-1"></a>Let's start by using *t.rast.what* that will output the result in the standard</span>
+<span id="cb27-143"><a href="#cb27-143" aria-hidden="true" tabindex="-1"></a>output, i.e., the terminal, the GUI console or the Jupyter cell.</span>
+<span id="cb27-144"><a href="#cb27-144" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-147"><a href="#cb27-147" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb27-148"><a href="#cb27-148" aria-hidden="true" tabindex="-1"></a><span class="co"># Get LST monthly values for the points</span></span>
+<span id="cb27-149"><a href="#cb27-149" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"t.rast.what"</span>,</span>
+<span id="cb27-150"><a href="#cb27-150" aria-hidden="true" tabindex="-1"></a>               points<span class="op">=</span><span class="st">"sampling_points"</span>,</span>
+<span id="cb27-151"><a href="#cb27-151" aria-hidden="true" tabindex="-1"></a>               strds<span class="op">=</span><span class="st">"lst_monthly"</span>,</span>
+<span id="cb27-152"><a href="#cb27-152" aria-hidden="true" tabindex="-1"></a>               layout<span class="op">=</span><span class="st">"row"</span>,</span>
+<span id="cb27-153"><a href="#cb27-153" aria-hidden="true" tabindex="-1"></a>               flags<span class="op">=</span><span class="st">"n"</span>)</span>
+<span id="cb27-154"><a href="#cb27-154" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb27-155"><a href="#cb27-155" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-156"><a href="#cb27-156" aria-hidden="true" tabindex="-1"></a>::: {.callout-note title="Layouts"}</span>
+<span id="cb27-157"><a href="#cb27-157" aria-hidden="true" tabindex="-1"></a>Users can then play around with the different output layouts, i.e., </span>
+<span id="cb27-158"><a href="#cb27-158" aria-hidden="true" tabindex="-1"></a>*row, column, timerow*, to find the one that better suits their data</span>
+<span id="cb27-159"><a href="#cb27-159" aria-hidden="true" tabindex="-1"></a>pipelines. </span>
+<span id="cb27-160"><a href="#cb27-160" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb27-161"><a href="#cb27-161" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-162"><a href="#cb27-162" aria-hidden="true" tabindex="-1"></a>Now, to exemplify the use of *t.rast.what.aggr* imagine we did some mosquito</span>
+<span id="cb27-163"><a href="#cb27-163" aria-hidden="true" tabindex="-1"></a>trappings in two different dates and we need to know which was the average</span>
+<span id="cb27-164"><a href="#cb27-164" aria-hidden="true" tabindex="-1"></a>LST the two months before the trappings. Since the dates are different, we</span>
+<span id="cb27-165"><a href="#cb27-165" aria-hidden="true" tabindex="-1"></a>actually need to aggregate different days. This is done on the fly (i.e., </span>
+<span id="cb27-166"><a href="#cb27-166" aria-hidden="true" tabindex="-1"></a>without the need to aggregate the whole raster time series) by the extension </span>
+<span id="cb27-167"><a href="#cb27-167" aria-hidden="true" tabindex="-1"></a>*t.rast.what.aggr*. Let's install it and add dates to our point vector map.</span>
+<span id="cb27-168"><a href="#cb27-168" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-169"><a href="#cb27-169" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-172"><a href="#cb27-172" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb27-173"><a href="#cb27-173" aria-hidden="true" tabindex="-1"></a><span class="co"># Install t.rast.what.aggr extension</span></span>
+<span id="cb27-174"><a href="#cb27-174" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"g.extension"</span>, extension<span class="op">=</span><span class="st">"t.rast.what.aggr"</span>)</span>
+<span id="cb27-175"><a href="#cb27-175" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb27-176"><a href="#cb27-176" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-179"><a href="#cb27-179" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb27-180"><a href="#cb27-180" aria-hidden="true" tabindex="-1"></a><span class="co"># Add a new date type column</span></span>
+<span id="cb27-181"><a href="#cb27-181" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"v.db.addcolumn"</span>, </span>
+<span id="cb27-182"><a href="#cb27-182" aria-hidden="true" tabindex="-1"></a>               <span class="bu">map</span><span class="op">=</span><span class="st">"sampling_points"</span>,</span>
+<span id="cb27-183"><a href="#cb27-183" aria-hidden="true" tabindex="-1"></a>               column<span class="op">=</span><span class="st">"sampling_date date"</span>)</span>
+<span id="cb27-184"><a href="#cb27-184" aria-hidden="true" tabindex="-1"></a>               </span>
+<span id="cb27-185"><a href="#cb27-185" aria-hidden="true" tabindex="-1"></a><span class="co"># Add values to the date column</span></span>
+<span id="cb27-186"><a href="#cb27-186" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"v.db.update"</span>, </span>
+<span id="cb27-187"><a href="#cb27-187" aria-hidden="true" tabindex="-1"></a>               <span class="bu">map</span><span class="op">=</span><span class="st">"sampling_points"</span>, </span>
+<span id="cb27-188"><a href="#cb27-188" aria-hidden="true" tabindex="-1"></a>               column<span class="op">=</span><span class="st">"sampling_date"</span>,</span>
+<span id="cb27-189"><a href="#cb27-189" aria-hidden="true" tabindex="-1"></a>               value<span class="op">=</span><span class="st">"2018-08-27"</span>)</span>
+<span id="cb27-190"><a href="#cb27-190" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"v.db.update"</span>,</span>
+<span id="cb27-191"><a href="#cb27-191" aria-hidden="true" tabindex="-1"></a>               <span class="bu">map</span><span class="op">=</span><span class="st">"sampling_points"</span>,</span>
+<span id="cb27-192"><a href="#cb27-192" aria-hidden="true" tabindex="-1"></a>               column<span class="op">=</span><span class="st">"sampling_date"</span>,</span>
+<span id="cb27-193"><a href="#cb27-193" aria-hidden="true" tabindex="-1"></a>               value<span class="op">=</span><span class="st">"2018-07-01"</span>,</span>
+<span id="cb27-194"><a href="#cb27-194" aria-hidden="true" tabindex="-1"></a>               where<span class="op">=</span><span class="st">"cat &gt;= '68'"</span>)</span>
+<span id="cb27-195"><a href="#cb27-195" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb27-196"><a href="#cb27-196" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-197"><a href="#cb27-197" aria-hidden="true" tabindex="-1"></a>We will use the daily time series in this case to get the aggregation </span>
+<span id="cb27-198"><a href="#cb27-198" aria-hidden="true" tabindex="-1"></a>period right.</span>
 <span id="cb27-199"><a href="#cb27-199" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb27-202"><a href="#cb27-202" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb27-203"><a href="#cb27-203" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
-<span id="cb27-204"><a href="#cb27-204" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-205"><a href="#cb27-205" aria-hidden="true" tabindex="-1"></a>table <span class="op">=</span> pd.DataFrame.from_dict(gs.vector_db_select(<span class="st">"sampling_points"</span>)[<span class="st">"values"</span>], </span>
-<span id="cb27-206"><a href="#cb27-206" aria-hidden="true" tabindex="-1"></a>                               orient<span class="op">=</span><span class="st">"index"</span>, </span>
-<span id="cb27-207"><a href="#cb27-207" aria-hidden="true" tabindex="-1"></a>                               columns<span class="op">=</span>gs.vector_db_select(<span class="st">"sampling_points"</span>)[<span class="st">"columns"</span>])</span>
-<span id="cb27-208"><a href="#cb27-208" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-209"><a href="#cb27-209" aria-hidden="true" tabindex="-1"></a>table</span>
-<span id="cb27-210"><a href="#cb27-210" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb27-211"><a href="#cb27-211" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-212"><a href="#cb27-212" aria-hidden="true" tabindex="-1"></a><span class="co">&lt;!-- this above does not work anymore but I do not understand why, </span></span>
-<span id="cb27-213"><a href="#cb27-213" aria-hidden="true" tabindex="-1"></a><span class="co">there are indeed 16 columns and 16 values per row... boh  --&gt;</span></span>
-<span id="cb27-214"><a href="#cb27-214" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-215"><a href="#cb27-215" aria-hidden="true" tabindex="-1"></a>:::{.callout-note title="Question"}</span>
-<span id="cb27-216"><a href="#cb27-216" aria-hidden="true" tabindex="-1"></a>What would be the result if we use the monthly time series?</span>
-<span id="cb27-217"><a href="#cb27-217" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb27-218"><a href="#cb27-218" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-219"><a href="#cb27-219" aria-hidden="true" tabindex="-1"></a>Let's demonstrate now the use of t.vect.observe.strds and </span>
-<span id="cb27-220"><a href="#cb27-220" aria-hidden="true" tabindex="-1"></a>t.vect.what.strds. These tools as mentioned above output a vector </span>
-<span id="cb27-221"><a href="#cb27-221" aria-hidden="true" tabindex="-1"></a>time series.</span>
-<span id="cb27-222"><a href="#cb27-222" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-225"><a href="#cb27-225" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb27-226"><a href="#cb27-226" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"t.vect.observe.strds"</span>,</span>
-<span id="cb27-227"><a href="#cb27-227" aria-hidden="true" tabindex="-1"></a>               <span class="bu">input</span><span class="op">=</span><span class="st">"sampling_points"</span>,</span>
-<span id="cb27-228"><a href="#cb27-228" aria-hidden="true" tabindex="-1"></a>               strds<span class="op">=</span><span class="st">"lst_monthly"</span>,</span>
-<span id="cb27-229"><a href="#cb27-229" aria-hidden="true" tabindex="-1"></a>               output<span class="op">=</span><span class="st">"sp_lst_monthly"</span>,</span>
-<span id="cb27-230"><a href="#cb27-230" aria-hidden="true" tabindex="-1"></a>               vector_output<span class="op">=</span><span class="st">"sp_lst_monthly"</span>,</span>
-<span id="cb27-231"><a href="#cb27-231" aria-hidden="true" tabindex="-1"></a>               columns<span class="op">=</span><span class="st">"lst"</span>)</span>
-<span id="cb27-232"><a href="#cb27-232" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb27-233"><a href="#cb27-233" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-236"><a href="#cb27-236" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb27-237"><a href="#cb27-237" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"t.info"</span>,</span>
-<span id="cb27-238"><a href="#cb27-238" aria-hidden="true" tabindex="-1"></a>               <span class="bu">input</span><span class="op">=</span><span class="st">"sp_lst_monthly"</span>,</span>
-<span id="cb27-239"><a href="#cb27-239" aria-hidden="true" tabindex="-1"></a>               <span class="bu">type</span><span class="op">=</span><span class="st">"stvds"</span>)</span>
-<span id="cb27-240"><a href="#cb27-240" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb27-241"><a href="#cb27-241" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-244"><a href="#cb27-244" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb27-245"><a href="#cb27-245" aria-hidden="true" tabindex="-1"></a>gs.vector_info(<span class="st">"sp_lst_monthly"</span>)</span>
-<span id="cb27-246"><a href="#cb27-246" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb27-247"><a href="#cb27-247" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-250"><a href="#cb27-250" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb27-251"><a href="#cb27-251" aria-hidden="true" tabindex="-1"></a><span class="co"># Check one layer</span></span>
-<span id="cb27-252"><a href="#cb27-252" aria-hidden="true" tabindex="-1"></a>gs.vector_db_select(<span class="st">"sp_lst_monthly"</span>, layer<span class="op">=</span><span class="dv">7</span>)[<span class="st">"values"</span>]</span>
-<span id="cb27-253"><a href="#cb27-253" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb27-254"><a href="#cb27-254" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-257"><a href="#cb27-257" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb27-258"><a href="#cb27-258" aria-hidden="true" tabindex="-1"></a><span class="co"># Check all layers</span></span>
-<span id="cb27-259"><a href="#cb27-259" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"t.vect.db.select"</span>,</span>
-<span id="cb27-260"><a href="#cb27-260" aria-hidden="true" tabindex="-1"></a>               <span class="bu">input</span><span class="op">=</span><span class="st">"sp_lst_monthly"</span>)</span>
+<span id="cb27-203"><a href="#cb27-203" aria-hidden="true" tabindex="-1"></a><span class="co"># Get aggregated LST values</span></span>
+<span id="cb27-204"><a href="#cb27-204" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"t.rast.what.aggr"</span>, </span>
+<span id="cb27-205"><a href="#cb27-205" aria-hidden="true" tabindex="-1"></a>               <span class="bu">input</span><span class="op">=</span><span class="st">"sampling_points"</span>, </span>
+<span id="cb27-206"><a href="#cb27-206" aria-hidden="true" tabindex="-1"></a>               strds<span class="op">=</span><span class="st">"lst_daily"</span>, </span>
+<span id="cb27-207"><a href="#cb27-207" aria-hidden="true" tabindex="-1"></a>               date_column<span class="op">=</span><span class="st">"sampling_date"</span>,</span>
+<span id="cb27-208"><a href="#cb27-208" aria-hidden="true" tabindex="-1"></a>               granularity<span class="op">=</span><span class="st">"2 months"</span>,</span>
+<span id="cb27-209"><a href="#cb27-209" aria-hidden="true" tabindex="-1"></a>               method<span class="op">=</span><span class="st">"average"</span>,</span>
+<span id="cb27-210"><a href="#cb27-210" aria-hidden="true" tabindex="-1"></a>               flags<span class="op">=</span><span class="st">"c"</span>)</span>
+<span id="cb27-211"><a href="#cb27-211" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb27-212"><a href="#cb27-212" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-213"><a href="#cb27-213" aria-hidden="true" tabindex="-1"></a>Let's display the result by converting the attribute table into a Pandas </span>
+<span id="cb27-214"><a href="#cb27-214" aria-hidden="true" tabindex="-1"></a>DataFrame.</span>
+<span id="cb27-215"><a href="#cb27-215" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-218"><a href="#cb27-218" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb27-219"><a href="#cb27-219" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb27-220"><a href="#cb27-220" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-221"><a href="#cb27-221" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> gs.parse_command(<span class="st">"v.db.select"</span>, </span>
+<span id="cb27-222"><a href="#cb27-222" aria-hidden="true" tabindex="-1"></a>                        <span class="bu">map</span><span class="op">=</span><span class="st">"sampling_points"</span>, </span>
+<span id="cb27-223"><a href="#cb27-223" aria-hidden="true" tabindex="-1"></a>                        <span class="bu">format</span><span class="op">=</span><span class="st">"json"</span>)</span>
+<span id="cb27-224"><a href="#cb27-224" aria-hidden="true" tabindex="-1"></a>                        </span>
+<span id="cb27-225"><a href="#cb27-225" aria-hidden="true" tabindex="-1"></a>pd.DataFrame(data[<span class="st">'records'</span>])</span>
+<span id="cb27-226"><a href="#cb27-226" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb27-227"><a href="#cb27-227" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-228"><a href="#cb27-228" aria-hidden="true" tabindex="-1"></a>:::{.callout-note title="Question"}</span>
+<span id="cb27-229"><a href="#cb27-229" aria-hidden="true" tabindex="-1"></a>What would be the result if we use the monthly time series?</span>
+<span id="cb27-230"><a href="#cb27-230" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb27-231"><a href="#cb27-231" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-232"><a href="#cb27-232" aria-hidden="true" tabindex="-1"></a>Let's demonstrate now the use of *t.vect.observe.strds* and </span>
+<span id="cb27-233"><a href="#cb27-233" aria-hidden="true" tabindex="-1"></a>*t.vect.what.strds*. These tools, as mentioned above, output a vector </span>
+<span id="cb27-234"><a href="#cb27-234" aria-hidden="true" tabindex="-1"></a>time series or stvds. Vector time series in GRASS GIS can be created either </span>
+<span id="cb27-235"><a href="#cb27-235" aria-hidden="true" tabindex="-1"></a>from a series of vector maps (especially if features/geometries vary in time) </span>
+<span id="cb27-236"><a href="#cb27-236" aria-hidden="true" tabindex="-1"></a>or from layers added to a single vector map (i.e., features are always the </span>
+<span id="cb27-237"><a href="#cb27-237" aria-hidden="true" tabindex="-1"></a>same, as in the case of meteorological stations).</span>
+<span id="cb27-238"><a href="#cb27-238" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-239"><a href="#cb27-239" aria-hidden="true" tabindex="-1"></a>We start with *t.vect.observe.strds*. It will create a new vector map with </span>
+<span id="cb27-240"><a href="#cb27-240" aria-hidden="true" tabindex="-1"></a>as many layers as raster maps there are in the strds we are querying and it </span>
+<span id="cb27-241"><a href="#cb27-241" aria-hidden="true" tabindex="-1"></a>will register these in a stvds.</span>
+<span id="cb27-242"><a href="#cb27-242" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-245"><a href="#cb27-245" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb27-246"><a href="#cb27-246" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"t.vect.observe.strds"</span>,</span>
+<span id="cb27-247"><a href="#cb27-247" aria-hidden="true" tabindex="-1"></a>               <span class="bu">input</span><span class="op">=</span><span class="st">"sampling_points"</span>,</span>
+<span id="cb27-248"><a href="#cb27-248" aria-hidden="true" tabindex="-1"></a>               strds<span class="op">=</span><span class="st">"lst_monthly"</span>,</span>
+<span id="cb27-249"><a href="#cb27-249" aria-hidden="true" tabindex="-1"></a>               output<span class="op">=</span><span class="st">"sp_lst_monthly"</span>,</span>
+<span id="cb27-250"><a href="#cb27-250" aria-hidden="true" tabindex="-1"></a>               vector_output<span class="op">=</span><span class="st">"sp_lst_monthly"</span>,</span>
+<span id="cb27-251"><a href="#cb27-251" aria-hidden="true" tabindex="-1"></a>               columns<span class="op">=</span><span class="st">"lst"</span>)</span>
+<span id="cb27-252"><a href="#cb27-252" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb27-253"><a href="#cb27-253" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-256"><a href="#cb27-256" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb27-257"><a href="#cb27-257" aria-hidden="true" tabindex="-1"></a><span class="co"># Check the stvds is created</span></span>
+<span id="cb27-258"><a href="#cb27-258" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"t.info"</span>,</span>
+<span id="cb27-259"><a href="#cb27-259" aria-hidden="true" tabindex="-1"></a>               <span class="bu">input</span><span class="op">=</span><span class="st">"sp_lst_monthly"</span>,</span>
+<span id="cb27-260"><a href="#cb27-260" aria-hidden="true" tabindex="-1"></a>               <span class="bu">type</span><span class="op">=</span><span class="st">"stvds"</span>)</span>
 <span id="cb27-261"><a href="#cb27-261" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
 <span id="cb27-262"><a href="#cb27-262" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-263"><a href="#cb27-263" aria-hidden="true" tabindex="-1"></a>Let's compare the values obtained by querying the monthly LST time series</span>
-<span id="cb27-264"><a href="#cb27-264" aria-hidden="true" tabindex="-1"></a>with those resulting from aggregating the daily LST time series. They should </span>
-<span id="cb27-265"><a href="#cb27-265" aria-hidden="true" tabindex="-1"></a>be the same. For that we need to specify the sampling relation.</span>
-<span id="cb27-266"><a href="#cb27-266" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-269"><a href="#cb27-269" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb27-270"><a href="#cb27-270" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"t.vect.what.strds"</span>, </span>
-<span id="cb27-271"><a href="#cb27-271" aria-hidden="true" tabindex="-1"></a>               <span class="bu">input</span><span class="op">=</span><span class="st">"sp_lst_monthly"</span>, </span>
-<span id="cb27-272"><a href="#cb27-272" aria-hidden="true" tabindex="-1"></a>               strds<span class="op">=</span><span class="st">"lst_daily"</span>, </span>
-<span id="cb27-273"><a href="#cb27-273" aria-hidden="true" tabindex="-1"></a>               column<span class="op">=</span><span class="st">"lst_new"</span>, </span>
-<span id="cb27-274"><a href="#cb27-274" aria-hidden="true" tabindex="-1"></a>               method<span class="op">=</span><span class="st">"average"</span>, </span>
-<span id="cb27-275"><a href="#cb27-275" aria-hidden="true" tabindex="-1"></a>               sampling<span class="op">=</span><span class="st">"start"</span>)</span>
-<span id="cb27-276"><a href="#cb27-276" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb27-277"><a href="#cb27-277" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-280"><a href="#cb27-280" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb27-265"><a href="#cb27-265" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb27-266"><a href="#cb27-266" aria-hidden="true" tabindex="-1"></a><span class="co"># Check number of layers in the vector map</span></span>
+<span id="cb27-267"><a href="#cb27-267" aria-hidden="true" tabindex="-1"></a>gs.vector_info(<span class="st">"sp_lst_monthly"</span>)</span>
+<span id="cb27-268"><a href="#cb27-268" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb27-269"><a href="#cb27-269" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-272"><a href="#cb27-272" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb27-273"><a href="#cb27-273" aria-hidden="true" tabindex="-1"></a><span class="co"># Check one layer</span></span>
+<span id="cb27-274"><a href="#cb27-274" aria-hidden="true" tabindex="-1"></a>gs.vector_db_select(<span class="st">"sp_lst_monthly"</span>, layer<span class="op">=</span><span class="dv">7</span>)[<span class="st">"values"</span>]</span>
+<span id="cb27-275"><a href="#cb27-275" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb27-276"><a href="#cb27-276" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-279"><a href="#cb27-279" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb27-280"><a href="#cb27-280" aria-hidden="true" tabindex="-1"></a><span class="co"># Check all layers</span></span>
 <span id="cb27-281"><a href="#cb27-281" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"t.vect.db.select"</span>,</span>
 <span id="cb27-282"><a href="#cb27-282" aria-hidden="true" tabindex="-1"></a>               <span class="bu">input</span><span class="op">=</span><span class="st">"sp_lst_monthly"</span>)</span>
 <span id="cb27-283"><a href="#cb27-283" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
 <span id="cb27-284"><a href="#cb27-284" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-285"><a href="#cb27-285" aria-hidden="true" tabindex="-1"></a><span class="co">&lt;!-- create a stvds by adding layers to a points map and then registering </span></span>
-<span id="cb27-286"><a href="#cb27-286" aria-hidden="true" tabindex="-1"></a><span class="co">them and query a strds with a different sampling - contain does not work, so it seems the ref is the strds, not the stvds --&gt;</span></span>
-<span id="cb27-287"><a href="#cb27-287" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-288"><a href="#cb27-288" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-289"><a href="#cb27-289" aria-hidden="true" tabindex="-1"></a><span class="fu">## Vector tools</span></span>
-<span id="cb27-290"><a href="#cb27-290" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-291"><a href="#cb27-291" aria-hidden="true" tabindex="-1"></a><span class="co">&lt;!-- add summary here --&gt;</span></span>
-<span id="cb27-292"><a href="#cb27-292" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-285"><a href="#cb27-285" aria-hidden="true" tabindex="-1"></a>Let's now compare the values obtained by querying the monthly LST time series</span>
+<span id="cb27-286"><a href="#cb27-286" aria-hidden="true" tabindex="-1"></a>with those resulting from aggregating the daily LST time series. They should </span>
+<span id="cb27-287"><a href="#cb27-287" aria-hidden="true" tabindex="-1"></a>be the same. For that we need to specify the sampling relation. The temporal </span>
+<span id="cb27-288"><a href="#cb27-288" aria-hidden="true" tabindex="-1"></a>tool that allows to specify sampling relations and do temporal aggregation is</span>
+<span id="cb27-289"><a href="#cb27-289" aria-hidden="true" tabindex="-1"></a>*t.vect.what.strds*. It requires a stvds as input, so we'll use the one we </span>
+<span id="cb27-290"><a href="#cb27-290" aria-hidden="true" tabindex="-1"></a>just obtained above. We also specify the *start* relation, so all maps in the </span>
+<span id="cb27-291"><a href="#cb27-291" aria-hidden="true" tabindex="-1"></a>strds which start time matches the stvds will be aggregated. Let's see this </span>
+<span id="cb27-292"><a href="#cb27-292" aria-hidden="true" tabindex="-1"></a>graphically before running the tool.</span>
 <span id="cb27-293"><a href="#cb27-293" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-294"><a href="#cb27-294" aria-hidden="true" tabindex="-1"></a>: Comparison of vector tools that allow to query space time raster datasets.</span>
+<span id="cb27-294"><a href="#cb27-294" aria-hidden="true" tabindex="-1"></a><span class="al">![](img/comparison_of_granularities.png)</span></span>
 <span id="cb27-295"><a href="#cb27-295" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-296"><a href="#cb27-296" aria-hidden="true" tabindex="-1"></a>| Tools/&lt;br&gt;options | <span class="co">[</span><span class="ot">v.what.strds</span><span class="co">](https://grass.osgeo.org/grass-stable/manuals/v.what.strds.html)</span> | <span class="co">[</span><span class="ot">v.what.strds.timestamp</span><span class="co">](https://grass.osgeo.org/grass-stable/manuals/addons/v.what.strds.timestamp.html)</span> | <span class="co">[</span><span class="ot">v.strds.stats</span><span class="co">](https://grass.osgeo.org/grass-stable/manuals/addons/v.strds.stats.html)</span> |</span>
-<span id="cb27-297"><a href="#cb27-297" aria-hidden="true" tabindex="-1"></a>|---|---|---|---|</span>
-<span id="cb27-298"><a href="#cb27-298" aria-hidden="true" tabindex="-1"></a>| Purpose | Retrieves raster values from STRDSs using a point vector map | Matches points with timestamp in the attribute table with STRDSs based on point locations in space and time, and updates the input vector's attribute table | Calculates zonal statistics from STRDSs and uploads values to attribute columns of a new vector map |</span>
-<span id="cb27-299"><a href="#cb27-299" aria-hidden="true" tabindex="-1"></a>| input | vector (points) and strds(s) | vector (points) and strds(s) | vector (lines or polygons) and strds(s) |</span>
-<span id="cb27-300"><a href="#cb27-300" aria-hidden="true" tabindex="-1"></a>| output | vector | vector | vector |</span>
-<span id="cb27-301"><a href="#cb27-301" aria-hidden="true" tabindex="-1"></a>| where | yes | yes | yes |</span>
-<span id="cb27-302"><a href="#cb27-302" aria-hidden="true" tabindex="-1"></a>| t_where | yes | yes | yes |</span>
-<span id="cb27-303"><a href="#cb27-303" aria-hidden="true" tabindex="-1"></a>| spatial aggr |  |  | yes |</span>
-<span id="cb27-304"><a href="#cb27-304" aria-hidden="true" tabindex="-1"></a>| temporal aggr |  |  |  |</span>
-<span id="cb27-305"><a href="#cb27-305" aria-hidden="true" tabindex="-1"></a>| example | v.what.strds input=mypoints strds=mystrds output=newvector | v.what.strds.timestamp input=sampling_points timestamp_column=sampling_time column=lst_at_sampling_time strds=LST_Day_monthly | v.strds.stats input=myvector strds=mystrds output=newvector method=average |</span>
+<span id="cb27-298"><a href="#cb27-298" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb27-299"><a href="#cb27-299" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"t.vect.what.strds"</span>, </span>
+<span id="cb27-300"><a href="#cb27-300" aria-hidden="true" tabindex="-1"></a>               <span class="bu">input</span><span class="op">=</span><span class="st">"sp_lst_monthly"</span>, </span>
+<span id="cb27-301"><a href="#cb27-301" aria-hidden="true" tabindex="-1"></a>               strds<span class="op">=</span><span class="st">"lst_daily"</span>, </span>
+<span id="cb27-302"><a href="#cb27-302" aria-hidden="true" tabindex="-1"></a>               column<span class="op">=</span><span class="st">"lst_new"</span>, </span>
+<span id="cb27-303"><a href="#cb27-303" aria-hidden="true" tabindex="-1"></a>               method<span class="op">=</span><span class="st">"average"</span>, </span>
+<span id="cb27-304"><a href="#cb27-304" aria-hidden="true" tabindex="-1"></a>               sampling<span class="op">=</span><span class="st">"start"</span>)</span>
+<span id="cb27-305"><a href="#cb27-305" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
 <span id="cb27-306"><a href="#cb27-306" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-307"><a href="#cb27-307" aria-hidden="true" tabindex="-1"></a><span class="co">&lt;!-- adapt examples to general names/objects --&gt;</span></span>
-<span id="cb27-308"><a href="#cb27-308" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-309"><a href="#cb27-309" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-312"><a href="#cb27-312" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb27-313"><a href="#cb27-313" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"v.what.strds"</span>,</span>
-<span id="cb27-314"><a href="#cb27-314" aria-hidden="true" tabindex="-1"></a>               <span class="bu">input</span><span class="op">=</span><span class="st">"sampling_points"</span>,</span>
-<span id="cb27-315"><a href="#cb27-315" aria-hidden="true" tabindex="-1"></a>               strds<span class="op">=</span><span class="st">"lst_monthly"</span>,</span>
-<span id="cb27-316"><a href="#cb27-316" aria-hidden="true" tabindex="-1"></a>               output<span class="op">=</span><span class="st">"sp_lst_monthly_2014"</span>,</span>
-<span id="cb27-317"><a href="#cb27-317" aria-hidden="true" tabindex="-1"></a>               t_where<span class="op">=</span><span class="st">"start_time &lt;= '2015-01-01'"</span>)</span>
-<span id="cb27-318"><a href="#cb27-318" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb27-319"><a href="#cb27-319" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-322"><a href="#cb27-322" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb27-323"><a href="#cb27-323" aria-hidden="true" tabindex="-1"></a><span class="co"># Check the attr table of the new vector</span></span>
-<span id="cb27-324"><a href="#cb27-324" aria-hidden="true" tabindex="-1"></a>gs.vector_db_select(<span class="st">"sp_lst_monthly_2014"</span>)[<span class="st">"values"</span>]</span>
-<span id="cb27-325"><a href="#cb27-325" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-326"><a href="#cb27-326" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb27-327"><a href="#cb27-327" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-328"><a href="#cb27-328" aria-hidden="true" tabindex="-1"></a><span class="co">&lt;!-- need help with using json output and get a nice pandas table displayed here, from dict does not seem to work (see above) --&gt;</span></span>
-<span id="cb27-329"><a href="#cb27-329" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-330"><a href="#cb27-330" aria-hidden="true" tabindex="-1"></a>:::{.callout-note title="Update vector attr table"}</span>
-<span id="cb27-331"><a href="#cb27-331" aria-hidden="true" tabindex="-1"></a>Instead of creating a new vector map, it is also possible to update</span>
-<span id="cb27-332"><a href="#cb27-332" aria-hidden="true" tabindex="-1"></a>the attribute table of the input vector map by setting the <span class="in">`u`</span> flag.</span>
-<span id="cb27-333"><a href="#cb27-333" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb27-309"><a href="#cb27-309" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb27-310"><a href="#cb27-310" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"t.vect.db.select"</span>,</span>
+<span id="cb27-311"><a href="#cb27-311" aria-hidden="true" tabindex="-1"></a>               <span class="bu">input</span><span class="op">=</span><span class="st">"sp_lst_monthly"</span>)</span>
+<span id="cb27-312"><a href="#cb27-312" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb27-313"><a href="#cb27-313" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-314"><a href="#cb27-314" aria-hidden="true" tabindex="-1"></a>As expected, results are exactly the same! So, if you are constrained by disk</span>
+<span id="cb27-315"><a href="#cb27-315" aria-hidden="true" tabindex="-1"></a>space for example, you don't need to aggregate your entire strds if you only</span>
+<span id="cb27-316"><a href="#cb27-316" aria-hidden="true" tabindex="-1"></a>need aggregated values for a set of points.</span>
+<span id="cb27-317"><a href="#cb27-317" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-318"><a href="#cb27-318" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-319"><a href="#cb27-319" aria-hidden="true" tabindex="-1"></a><span class="fu">## Vector tools</span></span>
+<span id="cb27-320"><a href="#cb27-320" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-321"><a href="#cb27-321" aria-hidden="true" tabindex="-1"></a>The main difference between temporal and vector tools to query raster time</span>
+<span id="cb27-322"><a href="#cb27-322" aria-hidden="true" tabindex="-1"></a>series is that vector tools can update the attribute table of the input vector</span>
+<span id="cb27-323"><a href="#cb27-323" aria-hidden="true" tabindex="-1"></a>without creating more layers. Regarding inputs, both *v.what.strds* and </span>
+<span id="cb27-324"><a href="#cb27-324" aria-hidden="true" tabindex="-1"></a>*v.what.strds.timestamp* take a point vector map as input, while *v.strds.stats*</span>
+<span id="cb27-325"><a href="#cb27-325" aria-hidden="true" tabindex="-1"></a>takes a line or polygon vector map and performs spatial aggregation, </span>
+<span id="cb27-326"><a href="#cb27-326" aria-hidden="true" tabindex="-1"></a>i.e. zonal stats over the full or a part of the strds. </span>
+<span id="cb27-327"><a href="#cb27-327" aria-hidden="true" tabindex="-1"></a>The extension *v.what.strds.timestamp*, somehow similar to *t.rast.what.aggr*,</span>
+<span id="cb27-328"><a href="#cb27-328" aria-hidden="true" tabindex="-1"></a>offers the possibility of reading input points' date information from a column</span>
+<span id="cb27-329"><a href="#cb27-329" aria-hidden="true" tabindex="-1"></a>in the attribute table and only performs the query for the dates that match. It</span>
+<span id="cb27-330"><a href="#cb27-330" aria-hidden="true" tabindex="-1"></a>also offers spatial interpolation of the four nearest pixels.</span>
+<span id="cb27-331"><a href="#cb27-331" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-332"><a href="#cb27-332" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-333"><a href="#cb27-333" aria-hidden="true" tabindex="-1"></a>: Comparison of vector tools that allow to query space time raster datasets.</span>
 <span id="cb27-334"><a href="#cb27-334" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-337"><a href="#cb27-337" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb27-338"><a href="#cb27-338" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"g.extension"</span>, extension<span class="op">=</span><span class="st">"v.what.strds.timestamp"</span>)</span>
-<span id="cb27-339"><a href="#cb27-339" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb27-340"><a href="#cb27-340" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-343"><a href="#cb27-343" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb27-344"><a href="#cb27-344" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"v.what.strds.timestamp"</span>,</span>
-<span id="cb27-345"><a href="#cb27-345" aria-hidden="true" tabindex="-1"></a>               <span class="bu">input</span><span class="op">=</span><span class="st">"sampling_points"</span>,</span>
-<span id="cb27-346"><a href="#cb27-346" aria-hidden="true" tabindex="-1"></a>               timestamp_column<span class="op">=</span><span class="st">"sampling_date"</span>,</span>
-<span id="cb27-347"><a href="#cb27-347" aria-hidden="true" tabindex="-1"></a>               column<span class="op">=</span><span class="st">"lst_sampling_date"</span>,</span>
-<span id="cb27-348"><a href="#cb27-348" aria-hidden="true" tabindex="-1"></a>               strds<span class="op">=</span><span class="st">"lst_daily"</span>,</span>
-<span id="cb27-349"><a href="#cb27-349" aria-hidden="true" tabindex="-1"></a>               flags<span class="op">=</span><span class="st">"i"</span>)</span>
-<span id="cb27-350"><a href="#cb27-350" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb27-351"><a href="#cb27-351" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-354"><a href="#cb27-354" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb27-355"><a href="#cb27-355" aria-hidden="true" tabindex="-1"></a>gs.vector_db_select(<span class="st">"sampling_points"</span>)[<span class="st">"values"</span>]</span>
-<span id="cb27-356"><a href="#cb27-356" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb27-357"><a href="#cb27-357" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-358"><a href="#cb27-358" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-359"><a href="#cb27-359" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-362"><a href="#cb27-362" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb27-363"><a href="#cb27-363" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"g.extension"</span>, extension<span class="op">=</span><span class="st">"v.strds.stats"</span>)</span>
-<span id="cb27-364"><a href="#cb27-364" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb27-365"><a href="#cb27-365" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-368"><a href="#cb27-368" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb27-369"><a href="#cb27-369" aria-hidden="true" tabindex="-1"></a><span class="co"># Extract August average LST for Milano</span></span>
-<span id="cb27-370"><a href="#cb27-370" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"v.strds.stats"</span>,</span>
-<span id="cb27-371"><a href="#cb27-371" aria-hidden="true" tabindex="-1"></a>               <span class="bu">input</span><span class="op">=</span><span class="st">"italy_borders_3"</span>,</span>
-<span id="cb27-372"><a href="#cb27-372" aria-hidden="true" tabindex="-1"></a>               strds<span class="op">=</span><span class="st">"lst_monthly"</span>,</span>
-<span id="cb27-373"><a href="#cb27-373" aria-hidden="true" tabindex="-1"></a>               where<span class="op">=</span><span class="st">"NAME_3 == 'Milano'"</span>,</span>
-<span id="cb27-374"><a href="#cb27-374" aria-hidden="true" tabindex="-1"></a>               t_where<span class="op">=</span><span class="st">"strftime('%m', start_time)='08'"</span>,</span>
-<span id="cb27-375"><a href="#cb27-375" aria-hidden="true" tabindex="-1"></a>               output<span class="op">=</span><span class="st">"milano_lst_august"</span>,</span>
-<span id="cb27-376"><a href="#cb27-376" aria-hidden="true" tabindex="-1"></a>               method<span class="op">=</span><span class="st">"average"</span>)</span>
-<span id="cb27-377"><a href="#cb27-377" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb27-378"><a href="#cb27-378" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-381"><a href="#cb27-381" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb27-382"><a href="#cb27-382" aria-hidden="true" tabindex="-1"></a>gs.vector_db_select(<span class="st">"milano_lst_august"</span>)[<span class="st">"values"</span>]</span>
-<span id="cb27-383"><a href="#cb27-383" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb27-384"><a href="#cb27-384" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-385"><a href="#cb27-385" aria-hidden="true" tabindex="-1"></a>Which municipality in northern Italy had the highest August average temperature each year?</span>
-<span id="cb27-386"><a href="#cb27-386" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-389"><a href="#cb27-389" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb27-390"><a href="#cb27-390" aria-hidden="true" tabindex="-1"></a><span class="co"># Clip municipalities to comp reg</span></span>
-<span id="cb27-391"><a href="#cb27-391" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"v.clip"</span>, <span class="bu">input</span><span class="op">=</span><span class="st">"italy_borders_3"</span>, output<span class="op">=</span><span class="st">"italy_borders_3_clip"</span>, flags<span class="op">=</span><span class="st">"r"</span>)</span>
-<span id="cb27-392"><a href="#cb27-392" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb27-393"><a href="#cb27-393" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-396"><a href="#cb27-396" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb27-397"><a href="#cb27-397" aria-hidden="true" tabindex="-1"></a><span class="co"># Extract summer average LST municipalities</span></span>
-<span id="cb27-398"><a href="#cb27-398" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"v.strds.stats"</span>,</span>
-<span id="cb27-399"><a href="#cb27-399" aria-hidden="true" tabindex="-1"></a>               <span class="bu">input</span><span class="op">=</span><span class="st">"italy_borders_3_clip"</span>,</span>
-<span id="cb27-400"><a href="#cb27-400" aria-hidden="true" tabindex="-1"></a>               strds<span class="op">=</span><span class="st">"lst_monthly"</span>,</span>
-<span id="cb27-401"><a href="#cb27-401" aria-hidden="true" tabindex="-1"></a>               t_where<span class="op">=</span><span class="st">"strftime('%m', start_time)='08'"</span>,</span>
-<span id="cb27-402"><a href="#cb27-402" aria-hidden="true" tabindex="-1"></a>               output<span class="op">=</span><span class="st">"municip_lst_august"</span>,</span>
-<span id="cb27-403"><a href="#cb27-403" aria-hidden="true" tabindex="-1"></a>               method<span class="op">=</span><span class="st">"average"</span>)</span>
-<span id="cb27-404"><a href="#cb27-404" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb27-405"><a href="#cb27-405" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-408"><a href="#cb27-408" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb27-409"><a href="#cb27-409" aria-hidden="true" tabindex="-1"></a>gs.vector_db_select(<span class="st">"municip_lst_august"</span>)[<span class="st">"values"</span>]</span>
-<span id="cb27-410"><a href="#cb27-410" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb27-411"><a href="#cb27-411" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-412"><a href="#cb27-412" aria-hidden="true" tabindex="-1"></a><span class="co">&lt;!-- how to get the resulting attr table into something useful to answer the </span></span>
-<span id="cb27-413"><a href="#cb27-413" aria-hidden="true" tabindex="-1"></a><span class="co">question? --&gt;</span></span>
-<span id="cb27-414"><a href="#cb27-414" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-415"><a href="#cb27-415" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-416"><a href="#cb27-416" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-335"><a href="#cb27-335" aria-hidden="true" tabindex="-1"></a>| Tools/&lt;br&gt;options | <span class="co">[</span><span class="ot">v.what.strds</span><span class="co">](https://grass.osgeo.org/grass-stable/manuals/v.what.strds.html)</span> | <span class="co">[</span><span class="ot">v.what.strds.timestamp</span><span class="co">](https://grass.osgeo.org/grass-stable/manuals/addons/v.what.strds.timestamp.html)</span> | <span class="co">[</span><span class="ot">v.strds.stats</span><span class="co">](https://grass.osgeo.org/grass-stable/manuals/addons/v.strds.stats.html)</span> |</span>
+<span id="cb27-336"><a href="#cb27-336" aria-hidden="true" tabindex="-1"></a>|---|---|---|---|</span>
+<span id="cb27-337"><a href="#cb27-337" aria-hidden="true" tabindex="-1"></a>| Purpose | Retrieves raster values from STRDSs using a point vector map | Matches points with timestamp in the attribute table with STRDSs based on point locations in space and time, and updates the input vector's attribute table | Calculates zonal statistics from STRDSs and uploads values to attribute columns of a new vector map |</span>
+<span id="cb27-338"><a href="#cb27-338" aria-hidden="true" tabindex="-1"></a>| input | vector (points) and strds(s) | vector (points) and strds(s) | vector (lines or polygons) and strds(s) |</span>
+<span id="cb27-339"><a href="#cb27-339" aria-hidden="true" tabindex="-1"></a>| output | vector | vector | vector |</span>
+<span id="cb27-340"><a href="#cb27-340" aria-hidden="true" tabindex="-1"></a>| where | yes | yes | yes |</span>
+<span id="cb27-341"><a href="#cb27-341" aria-hidden="true" tabindex="-1"></a>| t_where | yes | yes | yes |</span>
+<span id="cb27-342"><a href="#cb27-342" aria-hidden="true" tabindex="-1"></a>| spatial aggr |  |  | yes |</span>
+<span id="cb27-343"><a href="#cb27-343" aria-hidden="true" tabindex="-1"></a>| temporal aggr |  |  |  |</span>
+<span id="cb27-344"><a href="#cb27-344" aria-hidden="true" tabindex="-1"></a>| spatial interp | | yes | |</span>
+<span id="cb27-345"><a href="#cb27-345" aria-hidden="true" tabindex="-1"></a>| example | v.what.strds -u input=points strds=A  | v.what.strds.timestamp input=points timestamp_column=sampling_time column=A_at_sampling_time strds=A | v.strds.stats input=areas strds=A output=areas_new method=average |</span>
+<span id="cb27-346"><a href="#cb27-346" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-347"><a href="#cb27-347" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-348"><a href="#cb27-348" aria-hidden="true" tabindex="-1"></a>Let's go through the usage of the vector tools to query raster time series now.</span>
+<span id="cb27-349"><a href="#cb27-349" aria-hidden="true" tabindex="-1"></a>When we run *v.what.strds* to query strds we can either save the results in </span>
+<span id="cb27-350"><a href="#cb27-350" aria-hidden="true" tabindex="-1"></a>a new vector map or update the input vector attribute table by setting the</span>
+<span id="cb27-351"><a href="#cb27-351" aria-hidden="true" tabindex="-1"></a><span class="in">`u`</span> flag. In this case, we'll create a new vector map and do a temporal</span>
+<span id="cb27-352"><a href="#cb27-352" aria-hidden="true" tabindex="-1"></a>selection.</span>
+<span id="cb27-353"><a href="#cb27-353" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-356"><a href="#cb27-356" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb27-357"><a href="#cb27-357" aria-hidden="true" tabindex="-1"></a><span class="co"># Run v.what.strds with temporal selection</span></span>
+<span id="cb27-358"><a href="#cb27-358" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"v.what.strds"</span>,</span>
+<span id="cb27-359"><a href="#cb27-359" aria-hidden="true" tabindex="-1"></a>               <span class="bu">input</span><span class="op">=</span><span class="st">"sampling_points"</span>,</span>
+<span id="cb27-360"><a href="#cb27-360" aria-hidden="true" tabindex="-1"></a>               strds<span class="op">=</span><span class="st">"lst_monthly"</span>,</span>
+<span id="cb27-361"><a href="#cb27-361" aria-hidden="true" tabindex="-1"></a>               output<span class="op">=</span><span class="st">"sp_lst_monthly_2014"</span>,</span>
+<span id="cb27-362"><a href="#cb27-362" aria-hidden="true" tabindex="-1"></a>               t_where<span class="op">=</span><span class="st">"start_time &lt;= '2015-01-01'"</span>)</span>
+<span id="cb27-363"><a href="#cb27-363" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb27-364"><a href="#cb27-364" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-365"><a href="#cb27-365" aria-hidden="true" tabindex="-1"></a>Let's check the new vector created. It contains a new column per map in the </span>
+<span id="cb27-366"><a href="#cb27-366" aria-hidden="true" tabindex="-1"></a>queried strds.</span>
+<span id="cb27-367"><a href="#cb27-367" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-370"><a href="#cb27-370" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb27-371"><a href="#cb27-371" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> gs.parse_command(<span class="st">"v.db.select"</span>, </span>
+<span id="cb27-372"><a href="#cb27-372" aria-hidden="true" tabindex="-1"></a>                        <span class="bu">map</span><span class="op">=</span><span class="st">"sp_lst_monthly_2014"</span>, </span>
+<span id="cb27-373"><a href="#cb27-373" aria-hidden="true" tabindex="-1"></a>                        <span class="bu">format</span><span class="op">=</span><span class="st">"json"</span>)</span>
+<span id="cb27-374"><a href="#cb27-374" aria-hidden="true" tabindex="-1"></a>                        </span>
+<span id="cb27-375"><a href="#cb27-375" aria-hidden="true" tabindex="-1"></a>pd.DataFrame(data[<span class="st">'records'</span>])</span>
+<span id="cb27-376"><a href="#cb27-376" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb27-377"><a href="#cb27-377" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-378"><a href="#cb27-378" aria-hidden="true" tabindex="-1"></a>The tool *v.what.strds.timestamp* is an extension so we need to install it first.</span>
+<span id="cb27-379"><a href="#cb27-379" aria-hidden="true" tabindex="-1"></a>It will by default update the input vector attribute table with a column that </span>
+<span id="cb27-380"><a href="#cb27-380" aria-hidden="true" tabindex="-1"></a>needs to be specified by the user. Furthermore, it offers spatial interpolation </span>
+<span id="cb27-381"><a href="#cb27-381" aria-hidden="true" tabindex="-1"></a>of the four nearest cells via the <span class="in">`i`</span> flag. Let's compare the results with and</span>
+<span id="cb27-382"><a href="#cb27-382" aria-hidden="true" tabindex="-1"></a>without it.</span>
+<span id="cb27-383"><a href="#cb27-383" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-386"><a href="#cb27-386" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb27-387"><a href="#cb27-387" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"g.extension"</span>, extension<span class="op">=</span><span class="st">"v.what.strds.timestamp"</span>)</span>
+<span id="cb27-388"><a href="#cb27-388" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb27-389"><a href="#cb27-389" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-392"><a href="#cb27-392" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb27-393"><a href="#cb27-393" aria-hidden="true" tabindex="-1"></a><span class="co"># with spatial interp of neighbor cells</span></span>
+<span id="cb27-394"><a href="#cb27-394" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"v.what.strds.timestamp"</span>,</span>
+<span id="cb27-395"><a href="#cb27-395" aria-hidden="true" tabindex="-1"></a>               <span class="bu">input</span><span class="op">=</span><span class="st">"sampling_points"</span>,</span>
+<span id="cb27-396"><a href="#cb27-396" aria-hidden="true" tabindex="-1"></a>               timestamp_column<span class="op">=</span><span class="st">"sampling_date"</span>,</span>
+<span id="cb27-397"><a href="#cb27-397" aria-hidden="true" tabindex="-1"></a>               column<span class="op">=</span><span class="st">"lst_sampling_date_i"</span>,</span>
+<span id="cb27-398"><a href="#cb27-398" aria-hidden="true" tabindex="-1"></a>               strds<span class="op">=</span><span class="st">"lst_daily"</span>,</span>
+<span id="cb27-399"><a href="#cb27-399" aria-hidden="true" tabindex="-1"></a>               flags<span class="op">=</span><span class="st">"i"</span>)</span>
+<span id="cb27-400"><a href="#cb27-400" aria-hidden="true" tabindex="-1"></a>               </span>
+<span id="cb27-401"><a href="#cb27-401" aria-hidden="true" tabindex="-1"></a><span class="co"># without spatial interp of neighbor cells</span></span>
+<span id="cb27-402"><a href="#cb27-402" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"v.what.strds.timestamp"</span>,</span>
+<span id="cb27-403"><a href="#cb27-403" aria-hidden="true" tabindex="-1"></a>               <span class="bu">input</span><span class="op">=</span><span class="st">"sampling_points"</span>,</span>
+<span id="cb27-404"><a href="#cb27-404" aria-hidden="true" tabindex="-1"></a>               timestamp_column<span class="op">=</span><span class="st">"sampling_date"</span>,</span>
+<span id="cb27-405"><a href="#cb27-405" aria-hidden="true" tabindex="-1"></a>               column<span class="op">=</span><span class="st">"lst_sampling_date_no_i"</span>,</span>
+<span id="cb27-406"><a href="#cb27-406" aria-hidden="true" tabindex="-1"></a>               strds<span class="op">=</span><span class="st">"lst_daily"</span>)</span>
+<span id="cb27-407"><a href="#cb27-407" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb27-408"><a href="#cb27-408" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-409"><a href="#cb27-409" aria-hidden="true" tabindex="-1"></a>Let's check the results.</span>
+<span id="cb27-410"><a href="#cb27-410" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-413"><a href="#cb27-413" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb27-414"><a href="#cb27-414" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> gs.parse_command(<span class="st">"v.db.select"</span>, </span>
+<span id="cb27-415"><a href="#cb27-415" aria-hidden="true" tabindex="-1"></a>                        <span class="bu">map</span><span class="op">=</span><span class="st">"sampling_points"</span>, </span>
+<span id="cb27-416"><a href="#cb27-416" aria-hidden="true" tabindex="-1"></a>                        <span class="bu">format</span><span class="op">=</span><span class="st">"json"</span>)</span>
+<span id="cb27-417"><a href="#cb27-417" aria-hidden="true" tabindex="-1"></a>                        </span>
+<span id="cb27-418"><a href="#cb27-418" aria-hidden="true" tabindex="-1"></a>pd.DataFrame(data[<span class="st">'records'</span>])</span>
+<span id="cb27-419"><a href="#cb27-419" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb27-420"><a href="#cb27-420" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-421"><a href="#cb27-421" aria-hidden="true" tabindex="-1"></a>Finally, we'll extract zonal statistics of a raster time series. For this, we</span>
+<span id="cb27-422"><a href="#cb27-422" aria-hidden="true" tabindex="-1"></a>need either a line or polygon vector map as input. We'll use the map of</span>
+<span id="cb27-423"><a href="#cb27-423" aria-hidden="true" tabindex="-1"></a>italian municipalities and demonstrate the use of spatial (<span class="in">`where`</span>) and temporal </span>
+<span id="cb27-424"><a href="#cb27-424" aria-hidden="true" tabindex="-1"></a>(<span class="in">`t_where`</span>) selection.</span>
+<span id="cb27-425"><a href="#cb27-425" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-428"><a href="#cb27-428" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb27-429"><a href="#cb27-429" aria-hidden="true" tabindex="-1"></a><span class="co"># Install v.strds.stats extension</span></span>
+<span id="cb27-430"><a href="#cb27-430" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"g.extension"</span>, extension<span class="op">=</span><span class="st">"v.strds.stats"</span>)</span>
+<span id="cb27-431"><a href="#cb27-431" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb27-432"><a href="#cb27-432" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-435"><a href="#cb27-435" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb27-436"><a href="#cb27-436" aria-hidden="true" tabindex="-1"></a><span class="co"># Extract August average LST for Milano municipality</span></span>
+<span id="cb27-437"><a href="#cb27-437" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"v.strds.stats"</span>,</span>
+<span id="cb27-438"><a href="#cb27-438" aria-hidden="true" tabindex="-1"></a>               <span class="bu">input</span><span class="op">=</span><span class="st">"italy_borders_3"</span>,</span>
+<span id="cb27-439"><a href="#cb27-439" aria-hidden="true" tabindex="-1"></a>               strds<span class="op">=</span><span class="st">"lst_monthly"</span>,</span>
+<span id="cb27-440"><a href="#cb27-440" aria-hidden="true" tabindex="-1"></a>               where<span class="op">=</span><span class="st">"NAME_3 == 'Milano'"</span>,</span>
+<span id="cb27-441"><a href="#cb27-441" aria-hidden="true" tabindex="-1"></a>               t_where<span class="op">=</span><span class="st">"strftime('%m', start_time)='08'"</span>,</span>
+<span id="cb27-442"><a href="#cb27-442" aria-hidden="true" tabindex="-1"></a>               output<span class="op">=</span><span class="st">"milano_lst_august"</span>,</span>
+<span id="cb27-443"><a href="#cb27-443" aria-hidden="true" tabindex="-1"></a>               method<span class="op">=</span><span class="st">"average"</span>)</span>
+<span id="cb27-444"><a href="#cb27-444" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb27-445"><a href="#cb27-445" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-448"><a href="#cb27-448" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb27-449"><a href="#cb27-449" aria-hidden="true" tabindex="-1"></a>gs.vector_db_select(<span class="st">"milano_lst_august"</span>)[<span class="st">"values"</span>]</span>
+<span id="cb27-450"><a href="#cb27-450" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb27-451"><a href="#cb27-451" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-452"><a href="#cb27-452" aria-hidden="true" tabindex="-1"></a>Let's now try to find out which municipality in northern Italy had the highest </span>
+<span id="cb27-453"><a href="#cb27-453" aria-hidden="true" tabindex="-1"></a>August average temperature each year? </span>
+<span id="cb27-454"><a href="#cb27-454" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-457"><a href="#cb27-457" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb27-458"><a href="#cb27-458" aria-hidden="true" tabindex="-1"></a><span class="co"># Clip municipalities to computational region</span></span>
+<span id="cb27-459"><a href="#cb27-459" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"v.clip"</span>, </span>
+<span id="cb27-460"><a href="#cb27-460" aria-hidden="true" tabindex="-1"></a>               <span class="bu">input</span><span class="op">=</span><span class="st">"italy_borders_3"</span>, </span>
+<span id="cb27-461"><a href="#cb27-461" aria-hidden="true" tabindex="-1"></a>               output<span class="op">=</span><span class="st">"italy_borders_3_clip"</span>, </span>
+<span id="cb27-462"><a href="#cb27-462" aria-hidden="true" tabindex="-1"></a>               flags<span class="op">=</span><span class="st">"r"</span>)</span>
+<span id="cb27-463"><a href="#cb27-463" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb27-464"><a href="#cb27-464" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-467"><a href="#cb27-467" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb27-468"><a href="#cb27-468" aria-hidden="true" tabindex="-1"></a><span class="co"># Extract summer average LST municipalities</span></span>
+<span id="cb27-469"><a href="#cb27-469" aria-hidden="true" tabindex="-1"></a>gs.run_command(<span class="st">"v.strds.stats"</span>,</span>
+<span id="cb27-470"><a href="#cb27-470" aria-hidden="true" tabindex="-1"></a>               <span class="bu">input</span><span class="op">=</span><span class="st">"italy_borders_3_clip"</span>,</span>
+<span id="cb27-471"><a href="#cb27-471" aria-hidden="true" tabindex="-1"></a>               strds<span class="op">=</span><span class="st">"lst_monthly"</span>,</span>
+<span id="cb27-472"><a href="#cb27-472" aria-hidden="true" tabindex="-1"></a>               t_where<span class="op">=</span><span class="st">"strftime('%m', start_time)='08'"</span>,</span>
+<span id="cb27-473"><a href="#cb27-473" aria-hidden="true" tabindex="-1"></a>               output<span class="op">=</span><span class="st">"municip_lst_august"</span>,</span>
+<span id="cb27-474"><a href="#cb27-474" aria-hidden="true" tabindex="-1"></a>               method<span class="op">=</span><span class="st">"average"</span>)</span>
+<span id="cb27-475"><a href="#cb27-475" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb27-476"><a href="#cb27-476" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-479"><a href="#cb27-479" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb27-480"><a href="#cb27-480" aria-hidden="true" tabindex="-1"></a><span class="co"># Check the output table</span></span>
+<span id="cb27-481"><a href="#cb27-481" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> gs.parse_command(<span class="st">"v.db.select"</span>, </span>
+<span id="cb27-482"><a href="#cb27-482" aria-hidden="true" tabindex="-1"></a>                        <span class="bu">map</span><span class="op">=</span><span class="st">"sampling_points"</span>, </span>
+<span id="cb27-483"><a href="#cb27-483" aria-hidden="true" tabindex="-1"></a>                        <span class="bu">format</span><span class="op">=</span><span class="st">"json"</span>)</span>
+<span id="cb27-484"><a href="#cb27-484" aria-hidden="true" tabindex="-1"></a>                        </span>
+<span id="cb27-485"><a href="#cb27-485" aria-hidden="true" tabindex="-1"></a>pd.DataFrame(data[<span class="st">'records'</span>])</span>
+<span id="cb27-486"><a href="#cb27-486" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb27-487"><a href="#cb27-487" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-488"><a href="#cb27-488" aria-hidden="true" tabindex="-1"></a><span class="co">&lt;!-- how to get the max of each new col --&gt;</span></span>
+<span id="cb27-489"><a href="#cb27-489" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-490"><a href="#cb27-490" aria-hidden="true" tabindex="-1"></a><span class="co">&lt;!-- write the result --&gt;</span></span>
+<span id="cb27-491"><a href="#cb27-491" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-492"><a href="#cb27-492" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-493"><a href="#cb27-493" aria-hidden="true" tabindex="-1"></a><span class="fu">## References</span></span>
+<span id="cb27-494"><a href="#cb27-494" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-495"><a href="#cb27-495" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-496"><a href="#cb27-496" aria-hidden="true" tabindex="-1"></a>:::{.smaller}</span>
+<span id="cb27-497"><a href="#cb27-497" aria-hidden="true" tabindex="-1"></a>Development of this tutorial was funded by the US </span>
+<span id="cb27-498"><a href="#cb27-498" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">National Science Foundation (NSF)</span><span class="co">](https://www.nsf.gov/)</span>, </span>
+<span id="cb27-499"><a href="#cb27-499" aria-hidden="true" tabindex="-1"></a>award <span class="co">[</span><span class="ot">2303651</span><span class="co">](https://www.nsf.gov/awardsearch/showAward?AWD_ID=2303651)</span>.</span>
+<span id="cb27-500"><a href="#cb27-500" aria-hidden="true" tabindex="-1"></a>:::</span>
 </code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div></div></div></div></div>
 </div> <!-- /content -->

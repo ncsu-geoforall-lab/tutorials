@@ -18,17 +18,19 @@ editor:
 ---
 
 In this sixth part of the time series tutorials, we will go through time series
-querying and compare and contrast the different tools available according to
-input, output and other options. We will split tools into two groups according to their name to facilitate comparisons:
+querying and compare and contrast the different tools available according to 
+their inputs, outputs and other options. 
+We will split tools into two groups according to their name to facilitate 
+comparisons:
 
-- temporal tools: [t.rast.what](), [t.rast.what.aggr](), [t.vect.observe.strds](https://grass.osgeo.org/grass-stable/manuals/t.vect.observe.strds.html), [t.vect.what.strds](), and 
-- vector tools: [v.what.strds](), [v.what.strds.timestamps](), [v.strds.stats]().
-
+- temporal tools: [t.rast.what](https://grass.osgeo.org/grass-stable/manuals/t.rast.what.html), [t.rast.what.aggr](https://grass.osgeo.org/grass-stable/manuals/addons/t.rast.what.aggr.html),[t.vect.observe.strds](https://grass.osgeo.org/grass-stable/manuals/t.vect.observe.strds.html), [t.vect.what.strds](https://grass.osgeo.org/grass-stable/manuals/t.vect.what.strds.html) and, 
+- vector tools: [v.what.strds](https://grass.osgeo.org/grass-stable/manuals/v.what.strds.html), [v.what.strds.timestamp](https://grass.osgeo.org/grass-stable/manuals/addons/v.what.strds.timestamp.html), [v.strds.stats](https://grass.osgeo.org/grass-stable/manuals/addons/v.strds.stats.html).
 
 ::: {.callout-note title="Setup"}
 This tutorial can be run locally or in Google Colab. However, make sure you
-install GRASS GIS 8.4+, download the LST sample data and set up your
-project as explained in the 
+install GRASS GIS 8.4+, download the 
+[LST sample project]() 
+and set up your project as explained in the 
 [first part](time_series_management_and_visualization.qmd) of these time
 series tutorials.
 :::
@@ -66,36 +68,35 @@ session = gj.init(grassdata, project, mapset);
 ## Temporal tools
 
 All the temporal tools that allow to query raster time series take either 
-coordinates or a point vector map to sample one or various STRDS. 
+coordinates or a point vector map as inputs to sample one or various STRDS. 
 Regarding outputs, the *t.rast.\** tools retrieve values to stdout, write
 them in plain text files or update the vector attribute table. In contrast, 
 the *t.vect.\** tools output vector time series. Only two of these tools
-allow to do queries with temporal aggregation of the raster data according 
-to a fixed date or a date column in the case of
-[t.rast.what.aggr](https://grass.osgeo.org/grass-stable/manuals/addons/t.rast.what.aggr.html)
-and with temporal topology relations in the case of 
-[t.vect.what.strds](https://grass.osgeo.org/grass-stable/manuals/t.vect.what.strds.html).
+allow to do queries with temporal aggregation of the raster data either 
+according to a fixed date or a date column in the case of
+*t.rast.what.aggr* or with temporal topology relations in the case of 
+*t.vect.what.strds*.
 
 
 : Comparison of temporal tools that allow to query space time raster datasets.
 
 | Tools/<br>options | [t.rast.what](https://grass.osgeo.org/grass-stable/manuals/t.rast.what.html) | [t.rast.what.aggr](https://grass.osgeo.org/grass-stable/manuals/addons/t.rast.what.aggr.html) | [t.vect.observe.strds](https://grass.osgeo.org/grass-stable/manuals/t.vect.observe.strds.html) | [t.vect.what.strds](https://grass.osgeo.org/grass-stable/manuals/t.vect.what.strds.html) |
 |---|---|---|---|---|
-| Purpose | Samples a STRDS at vector points and writes the output to stdout or text file with different layouts | Samples a STRDS at vector points and returns **aggregated** values  to stdout or in the attribute table | Samples STRDSs at points from a vector map and outputs a **STVDS** | Samples a STRDS at the spatio-temporal locations of a STVDS |
+| Purpose | Samples a STRDS at vector points and writes the output to stdout or text file with different layouts | Samples a STRDS at vector points and returns aggregated values  to stdout or in the attribute table | Samples STRDSs at points from a vector map and outputs a STVDS | Samples a STRDS at the spatio-temporal locations of a STVDS |
 | input | vector (points) or coordinates and strds | vector (points) and strds | vector (points) and strds(s) | stvds (points) and strds |
 | output | stdout or plain text file | vector, plain text or stdout | stvds | stvds |
 | where | yes |  | yes | yes |
 | t_where |  |  |  | yes |
 | spatial aggr |  |  |  |  |
 | temporal aggr |  | yes |  | yes |
-| example | t.rast.what -n strds=A points=points output=result.txt layout=row | t.rast.what.aggr input=stations strds=ndvi date="2015-05-01" granularity="2 months" | t.vect.observe.strds input=stations strds=tempmean output=stations vector_output=stations columns=month | t.vect.what.strds input=stations strds=tempmean column=temp method=average |
+| example | t.rast.what -n strds=A points=points output=result.txt layout=row | t.rast.what.aggr input=points strds=A date="2015-05-01" granularity="2 months" | t.vect.observe.strds input=points strds=A output=points_stvds vector_output=points_vector columns=A_values | t.vect.what.strds input=points strds=A column=A_values method=average |
 
 Let's see some examples. We will first randomly extract the centroids of 15 
-Italian regions in our study area and save them as a points vector map to
-query the raster time series.
+Italian regions in our study area and save them as a point vector map to
+query the raster time series afterwards.
 
 ```{python}
-# Extract centroids
+# Extract 15 random centroids
 gs.run_command("v.extract", 
                input="italy_borders_2_clip",
                type="centroid",
@@ -119,6 +120,19 @@ centroids.show()
 ```
 
 ```{python}
+# Calculate monthly LST time series
+gs.run_command("t.rast.aggregate", 
+               input="lst_daily", 
+               output="lst_monthly",
+               basename="lst_monthly",
+               suffix="gran",
+               method="average")
+```
+
+Let's start by using *t.rast.what* that will output the result in the standard
+output, i.e., the terminal, the GUI console or the Jupyter cell.
+
+```{python}
 # Get LST monthly values for the points
 gs.run_command("t.rast.what",
                points="sampling_points",
@@ -128,18 +142,18 @@ gs.run_command("t.rast.what",
 ```
 
 ::: {.callout-note title="Layouts"}
-You can then play around with the different output layouts, i.e., 
-*row, column, timerow*, to find the one that better suits your data
+Users can then play around with the different output layouts, i.e., 
+*row, column, timerow*, to find the one that better suits their data
 pipelines. 
 :::
 
-Now, to exemplify the use of t.rast.what.aggr imagine we did some mosquito
+Now, to exemplify the use of *t.rast.what.aggr* imagine we did some mosquito
 trappings in two different dates and we need to know which was the average
 LST the two months before the trappings. Since the dates are different, we
 actually need to aggregate different days. This is done on the fly (i.e., 
-without the need to aggregate the whole raster time series) by
-t.rast.what.aggr.
-Let's install the extension and add dates to our point vector map.
+without the need to aggregate the whole raster time series) by the extension 
+*t.rast.what.aggr*. Let's install it and add dates to our point vector map.
+
 
 ```{python}
 # Install t.rast.what.aggr extension
@@ -147,9 +161,12 @@ gs.run_command("g.extension", extension="t.rast.what.aggr")
 ```
 
 ```{python}
+# Add a new date type column
 gs.run_command("v.db.addcolumn", 
                map="sampling_points",
                column="sampling_date date")
+               
+# Add values to the date column
 gs.run_command("v.db.update", 
                map="sampling_points", 
                column="sampling_date",
@@ -175,30 +192,33 @@ gs.run_command("t.rast.what.aggr",
                flags="c")
 ```
 
-```{python}
-gs.vector_db_select("sampling_points")["values"]
-```
+Let's display the result by converting the attribute table into a Pandas 
+DataFrame.
 
 ```{python}
 import pandas as pd
 
-table = pd.DataFrame.from_dict(gs.vector_db_select("sampling_points")["values"], 
-                               orient="index", 
-                               columns=gs.vector_db_select("sampling_points")["columns"])
-
-table
+data = gs.parse_command("v.db.select", 
+                        map="sampling_points", 
+                        format="json")
+                        
+pd.DataFrame(data['records'])
 ```
-
-<!-- this above does not work anymore but I do not understand why, 
-there are indeed 16 columns and 16 values per row... boh  -->
 
 :::{.callout-note title="Question"}
 What would be the result if we use the monthly time series?
 :::
 
-Let's demonstrate now the use of t.vect.observe.strds and 
-t.vect.what.strds. These tools as mentioned above output a vector 
-time series.
+Let's demonstrate now the use of *t.vect.observe.strds* and 
+*t.vect.what.strds*. These tools, as mentioned above, output a vector 
+time series or stvds. Vector time series in GRASS GIS can be created either 
+from a series of vector maps (especially if features/geometries vary in time) 
+or from layers added to a single vector map (i.e., features are always the 
+same, as in the case of meteorological stations).
+
+We start with *t.vect.observe.strds*. It will create a new vector map with 
+as many layers as raster maps there are in the strds we are querying and it 
+will register these in a stvds.
 
 ```{python}
 gs.run_command("t.vect.observe.strds",
@@ -210,12 +230,14 @@ gs.run_command("t.vect.observe.strds",
 ```
 
 ```{python}
+# Check the stvds is created
 gs.run_command("t.info",
                input="sp_lst_monthly",
                type="stvds")
 ```
 
 ```{python}
+# Check number of layers in the vector map
 gs.vector_info("sp_lst_monthly")
 ```
 
@@ -230,9 +252,16 @@ gs.run_command("t.vect.db.select",
                input="sp_lst_monthly")
 ```
 
-Let's compare the values obtained by querying the monthly LST time series
+Let's now compare the values obtained by querying the monthly LST time series
 with those resulting from aggregating the daily LST time series. They should 
-be the same. For that we need to specify the sampling relation.
+be the same. For that we need to specify the sampling relation. The temporal 
+tool that allows to specify sampling relations and do temporal aggregation is
+*t.vect.what.strds*. It requires a stvds as input, so we'll use the one we 
+just obtained above. We also specify the *start* relation, so all maps in the 
+strds which start time matches the stvds will be aggregated. Let's see this 
+graphically before running the tool.
+
+![](img/comparison_of_granularities.png)
 
 ```{python}
 gs.run_command("t.vect.what.strds", 
@@ -248,13 +277,23 @@ gs.run_command("t.vect.db.select",
                input="sp_lst_monthly")
 ```
 
-<!-- create a stvds by adding layers to a points map and then registering 
-them and query a strds with a different sampling - contain does not work, so it seems the ref is the strds, not the stvds -->
+As expected, results are exactly the same! So, if you are constrained by disk
+space for example, you don't need to aggregate your entire strds if you only
+need aggregated values for a set of points.
 
 
 ## Vector tools
 
-<!-- add summary here -->
+The main difference between temporal and vector tools to query raster time
+series is that vector tools can update the attribute table of the input vector
+without creating more layers. Regarding inputs, both *v.what.strds* and 
+*v.what.strds.timestamp* take a point vector map as input, while *v.strds.stats*
+takes a line or polygon vector map and performs spatial aggregation, 
+i.e. zonal stats over the full or a part of the strds. 
+The extension *v.what.strds.timestamp*, somehow similar to *t.rast.what.aggr*,
+offers the possibility of reading input points' date information from a column
+in the attribute table and only performs the query for the dates that match. It
+also offers spatial interpolation of the four nearest pixels.
 
 
 : Comparison of vector tools that allow to query space time raster datasets.
@@ -268,12 +307,18 @@ them and query a strds with a different sampling - contain does not work, so it 
 | t_where | yes | yes | yes |
 | spatial aggr |  |  | yes |
 | temporal aggr |  |  |  |
-| example | v.what.strds input=mypoints strds=mystrds output=newvector | v.what.strds.timestamp input=sampling_points timestamp_column=sampling_time column=lst_at_sampling_time strds=LST_Day_monthly | v.strds.stats input=myvector strds=mystrds output=newvector method=average |
+| spatial interp | | yes | |
+| example | v.what.strds -u input=points strds=A  | v.what.strds.timestamp input=points timestamp_column=sampling_time column=A_at_sampling_time strds=A | v.strds.stats input=areas strds=A output=areas_new method=average |
 
-<!-- adapt examples to general names/objects -->
 
+Let's go through the usage of the vector tools to query raster time series now.
+When we run *v.what.strds* to query strds we can either save the results in 
+a new vector map or update the input vector attribute table by setting the
+`u` flag. In this case, we'll create a new vector map and do a temporal
+selection.
 
 ```{python}
+# Run v.what.strds with temporal selection
 gs.run_command("v.what.strds",
                input="sampling_points",
                strds="lst_monthly",
@@ -281,44 +326,66 @@ gs.run_command("v.what.strds",
                t_where="start_time <= '2015-01-01'")
 ```
 
-```{python}
-# Check the attr table of the new vector
-gs.vector_db_select("sp_lst_monthly_2014")["values"]
+Let's check the new vector created. It contains a new column per map in the 
+queried strds.
 
+```{python}
+data = gs.parse_command("v.db.select", 
+                        map="sp_lst_monthly_2014", 
+                        format="json")
+                        
+pd.DataFrame(data['records'])
 ```
 
-<!-- need help with using json output and get a nice pandas table displayed here, from dict does not seem to work (see above) -->
-
-:::{.callout-note title="Update vector attr table"}
-Instead of creating a new vector map, it is also possible to update
-the attribute table of the input vector map by setting the `u` flag.
-:::
+The tool *v.what.strds.timestamp* is an extension so we need to install it first.
+It will by default update the input vector attribute table with a column that 
+needs to be specified by the user. Furthermore, it offers spatial interpolation 
+of the four nearest cells via the `i` flag. Let's compare the results with and
+without it.
 
 ```{python}
 gs.run_command("g.extension", extension="v.what.strds.timestamp")
 ```
 
 ```{python}
+# with spatial interp of neighbor cells
 gs.run_command("v.what.strds.timestamp",
                input="sampling_points",
                timestamp_column="sampling_date",
-               column="lst_sampling_date",
+               column="lst_sampling_date_i",
                strds="lst_daily",
                flags="i")
+               
+# without spatial interp of neighbor cells
+gs.run_command("v.what.strds.timestamp",
+               input="sampling_points",
+               timestamp_column="sampling_date",
+               column="lst_sampling_date_no_i",
+               strds="lst_daily")
 ```
 
+Let's check the results.
+
 ```{python}
-gs.vector_db_select("sampling_points")["values"]
+data = gs.parse_command("v.db.select", 
+                        map="sampling_points", 
+                        format="json")
+                        
+pd.DataFrame(data['records'])
 ```
 
-
+Finally, we'll extract zonal statistics of a raster time series. For this, we
+need either a line or polygon vector map as input. We'll use the map of
+italian municipalities and demonstrate the use of spatial (`where`) and temporal 
+(`t_where`) selection.
 
 ```{python}
+# Install v.strds.stats extension
 gs.run_command("g.extension", extension="v.strds.stats")
 ```
 
 ```{python}
-# Extract August average LST for Milano
+# Extract August average LST for Milano municipality
 gs.run_command("v.strds.stats",
                input="italy_borders_3",
                strds="lst_monthly",
@@ -332,11 +399,15 @@ gs.run_command("v.strds.stats",
 gs.vector_db_select("milano_lst_august")["values"]
 ```
 
-Which municipality in northern Italy had the highest August average temperature each year?
+Let's now try to find out which municipality in northern Italy had the highest 
+August average temperature each year? 
 
 ```{python}
-# Clip municipalities to comp reg
-gs.run_command("v.clip", input="italy_borders_3", output="italy_borders_3_clip", flags="r")
+# Clip municipalities to computational region
+gs.run_command("v.clip", 
+               input="italy_borders_3", 
+               output="italy_borders_3_clip", 
+               flags="r")
 ```
 
 ```{python}
@@ -350,12 +421,24 @@ gs.run_command("v.strds.stats",
 ```
 
 ```{python}
-gs.vector_db_select("municip_lst_august")["values"]
+# Check the output table
+data = gs.parse_command("v.db.select", 
+                        map="sampling_points", 
+                        format="json")
+                        
+pd.DataFrame(data['records'])
 ```
 
-<!-- how to get the resulting attr table into something useful to answer the 
-question? -->
+<!-- how to get the max of each new col -->
+
+<!-- write the result -->
 
 
+## References
 
 
+:::{.smaller}
+Development of this tutorial was funded by the US 
+[National Science Foundation (NSF)](https://www.nsf.gov/), 
+award [2303651](https://www.nsf.gov/awardsearch/showAward?AWD_ID=2303651).
+:::
