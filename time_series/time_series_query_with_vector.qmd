@@ -1,6 +1,6 @@
 ---
-title: "Time series querying"
-author: "Veronica Andreo"
+title: Time series querying
+author: Veronica Andreo
 date: today
 format:
   html:
@@ -10,11 +10,11 @@ format:
 engine: knitr
 execute:
   eval: false
-  keep-ipynb: true  
-jupyter: python3
-editor: 
-  markdown: 
+  keep-ipynb: true
+editor:
+  markdown:
     wrap: 80
+jupyter: python3
 ---
 
 In this sixth part of the time series tutorials, we will go through time series
@@ -64,7 +64,6 @@ import grass.jupyter as gj
 session = gj.init(grassdata, project, mapset);
 ```
 
-
 ## Temporal tools
 
 All the temporal tools that allow to query raster time series take either 
@@ -96,27 +95,29 @@ Italian regions in our study area and save them as a point vector map to
 query the raster time series afterwards.
 
 ```{python}
-# Extract 15 random centroids
-gs.run_command("v.extract", 
-               input="italy_borders_2_clip",
-               type="centroid",
-               output="regions_centroids",
-               random=15)
-               
-# Convert centroids to points
-gs.run_command("v.type", 
-               input="regions_centroids", 
-               output="sampling_points", 
-               from_type="centroids", 
-               to_type="points")
+# Create 15 random points and add attr table
+gs.run_command("v.random", 
+               output="sampling_points",
+               npoints=15,
+               restrict="italy_borders_2_clip",
+               seed=47)
+gs.run_command("v.db.addtable",
+               map="sampling_points",
+               columns="cat integer")
 ```
 
 ```{python}
 # Display polygons and points
-centroids = gj.Map(height = 500)
-centroids.d_vect(map="italy_borders_2_clip")
-centroids.d_vect(map="sampling_points")
-centroids.show()
+points = gj.Map(height = 500)
+points.d_vect(map="italy_borders_2_clip", type="boundary")
+points.d_vect(map="sampling_points", icon="basic/circle", size=8)
+points.d_barscale()
+points.show()
+```
+
+```{python}
+# Save map
+points.save("points.png")
 ```
 
 ```{python}
@@ -125,6 +126,7 @@ gs.run_command("t.rast.aggregate",
                input="lst_daily", 
                output="lst_monthly",
                basename="lst_monthly",
+               granularity="1 month",
                suffix="gran",
                method="average")
 ```
@@ -133,6 +135,7 @@ Let's start by using *t.rast.what* that will output the result in the standard
 output, i.e., the terminal, the GUI console or the Jupyter cell.
 
 ```{python}
+#| scrolled: true
 # Get LST monthly values for the points
 gs.run_command("t.rast.what",
                points="sampling_points",
@@ -140,6 +143,21 @@ gs.run_command("t.rast.what",
                layout="row",
                flags="n")
 ```
+
+x|y|start|end|value
+4577892.8167900704|2607156.3643725100|2014-01-01 00:00:00|2014-02-01 00:00:00|-3.3495627520159
+4577892.8167900704|2607156.3643725100|2014-02-01 00:00:00|2014-03-01 00:00:00|-4.49710379464276
+4577892.8167900704|2607156.3643725100|2014-03-01 00:00:00|2014-04-01 00:00:00|2.75497920866939
+4577892.8167900704|2607156.3643725100|2014-04-01 00:00:00|2014-05-01 00:00:00|5.8034850260417
+4577892.8167900704|2607156.3643725100|2014-05-01 00:00:00|2014-06-01 00:00:00|9.28137663810487
+4577892.8167900704|2607156.3643725100|2014-06-01 00:00:00|2014-07-01 00:00:00|13.8477356770834
+4577892.8167900704|2607156.3643725100|2014-07-01 00:00:00|2014-08-01 00:00:00|15.1575793850807
+4577892.8167900704|2607156.3643725100|2014-08-01 00:00:00|2014-09-01 00:00:00|13.6287058971774
+4577892.8167900704|2607156.3643725100|2014-09-01 00:00:00|2014-10-01 00:00:00|11.6199055989584
+4577892.8167900704|2607156.3643725100|2014-10-01 00:00:00|2014-11-01 00:00:00|8.36024697580648
+4577892.8167900704|2607156.3643725100|2014-11-01 00:00:00|2014-12-01 00:00:00|2.6866315104167
+4577892.8167900704|2607156.3643725100|2014-12-01 00:00:00|2015-01-01 00:00:00|-1.45273122479836
+4577892.8167900704|2607156.3643725100|2015-01-01 00:00:00|2015-02-01 00:00:00|-3.12071761592739
 
 ::: {.callout-note title="Layouts"}
 Users can then play around with the different output layouts, i.e., 
@@ -153,7 +171,6 @@ LST the two months before the trappings. Since the dates are different, we
 actually need to aggregate different days. This is done on the fly (i.e., 
 without the need to aggregate the whole raster time series) by the extension 
 *t.rast.what.aggr*. Let's install it and add dates to our point vector map.
-
 
 ```{python}
 # Install t.rast.what.aggr extension
@@ -170,12 +187,17 @@ gs.run_command("v.db.addcolumn",
 gs.run_command("v.db.update", 
                map="sampling_points", 
                column="sampling_date",
-               value="2018-08-27")
+               value="2018-07-01")
 gs.run_command("v.db.update",
                map="sampling_points",
                column="sampling_date",
-               value="2018-07-01",
-               where="cat >= '68'")
+               value="2018-08-10",
+               where="cat >= '9'")
+```
+
+```{python}
+# Inspect dates
+gs.vector_db_select("sampling_points")
 ```
 
 We will use the daily time series in this case to get the aggregation 
@@ -238,7 +260,7 @@ gs.run_command("t.info",
 
 ```{python}
 # Check number of layers in the vector map
-gs.vector_info("sp_lst_monthly")
+gs.vector_info("sp_lst_monthly")["num_dblinks"]
 ```
 
 ```{python}
@@ -247,6 +269,7 @@ gs.vector_db_select("sp_lst_monthly", layer=7)["values"]
 ```
 
 ```{python}
+#| scrolled: true
 # Check all layers
 gs.run_command("t.vect.db.select",
                input="sp_lst_monthly")
@@ -273,6 +296,7 @@ gs.run_command("t.vect.what.strds",
 ```
 
 ```{python}
+#| scrolled: true
 gs.run_command("t.vect.db.select",
                input="sp_lst_monthly")
 ```
@@ -423,15 +447,42 @@ gs.run_command("v.strds.stats",
 ```{python}
 # Check the output table
 data = gs.parse_command("v.db.select", 
-                        map="sampling_points", 
+                        map="municip_lst_august", 
                         format="json")
                         
-pd.DataFrame(data['records'])
+table = pd.DataFrame(data['records'])
+table
 ```
 
-<!-- how to get the max of each new col -->
+```{python}
+# List with column names
+cols = list(table.columns[-5:])
 
-<!-- write the result -->
+# Dictionary to store results
+results = {}
+
+for col in cols:
+    # Find the maximum value in the column
+    max_value = table[col].max()
+    
+    # Find the index of the row with the maximum value
+    max_index = table[col].idxmax()
+    
+    # Find the corresponding value in column 'D'
+    municipality = table.loc[max_index, "NAME_3"]
+    
+    # Store the results
+    results[col] = {'max_value': max_value, 'municipality': municipality}
+
+# Display the results
+for col, res in results.items():
+    print(f"Column '{col}':")
+    print(f"  Maximum value: {res['max_value']}")
+    print(f"  Municipality name: {res['municipality']}")
+    print()
+```
+
+The highest average temperature in August varied among years and municipalities, however, Campi Bisenzio in the province of Florence, had the highest value both in 2016 and 2017.
 
 
 ## References
@@ -442,3 +493,4 @@ Development of this tutorial was funded by the US
 [National Science Foundation (NSF)](https://www.nsf.gov/), 
 award [2303651](https://www.nsf.gov/awardsearch/showAward?AWD_ID=2303651).
 :::
+
