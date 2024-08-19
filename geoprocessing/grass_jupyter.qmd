@@ -1,0 +1,39 @@
+---
+jupyter: python3
+---
+
+```{python}
+# import standard Python packages
+import os
+import sys
+import subprocess
+from pathlib import Path
+```
+
+```{python}
+sys.path.append(
+    subprocess.check_output(["grass", "--config", "python_path"], text=True).strip()
+)
+```
+
+```{python}
+# import GRASS GIS python packages
+import grass.script as gs
+import grass.jupyter as gj
+```
+
+```{python}
+# create a temporary folder where to place our GRASS project
+import tempfile
+tempdir = tempfile.TemporaryDirectory()
+```
+
+```{python}
+gs.create_project(path=tempdir.name, name="nc_sentinel", epsg="32617", overwrite=True)
+```
+
+```{python}
+# start GRASS in the recently created project
+session = gj.init(Path(tempdir.name,"nc_sentinel"))
+```
+
