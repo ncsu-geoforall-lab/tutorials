@@ -28,13 +28,14 @@
   - visualizations
 
 - Part 6:
-  - querying with vectors: t.rast.what, t.vect.observe.strds, t.vect.what.strds, t.rast.what.aggr, v.what.strds.timestamps
+  - querying with vectors: t.rast.what, t.vect.observe.strds, t.vect.what.strds, t.rast.what.aggr, v.what.strds.timestamps --> **explain t.sample when I use t.vect.what.strds**
   - zonal stats: v.strds.stats
 
 - Part 7:
-  - t.rast.extract
-  - t.select, t.sample
+  - t.rast.extract/t.vect.extract
   - import/export
+      - t.rast.export, t.vect.export
+      - t.rast.import, t.vect.import
   - t.rast.import.netcdf
   - t.rast.out.xyz
 
@@ -42,3 +43,6 @@
   - topology: t.topology, t.shift, t.snap, t.merge, t.select, t.sample
   - t.copy, t.remove, t.unregister --> **check if I used them, if yes, include explanations where they were used**
   - t.support
+
+- Part 9:
+  - Vector time series: algebra, univar

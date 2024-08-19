@@ -56,7 +56,7 @@ scheme. In this way, we have:
 
 ### TGRASS framework and workflow
 
-![](../img/tgrass_flowchart.png){width="70%" fig-align="center"}
+![](img/tgrass_flowchart.png){width="70%" fig-align="center"}
 
 ::: {.callout-note title="Setup note"}
 To run this tutorial locally or in Google Colab, you should install 
