@@ -1,6 +1,42 @@
 ---
+title: Geoprocessing with GRASS GIS and Jupyter Notebooks
 jupyter: python3
 ---
+
+
+## GRASS GIS v8.4
+
+- Geospatial Processing Engine
+- Open Source (GPL v2)
+- Developed by the GRASS Development Team
+- GRASS GIS is a founding member of the Open Source Geospatial Foundation (OSGeo)
+
+## Security First
+- Recieved Open Source Security Foundation (OpenSSF) Best Practices Badge - 2024
+
+## Modern Tooling
+
+- Jupyter Notebooks
+- GRASS GIS Python API
+- Actinia REST API
+- Easy intergration with other Data Science tools in Python and R ecosystem
+
+## Community
+
+- Active community of users and developers
+- Mailing lists, chat, and forums
+- Conferences and workshops
+- Documentation and tutorials
+- Mentoring and outreach programs
+
+## Leader in Open Science
+
+- Open Access
+- Community Mantaince and Support
+- Reproducible Research
+- Citiaions
+
+
 
 ```{python}
 # import standard Python packages
@@ -28,12 +64,219 @@ import tempfile
 tempdir = tempfile.TemporaryDirectory()
 ```
 
+## Let's create a new project in GRASS for Chaco Canyon National Park.
+
+The dataset is availeble through OpenTopography
+
+### Data Collection
+
+- Funding: National Science Foundation (NSF) Earth Sciences (EAR) Instrumentation and Facilities (IF) Program
+- Partner: University of New Mexico
+- Collector: National Center for Airborne Laser Mapping (NCALM)
+
+**Data Characteristics**
+
+- Area 542.72 km^2
+- Over 13 Billion Points
+- Point Density 25.56 pts/m^2
+
+Raster Resolution 0.5 m
+
+
+Coordinate System:
+Horizontal: NAD83 (2011) (EPOCH:2010) / UTM Zone 13N Meters [EPSG: 6342]
+Vertical: NAVD88 [EPSG: 5703]
+
+Units: Meters
+
+Complete metadata can be found at: [OpenTopography](https://portal.opentopography.org/datasetMetadata?otCollectionID=OT.042019.6342.1)
+
+> Dorshow, W. (2019).  3D Landscape Reconstruction and Land Use Modeling, Chaco Canyon, NM 2016. National Center for Airborne Laser Mapping (NCALM). Distributed by OpenTopography.  https://doi.org/10.5069/G9XG9P8D.. Accessed: 2024-08-19
+
 ```{python}
-gs.create_project(path=tempdir.name, name="nc_sentinel", epsg="32617", overwrite=True)
+gs.create_project(path=tempdir.name, name="ChacoCanyon2016", epsg="6342", overwrite=True)
 ```
 
 ```{python}
 # start GRASS in the recently created project
-session = gj.init(Path(tempdir.name,"nc_sentinel"))
+session = gj.init(Path(tempdir.name,"ChacoCanyon2016"))
 ```
+
+## Download Add-ons
+
+- t.stac.asset
+
+
+- t.stac.items
+
+## Select an Area of Interest to Use as the 
+
+https://ot-process2.sdsc.edu/potree/index.html?r=%22https://ot-process2.sdsc.edu/appEntwineEPTService1724096588005642548939/pc1724096516919%22
+
+```{python}
+!pdal info metadata/points2.laz
+```
+
+## Import Raster Data
+
+```{python}
+gs.run_command('r.in.pdal',
+            input='metadata/points2.laz', 
+            output='points_n',
+            method='n', # Count number of points per cell
+            resolution=0.5, # meter
+            flags="ewn",
+            overwrite=True)
+```
+
+## Visulalize the Raster Data
+
+```{python}
+m = gj.Map()
+m.d_rast(map="points_n")
+m.d_vect(map="lidar_boundary", color="red")
+m.d_legend(raster="points_n", at=(60, 95, 85, 90), flags="b")
+m.show()
+```
+
+```{python}
+gs.run_command('r.in.pdal',
+            input='metadata/points2.laz', 
+            output='points_stddev',
+            method='stddev', # median of the z values
+            resolution=1, # meter
+            flags="ewn",
+            overwrite=True)
+
+gs.run_command("r.colors", map="points_stddev", color="bcyr", flags="e")
+
+m = gj.Map()
+m.d_rast(map="points_stddev")
+m.d_legend(raster="points_stddev", at=(60, 95, 85, 90), flags="b")
+m.show()
+```
+
+```{python}
+hist = gj.Map()
+hist.d_histogram(map="points_stddev")
+hist.show()
+```
+
+```{python}
+gs.run_command("r.colors", map="points_median", color="elevation", flags="e")
+m = gj.Map()
+
+m.d_rast(map="points_median")
+m.d_vect(map="lidar_boundary", color="red")
+m.d_legend(raster="points_median", at=(60, 95, 85, 90), flags="b")
+m.show()
+```
+
+```{python}
+gs.run_command('r.in.pdal',
+            input='metadata/points2.laz', 
+            output='points_n',
+            method='n', # Count number of points per cell
+            resolution=0.5, # meter
+            flags="ewn",
+            overwrite=True)
+```
+
+## Import Vector Data
+
+```{python}
+hist = gj.Map()
+hist.d_histogram(map="points_median")
+hist.show()
+```
+
+```{python}
+gs.run_command("v.import",
+               input="https://raw.githubusercontent.com/OpenTopography/Data_Catalog_Spatial_Boundaries/main/OpenTopography_Point_Cloud_Lidar/NM16_Dorshow.geojson",
+               output="lidar_boundary", flags="o")
+```
+
+## Visualize the Vector Data
+
+## Perform some preprocessing
+
+```{python}
+gs.run_command('v.in.pdal',
+            input='metadata/points2.laz', 
+            output='lidar_points_be',
+            class_filter=2, # Bare earth points
+            flags="w",
+            overwrite=True)
+```
+
+50 million points.
+
+```{python}
+gs.run_command("v.surf.rst",
+               input="lidar_points_be",
+               elevation="lidar_be",
+               slope="lidar_be_slope",
+               aspect="lidar_be_aspect",
+               pcurvature="lidar_be_pcurvature",
+               tcurvature="lidar_be_tcurvature",
+               overwrite=True,
+               nprocs=24
+            )
+```
+
+## Visualize the Preprocessed Data
+
+```{python}
+gs.run_command("r.colors", map="lidar_be", color="elevation")
+gs.run_command("r.colors", map="lidar_be_slope", color="slope")
+gs.run_command("r.colors", map="lidar_be_aspect", color="aspect")
+
+m = gj.Map()
+m.d_shade(color="lidar_be", shade="lidar_be_aspect")
+m.d_legend(raster="lidar_be", at=(60, 95, 85, 90), flags="b")
+m.show()
+```
+
+## Visualize some univariate statistics and other descriptive statistics
+
+## Run some analysis or model
+
+```{python}
+gs.run_command(
+    "r.watershed", 
+    elevation="lidar_be", 
+    threshold=10000,
+    accumulation="accum10k",
+    drainage="direction10k",
+    basin="basins10k", 
+    stream="streams10k", 
+    memory=3000
+)
+```
+
+```{python}
+m = gj.Map()
+m.d_shade(color="accum10k", shade="lidar_be_aspect")
+m.d_legend(raster="accum10k", at=(60, 95, 85, 90), flags="b")
+m.show()
+```
+
+## Visualize the preliminary results
+
+```{python}
+m = gj.Map()
+m.d_shade(color="basins10k", shade="lidar_be_aspect")
+m.d_legend(raster="basins10k", at=(60, 95, 85, 90), flags="b")
+m.show()
+```
+
+## Visualize time-series map
+
+## Create figure with pandas and seaborn
+
+## Create Combined Publication Ready Figure
+
+## Export the figure
+
+## Export the data
 
