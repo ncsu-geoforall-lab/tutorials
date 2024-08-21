@@ -43,7 +43,15 @@ jupyter: python3
 import os
 import sys
 import subprocess
+import json
+from io import StringIO
+
 from pathlib import Path
+```
+
+```{python}
+import pandas as pd
+import seaborn as sns
 ```
 
 ```{python}
@@ -62,6 +70,7 @@ import grass.jupyter as gj
 # create a temporary folder where to place our GRASS project
 import tempfile
 tempdir = tempfile.TemporaryDirectory()
+print(tempdir.name)
 ```
 
 ## Let's create a new project in GRASS for Chaco Canyon National Park.
@@ -109,12 +118,22 @@ session = gj.init(Path(tempdir.name,"ChacoCanyon2016"))
 
 - t.stac.items
 
+```{python}
+with open("extensions.txt", "r") as f:
+    lines = f.readlines()
+    for line in lines:
+        line = line.strip()
+        print(f"Installing: {line}")
+        gs.run_command("g.extension", extension=line, operation="add")
+
+```
+
 ## Select an Area of Interest to Use as the 
 
 https://ot-process2.sdsc.edu/potree/index.html?r=%22https://ot-process2.sdsc.edu/appEntwineEPTService1724096588005642548939/pc1724096516919%22
 
 ```{python}
-!pdal info metadata/points2.laz
+!pdal info --summary metadata/points2.laz
 ```
 
 ## Import Raster Data
@@ -124,20 +143,39 @@ gs.run_command('r.in.pdal',
             input='metadata/points2.laz', 
             output='points_n',
             method='n', # Count number of points per cell
-            resolution=0.5, # meter
+            resolution=1, # meter
             flags="ewn",
             overwrite=True)
+```
+
+```{python}
+points_n_info = gs.parse_command('r.info', map='points_n', format="json")
+points_n_df = pd.read_json(json.dumps(points_n_info))
+points_n_df.T.head(40)[0]
 ```
 
 ## Visulalize the Raster Data
 
 ```{python}
+gs.run_command("r.colors", map="points_n", color="bcyr", flags="e")
 m = gj.Map()
 m.d_rast(map="points_n")
-m.d_vect(map="lidar_boundary", color="red")
 m.d_legend(raster="points_n", at=(60, 95, 85, 90), flags="b")
 m.show()
 ```
+
+```{python}
+hist = gj.Map()
+hist.d_histogram(map="points_n", flags="c")
+hist.show()
+```
+
+```{python}
+univar_json = gs.parse_command('r.univar', map='points_n', format="json")
+univar_df = pd.read_json(json.dumps(univar_json))
+univar_df.head(40)
+```
+
 
 ```{python}
 gs.run_command('r.in.pdal',
@@ -157,32 +195,28 @@ m.show()
 ```
 
 ```{python}
-hist = gj.Map()
-hist.d_histogram(map="points_stddev")
-hist.show()
-```
+gs.run_command('r.in.pdal',
+            input='metadata/points2.laz', 
+            output='points_median',
+            method='median', # median of the z values
+            resolution=1, # meter
+            flags="ewn",
+            overwrite=True)
 
-```{python}
-gs.run_command("r.colors", map="points_median", color="elevation", flags="e")
+gs.run_command("r.colors", map="points_median", color="elevation", flags="")
 m = gj.Map()
 
 m.d_rast(map="points_median")
-m.d_vect(map="lidar_boundary", color="red")
+# m.d_vect(map="lidar_boundary", color="red")
 m.d_legend(raster="points_median", at=(60, 95, 85, 90), flags="b")
 m.show()
 ```
 
 ```{python}
-gs.run_command('r.in.pdal',
-            input='metadata/points2.laz', 
-            output='points_n',
-            method='n', # Count number of points per cell
-            resolution=0.5, # meter
-            flags="ewn",
-            overwrite=True)
+univar_json = gs.parse_command('r.univar', map='points_n', format="json")
+univar_df = pd.read_json(json.dumps(univar_json))
+univar_df.head(40)
 ```
-
-## Import Vector Data
 
 ```{python}
 hist = gj.Map()
@@ -191,12 +225,24 @@ hist.show()
 ```
 
 ```{python}
-gs.run_command("v.import",
-               input="https://raw.githubusercontent.com/OpenTopography/Data_Catalog_Spatial_Boundaries/main/OpenTopography_Point_Cloud_Lidar/NM16_Dorshow.geojson",
-               output="lidar_boundary", flags="o")
+# gs.run_command("v.import",
+#                input="https://raw.githubusercontent.com/OpenTopography/Data_Catalog_Spatial_Boundaries/main/OpenTopography_Point_Cloud_Lidar/NM16_Dorshow.geojson",
+#                output="lidar_boundary", flags="o")
+# Data from https://rgis.unm.edu/rgis6/
+# gs.run_command("v.import",
+#                input="https://gstore.unm.edu/apps/rgis/datasets/10250353-44aa-4eb1-a593-6bb6a3abd1ce/Geologic_Formations.derived.geojson",
+#                output="geological_formations", extent="region", snap="0.001", flags="")
 ```
 
 ## Visualize the Vector Data
+
+```{python}
+m = gj.InteractiveMap(width="500", tiles="OpenStreetMap")
+m.add_raster("points_median")
+# m.add_vector("lidar_boundary")
+m.add_layer_control()
+m.show()
+```
 
 ## Perform some preprocessing
 
@@ -209,7 +255,34 @@ gs.run_command('v.in.pdal',
             overwrite=True)
 ```
 
-50 million points.
+```{python}
+# Assuming gs.parse_command is already defined and imported
+lidar_be_info = gs.read_command('v.info', map='lidar_points_be', format="json")
+lidar_be_dict = json.loads(lidar_be_info)
+num_be_points = lidar_be_dict["points"]
+print(f"We just imported {num_be_points} bare earth points")
+```
+
+```{python}
+!pdal pipeline pdal/preprocessing.json
+```
+
+```{python}
+# Assuming gs.parse_command is already defined and imported
+gs.run_command('v.in.pdal',
+            input='metadata/points2_clean.laz', 
+            output='lidar_points_be_clean',
+            class_filter=2, # Bare earth points
+            flags="w",
+            overwrite=True)
+
+lidar_be_info = gs.read_command('v.info', map='lidar_points_be_clean', format="json")
+lidar_be_dict = json.loads(lidar_be_info)
+num_be_points_clean = lidar_be_dict["points"]
+print(f"We just imported {num_be_points_clean} bare earth points")
+
+print(f"Number of points removed during cleaning: {num_be_points - num_be_points_clean}")
+```
 
 ```{python}
 gs.run_command("v.surf.rst",
@@ -219,6 +292,23 @@ gs.run_command("v.surf.rst",
                aspect="lidar_be_aspect",
                pcurvature="lidar_be_pcurvature",
                tcurvature="lidar_be_tcurvature",
+               smooth=0.5,
+               tension=40,
+               overwrite=True,
+               nprocs=24
+            )
+```
+
+```{python}
+gs.run_command("v.surf.rst",
+               input="lidar_points_be_clean",
+               elevation="lidar_be_clean",
+               slope="lidar_be_slope_clean",
+               aspect="lidar_be_aspect_clean",
+               pcurvature="lidar_be_pcurvature_clean",
+               tcurvature="lidar_be_tcurvature_clean",
+               smooth=0.5,
+               tension=40,
                overwrite=True,
                nprocs=24
             )
@@ -227,19 +317,150 @@ gs.run_command("v.surf.rst",
 ## Visualize the Preprocessed Data
 
 ```{python}
+def create_map_figure(map, display_name, output_dir, output_name, shade=False, **kwargs):    
+    map_name = display_name
+    out_file = os.path.join(output_dir, output_name)
+    dem_map = gj.Map(use_region=True, height=600, width=600, filename=out_file)
+    dem_map.d_shade(color="tcurv", shade="hillshade")
+    dem_map.d_legend(raster="tcurv", at=(5, 50, 5, 9), flags="b")
+    dem_map.d_barscale(at=(5, 7), flags="n")
+    dem_map.show()
+    elevation = {
+        "filename": out_file,
+        "rast_map": map_name,
+        "title": f"{display_name}",
+    }  # noqa: E501
+    return elevation
+```
+
+```{python}
+gs.run_command(
+    "r.relief",
+    input="lidar_be",
+    output="hillshade",
+    zscale=1,
+    overwrite=True,
+)
+
+gs.run_command(
+    "r.relief",
+    input="lidar_be_clean",
+    output="hillshade_clean",
+    zscale=1,
+    overwrite=True,
+)
+```
+
+```{python}
 gs.run_command("r.colors", map="lidar_be", color="elevation")
-gs.run_command("r.colors", map="lidar_be_slope", color="slope")
 gs.run_command("r.colors", map="lidar_be_aspect", color="aspect")
 
 m = gj.Map()
-m.d_shade(color="lidar_be", shade="lidar_be_aspect")
-m.d_legend(raster="lidar_be", at=(60, 95, 85, 90), flags="b")
+m.d_shade(color="lidar_be", shade="hillshade")
+m.d_legend(raster="lidar_be", at=(60, 95, 85, 90), flags="bd")
+m.d_barscale(at=(5, 7), flags="n")
+m.show()
+```
+
+```{python}
+gs.run_command("r.colors", map="lidar_be_slope", color="sepia", flags="e")
+m = gj.Map()
+m.d_shade(color="lidar_be_slope", shade="hillshade")
+m.d_legend(raster="lidar_be_slope", at=(60, 95, 85, 90), flags="bd")
+m.d_barscale(at=(5, 7), flags="n")
+m.show()
+```
+
+```{python}
+gs.run_command("r.colors", map="lidar_be_tcurvature", color="curvature")
+m = gj.Map()
+m.d_shade(color="lidar_be_tcurvature", shade="hillshade")
+m.d_legend(raster="lidar_be_tcurvature", at=(60, 95, 85, 90), flags="bd")
+m.d_barscale(at=(5, 7), flags="n")
+m.show()
+```
+
+```{python}
+gs.run_command("r.colors", map="lidar_be_pcurvature", color="curvature", flags="")
+m = gj.Map()
+m.d_shade(color="lidar_be_pcurvature", shade="hillshade")
+m.d_legend(raster="lidar_be_pcurvature", at=(60, 95, 85, 90), flags="bd")
+m.d_barscale(at=(5, 7), flags="n")
+m.show()
+```
+
+```{python}
+gs.run_command("r.colors", map="lidar_be_clean", color="elevation")
+gs.run_command("r.colors", map="lidar_be_slope_clean", color="sepia", flags="e")
+gs.run_command("r.colors", map="lidar_be_aspect_clean", color="aspect")
+gs.run_command("r.colors", map="lidar_be_pcurvature_clean", color="bcyr")
+gs.run_command("r.colors", map="lidar_be_tcurvature_clean", color="bcyr")
+
+m = gj.Map()
+m.d_shade(color="lidar_be", shade="hillshade_clean")
+m.d_legend(raster="lidar_be_clean", at=(60, 95, 85, 90), flags="bd")
+m.d_barscale(at=(5, 7), flags="n")
+m.show()
+```
+
+```{python}
+gs.run_command("r.mapcalc", expression="lidar_be_diff = lidar_be - lidar_be_clean", overwrite=True)
+gs.run_command("r.colors", map="lidar_be_diff", color="difference")
+```
+
+```{python}
+m = gj.Map()
+m.d_shade(color="lidar_be_diff", shade="hillshade_clean")
+m.d_legend(raster="lidar_be_diff", at=(60, 95, 85, 90), flags="bd")
+m.d_barscale(at=(5, 7), flags="n")
+m.show()
+```
+
+```{python}
+m = gj.InteractiveMap(width="500", tiles="OpenStreetMap")
+m.add_raster("lidar_be")
+m.add_raster("lidar_be_clean")
+m.add_raster("lidar_be_diff")
+m.add_layer_control()
 m.show()
 ```
 
 ## Visualize some univariate statistics and other descriptive statistics
 
 ## Run some analysis or model
+
+```{python}
+gs.run_command(
+        "r.geomorphon",
+        elevation="lidar_be",
+        forms="geomorphon",
+        search=3,
+        overwrite=True,
+    )
+
+m = gj.Map()
+m.d_shade(color="geomorphon", shade="hillshade")
+m.d_legend(raster="geomorphon", at=(60, 95, 85, 90), flags="bd")
+m.d_barscale(at=(5, 7), flags="n")
+m.show()
+```
+
+```{python}
+gs.run_command(
+        "r.geomorphon",
+        elevation="lidar_be",
+        forms="geomorphon",
+        search=21,
+        dist=0,
+        overwrite=True,
+    )
+
+m = gj.Map()
+m.d_shade(color="geomorphon", shade="hillshade")
+m.d_legend(raster="geomorphon", at=(60, 95, 85, 90), flags="bd")
+m.d_barscale(at=(5, 7), flags="n")
+m.show()
+```
 
 ```{python}
 gs.run_command(
@@ -256,7 +477,7 @@ gs.run_command(
 
 ```{python}
 m = gj.Map()
-m.d_shade(color="accum10k", shade="lidar_be_aspect")
+m.d_shade(color="accum10k", shade="hillshade")
 m.d_legend(raster="accum10k", at=(60, 95, 85, 90), flags="b")
 m.show()
 ```
@@ -265,10 +486,11 @@ m.show()
 
 ```{python}
 m = gj.Map()
-m.d_shade(color="basins10k", shade="lidar_be_aspect")
-m.d_legend(raster="basins10k", at=(60, 95, 85, 90), flags="b")
+m.d_shade(color="basins10k", shade="hillshade")
+# m.d_legend(raster="basins10k", at=(60, 95, 85, 90), flags="b")
 m.show()
 ```
+
 
 ## Visualize time-series map
 

@@ -1,13 +1,14 @@
 # Tutorials
+
 This repo is a temporary place holder for a set of jupyter and quarto notebooks to be used as tutorials within GRASS website and some maybe also included in docs within source code. 
 
-### Visualizing Quarto notebooks
+## Visualizing Quarto notebooks
 
-#### Download and install quarto
+### Download and install quarto
 
 See <https://quarto.org/docs/download/> and follow the instructions for your system. 
 
-#### Render the notebooks
+### Render the notebooks
 
 There are different ways to render and preview Quarto notebooks. They can be rendered from **RStudio** by clicking the `Render` button as shown below:
 
@@ -17,9 +18,27 @@ They can also be rendered in **VS Code** from the `Preview` button if the Quarto
 
 ![image](https://github.com/ncsu-geoforall-lab/tutorials/assets/20075188/efe322f7-766b-4103-b70a-b4e600596900)
 
-
 Finally, cloning this repo and running, eg.:
-```
+
+```bash
 quarto preview grass_gis_in_google_colab.qmd
 ```
+
 in a terminal will render the html output in the default internet browser. 
+
+## Local Project Setup
+
+clone the forked repository
+
+```bash
+git clone YOUR_FORKED_REPO_URL
+
+# create a virtual environment
+python3 -m venv venv
+# activate the virtual environment
+source venv/bin/activate
+
+# install dependencies
+pip install -r requirements.txt
+
+```

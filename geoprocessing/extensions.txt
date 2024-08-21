@@ -1,0 +1,6 @@
+t.stac
+r.accumulate
+r.stream.distance
+r.stream.order
+r.stream.basins
+v.transects
