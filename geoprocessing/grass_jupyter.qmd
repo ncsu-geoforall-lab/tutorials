@@ -398,7 +398,7 @@ m = gj.Map()
 m.d_rast(map="lidar_be_aspect")
 m.d_legend(raster="lidar_be_aspect", at=(5, 9, 50, 90), flags="b")
 m.d_barscale(at=(5, 7), flags="n")
-m.show()open
+m.show()
 ```
 
 ```{python}
@@ -557,6 +557,8 @@ depth_sum_ts_map.show()
 
 ![Animation](outputs/depth.gif)
 
+## Select a sample point for analysis
+
 ```{python}
 m = gj.InteractiveMap(width="500", map_backend="ipyleaflet")
 m.query_mode = "true"
@@ -572,14 +574,14 @@ gs.parse_command('v.what.strds', input='sample', strds='depth_sum', output="dept
 
 ```{python}
 sample_json = gs.parse_command('v.db.select', map="depth_sum_sample", format="json")
-records = sample_json['records'][0]
-del records['cat']
-records
-sample_df = pd.DataFrame([records])
-# sample_df.head()
 ```
 
 ```{python}
+# This is ugly and need to be improved
+sample_json = gs.parse_command('v.db.select', map="depth_sum_sample", format="json")
+records = sample_json['records'][0]
+del records['cat']
+sample_df = pd.DataFrame([records])
 transposed = sample_df.T
 transposed.columns = ['depth']
 sequence = [2, 4, 6, 8, 10]
@@ -587,6 +589,8 @@ transposed['time'] = sequence
 transposed.set_index('time', inplace=True)
 transposed.head()
 ```
+
+### Create a Time Series Line Plot
 
 ```{python}
 # Create a seaborn line plot
@@ -609,6 +613,8 @@ plt.savefig('outputs/line_plot.png')
 plt.show()
 ```
 
+### Add the sample point to the map
+
 ```{python}
 m = gj.Map(filename="outputs/depth_map.png", use_region=True)
 m.d_shade(color="depth.10", shade="hillshade")
@@ -617,6 +623,8 @@ m.d_legend(raster="depth.10", at=(5, 9, 50, 90), flags="bd", unit="m")
 m.d_barscale(at=(5, 7), flags="n")
 m.show()
 ```
+
+### Create our final figure
 
 ```{python}
 from PIL import Image
@@ -644,13 +652,13 @@ plt.show()
 
 ## STAC Integration
 
-* [Eath Observation Data Access Gateway (EODAG)](https://eodag.readthedocs.io/en/stable/) add-on currently in development by Google summer of code student.
-
 ## NAIP Data
 
 ```{python}
 !t.stac.item url="https://planetarycomputer.microsoft.com/api/stac/v1" collection="naip" datetime="2022" format="plain" method="nearest" extent=region nprocs=2 -d
 ```
+
+We can view raw data with GRASS using the `d_rgb` tool.
 
 ```{python}
 m = gj.Map()
@@ -662,6 +670,61 @@ m.d_rgb(red="naip.nm_m_3610864_ne_12_060_20220525.image.1",
         green="naip.nm_m_3610864_ne_12_060_20220525.image.2")
 m.d_vect(map="stream_vect", color="blue", type="line")
 
+m.show()
+```
+
+Let create a mosaic of the NAIP data, and give the bands some names.
+
+```{python}
+def patch_and_composite_naip(year=2022):
+    gs.run_command("g.region", res=1)
+    naip_bands = [(1, "red"), (2, "green"), (3, "blue"), (4, "nir")]
+    for band in naip_bands:
+        i, band_name = band
+        # Get the list of depth maps
+        image_list = gs.read_command(
+            "g.list", type="raster", pattern=f"*.image.{i}", separator="comma"
+        ).strip()
+
+        gs.run_command(
+            "r.patch",
+            input=image_list,
+            output=f"naip_{year}.{band_name}",
+            nprocs=4,
+            memory=2100,
+            overwrite=True,
+        )
+
+    gs.run_command(
+        "r.composite",
+        red=f"naip_{year}.red",
+        green=f"naip_{year}.green",
+        blue=f"naip_{year}.blue",
+        output=f"naip_{year}_rgb",
+        overwrite=True,
+    )
+
+patch_and_composite_naip()
+```
+
+Now we can view the naip compsite.
+
+```{python}
+m = gj.Map()
+m.d_shade(color="naip_2022_rgb", shade="hillshade")
+m.d_vect(map="depth_sum_sample", color="red", fill_color="red", type="point", size=12, icon="basic/point")
+m.d_barscale(at=(5, 7), flags="n")
+m.show()
+```
+
+We can use the NAIP data to calculate NDVI.
+
+```{python}
+gs.run_command("i.vi", red="naip_2022.red", nir="naip_2022.nir", output="ndvi", overwrite=True)
+m = gj.Map()
+m.d_shade(color="ndvi", shade="hillshade")
+m.d_legend(raster="ndvi", at=(5, 9, 50, 90), flags="bd")
+m.d_barscale(at=(5, 7), flags="n")
 m.show()
 ```
 
