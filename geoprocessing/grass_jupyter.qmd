@@ -294,6 +294,7 @@ mean_univar_df.head(5)
 ```{python}
 import seaborn as sns
 import matplotlib.pyplot as plt
+sns.set_theme(style="darkgrid")
 
 # Example plot: scatter plot of mean vs. resolution
 # Adjust the column names according to your DataFrame structure
@@ -578,6 +579,7 @@ sample_json = gs.parse_command('v.db.select', map="depth_sum_sample", format="js
 
 ```{python}
 # This is ugly and need to be improved
+
 sample_json = gs.parse_command('v.db.select', map="depth_sum_sample", format="json")
 records = sample_json['records'][0]
 del records['cat']
@@ -593,18 +595,20 @@ transposed.head()
 ### Create a Time Series Line Plot
 
 ```{python}
+
 # Create a seaborn line plot
 import seaborn as sns
 import matplotlib.pyplot as plt
 transposed.dropna(inplace=True)
-# Create a seaborn line plot
+
 plt.figure(figsize=(10, 6))
 transposed.plot(kind='line', y='depth', color='blue', marker='o', linestyle='-', linewidth=2)
 
 # Add titles and labels
-plt.title('Sample Depth vs. Time (minutes)')
-plt.xlabel('Time')
-plt.ylabel('Depth')
+plt.title('Sample Depth vs. Time')
+plt.xlabel('Time (minutes)')
+plt.ylabel('Depth (m)')
+
 
 # Save the plot as an image file
 plt.savefig('outputs/line_plot.png')
