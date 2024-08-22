@@ -1,9 +1,13 @@
 ---
 title: Geoprocessing with GRASS GIS and Jupyter Notebooks
-format: ipynb
+format: 
+    html: default
+        code-fold: ture
 author: Corey White
 date: '2024-08-22'
-jupyter: python3
+keep-ipynb: true
+execute: 
+  freeze: true
 ---
 
 <div style="display: flex; justify-content: flex-start;">
