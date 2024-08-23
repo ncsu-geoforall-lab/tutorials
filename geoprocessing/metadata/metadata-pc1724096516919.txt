@@ -15,24 +15,24 @@ Vertical Coordinates: NAVD88 [EPSG: 5703]
 
 Job Description:
 	User:[Guest] ctwhite@ncsu.edu
-	Job ID: pc1724101942181
+	Job ID: pc1724096516919
 	Title: 
 	Description:
 
 Job Processing Result:
-	Submission Time: 2024-08-19 21:12:22
+	Submission Time: 2024-08-19 19:41:57
 	Completion Time: N/A
 	Duration: -1 seconds
-	Number of Points: 0
-	Status: Querying
+	Number of Points: 34,419,684
+	Status: 3D Visualization
 
 Data Selection Coordinates: 
-	Xmin: 229377.168429
-	Xmax: 229974.2783
-	Ymin: 3996851.137748
-	Ymax: 3997397.294417
+	Xmin: 232980.931492
+	Xmax: 234168.158398
+	Ymin: 3994186.077738
+	Ymax: 3995245.218633
 	Classifications: all
-	Exclude Noise: Yes
+	Exclude Noise: No
 
 Point Cloud Results:
 	Download point cloud data format: laz
