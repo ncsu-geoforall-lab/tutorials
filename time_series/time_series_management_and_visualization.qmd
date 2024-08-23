@@ -87,7 +87,7 @@ import subprocess
 
 # Ask GRASS GIS where its Python packages are
 sys.path.append(
-    subprocess.check_output(["/home/akratoc/dev/grass/grass_main/bin.x86_64-pc-linux-gnu/grass", "--config", "python_path"], text=True).strip()
+    subprocess.check_output(["grass", "--config", "python_path"], text=True).strip()
 )
 # Import the GRASS GIS packages we need
 import grass.script as gs
@@ -97,8 +97,7 @@ import grass.jupyter as gj
 Now we are ready to start a GRASS GIS session in the downloaded project:
 
 ```{python}
-path_to_project = "/data_8TB/3564515/grassdata_eu_laea_northern_italy_LST_1km_daily_celsius_reconstructed_ZLIB/eu_laea/italy_LST_daily"
-#path_to_project = "eu_laea/italy_LST_daily"
+path_to_project = "eu_laea/italy_LST_daily"
 # Start the GRASS GIS Session
 session = gj.init(path_to_project)
 ```
@@ -350,7 +349,7 @@ print(gs.read_command("t.list",
                       where="start_time >= '2018-06-30'"))
 ```
 
-With the Python Pandas package we can simple read in the output of t.rast.list as a DataFrame:
+With the Python Pandas package we can simply read in the output of *t.rast.list* as a DataFrame:
 
 ```{python}
 #| scrolled: true
