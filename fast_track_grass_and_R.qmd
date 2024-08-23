@@ -56,11 +56,11 @@ you can start a GRASS session in your project from R or RStudio.
 Let's see the general **basic steps** and then dive into the details:
 
 1.  Make sure GRASS GIS is installed.
-1.  Open R (or RStudio)
-2.  Load `rgrass` library with `library(rgrass)`
-3.  Start a GRASS session with `initGRASS()`
-4.  Use GRASS tools through `execGRASS()`
-5.  Use `read_VECT()`, `read_RAST()`, `write_VECT()` and `write_RAST()` to read data from and write data into GRASS database.
+2.  Open R (or RStudio)
+3.  Load `rgrass` library with `library(rgrass)`
+4.  Start a GRASS session with `initGRASS()`
+5.  Use GRASS tools through `execGRASS()`
+6.  Use `read_VECT()`, `read_RAST()`, `write_VECT()` and `write_RAST()` to read data from and write data into GRASS database.
 
 
 ::: callout-note
@@ -79,7 +79,7 @@ is not running, but we know that already... and that's about to change in a
 moment.
 
 ```{r}
-library(terra)
+library(rgrass)
 ```
 
 In case you need to include some of the cool GRASS tools within your
@@ -98,12 +98,13 @@ processes, and export the outputs back to the R environment.
 Let's start with getting some spatial data, e.g., a raster file, into R.
 
 ```{r}
+library(terra)
 f <- system.file("ex/elev.tif", package="terra")
 r <- rast(f)
 plot(r)
 ```
 
-Now, we will load the rgrass library and start GRASS GIS in a temporary folder.
+Now, we will start GRASS GIS in a temporary folder.
 By specifying `SG = r`, the GRASS 
 project is internally created with raster `r`'s object CRS (BTW, you can check that with 
 `crs(r)`), extent and resolution. These latter define the GRASS computational
@@ -117,7 +118,6 @@ case we have several GRASS versions on our system. If not provided, `initGRASS()
 will attempt to find it in default locations depending on your operating system.
 
 ```{r}
-library(rgrass)
 
 # start GRASS GIS from R
 initGRASS(home = tempdir(),
@@ -332,7 +332,7 @@ execGRASS("g.list", parameters = list(type="raster", pattern="result*"))
 Finally, there is yet another way in which you can use GRASS and R together, and it 
 involves calling R from the GRASS terminal. In this way, *rgrass* will read all 
 GRASS session environmental variables, and you won't need to use 
-initGRASS. It goes more or less like this:
+`initGRASS()`. It goes more or less like this:
 
 1. Open GRASS GIS
 2. Type `R` or `rstudio &` in the GRASS terminal
