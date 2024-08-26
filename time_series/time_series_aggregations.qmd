@@ -4,6 +4,7 @@ author: Verónica Andreo
 date: today
 format:
   html:
+    toc: true
     code-tools: true
     code-copy: true
     code-fold: false
@@ -405,3 +406,21 @@ and
 
 ## References
 
+
+- Gebbert, S., Pebesma, E. 2014.
+_TGRASS: A temporal GIS for field based environmental modeling._
+Environmental Modelling & Software 53, 1-12. 
+[DOI](http://dx.doi.org/10.1016/j.envsoft.2013.11.001).
+- Gebbert, S., Pebesma, E. 2017. _The GRASS GIS temporal framework._
+International Journal of Geographical Information Science 31, 1273-1292. 
+[DOI](http://dx.doi.org/10.1080/13658816.2017.1306862).
+- [Temporal data processing](https://grasswiki.osgeo.org/wiki/Temporal_data_processing) wiki page.
+
+
+***
+
+:::{.smaller}
+The development of this tutorial was funded by the US 
+[National Science Foundation (NSF)](https://www.nsf.gov/), 
+award [2303651](https://www.nsf.gov/awardsearch/showAward?AWD_ID=2303651).
+:::
