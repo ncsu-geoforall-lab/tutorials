@@ -1,9 +1,16 @@
 ---
 title: "Fast track to GRASS with R: the rgrass package"
-author: Veronica Andreo
+author: "Veronica Andreo"
+date: today
 format: 
   html:
     toc: true
+    code-tools: true
+    code-copy: true
+    code-fold: false
+engine: knitr
+execute: 
+  eval: false
 ---
 
 The [**rgrass**](https://cran.r-project.org/web/packages/rgrass/index.html) 
@@ -13,8 +20,7 @@ The *rgrass* package is developed and maintained by Roger Bivand and can be
 found at: <https://github.com/rsbivand/rgrass/>. In this fast track tutorial, 
 we will learn how to use GRASS GIS from R.
 
-::: {.callout-note title="Setup note"}
-
+::: {.callout-note title="Setup"}
 To run this tutorial locally you should have GRASS GIS 8.4+, 
 [R](https://www.r-project.org/) and, optionally, 
 [RStudio](https://posit.co/download/rstudio-desktop/) installed. 
@@ -33,7 +39,7 @@ The main functions within **rgrass** are the following:
 - `read_VECT()` and `read_RAST()`: read vector and raster maps from a GRASS project into R.
 - `write_VECT()` and `write_RAST()`: write vector and raster objects from R into a GRASS project.
 
-::: callout-note
+:::{.callout-note}
 For further details on *rgrass* functionality, usage examples and data format 
 coercion, see: <https://rsbivand.github.io/rgrass/>.
 :::
@@ -45,7 +51,6 @@ If you are a regular R user that needs to use GRASS GIS functionality
 maybe you struggle with large raster datasets in R or you need some specific 
 tool, like watershed delineation for a large high resolution DEM. We will show 
 here the way to use GRASS tools within your R workflows. 
-
 
 On the other hand, if you already use GRASS as your geospatial data processing 
 engine, you most likely have your spatial data within GRASS projects. 
@@ -62,8 +67,7 @@ Let's see the general **basic steps** and then dive into the details:
 5.  Use GRASS tools through `execGRASS()`
 6.  Use `read_VECT()`, `read_RAST()`, `write_VECT()` and `write_RAST()` to read data from and write data into GRASS database.
 
-
-::: callout-note
+:::{.callout-note}
 GRASS raster and vector maps are translated into *terra*'s package SpatRaster 
 and SpatVector objects, respectively. These objects can then, within R, be 
 easily coerced to other types of spatial objects such as simple features (sf), 
@@ -74,6 +78,7 @@ See *terra* vignettes with further explanations and examples:
 :::
 
 ### A. Use GRASS GIS tools within your R spatial workflows
+
 We start R or Rstudio and load the `rgrass` library. It will tell us that GRASS 
 is not running, but we know that already... and that's about to change in a 
 moment.
@@ -104,22 +109,22 @@ r <- rast(f)
 plot(r)
 ```
 
-Now, we will start GRASS GIS in a temporary folder.
-By specifying `SG = r`, the GRASS 
-project is internally created with raster `r`'s object CRS (BTW, you can check that with 
-`crs(r)`), extent and resolution. These latter define the GRASS computational
-region that will affect all raster processing, i.e., all new raster maps generated
-within GRASS GIS will have the same extent and resolution of the map provided. 
+Now, we will start GRASS GIS in a temporary folder. By specifying `SG = r`,
+the GRASS project is internally created with raster `r`'s object CRS (BTW,
+you can check that with `crs(r)`), extent and resolution.
+These latter define the GRASS computational region that will affect all raster
+processing, i.e., all new raster maps generated within GRASS GIS will have the
+same extent and resolution of the map provided. 
 If you wish to change the computational region later on, you can use the 
 `g.region` GRASS tool with `execGRASS("g.region --h")`.
 
-Optionally, we can specify which GRASS binary to use with `grassBin`. This might be useful in 
-case we have several GRASS versions on our system. If not provided, `initGRASS()` 
-will attempt to find it in default locations depending on your operating system.
+Optionally, we can specify which GRASS binary to use with `grassBin`. This might
+be useful in case we have several GRASS versions on our system. If not provided,
+`initGRASS()` will attempt to find it in default locations depending on your
+operating system.
 
 ```{r}
-
-# start GRASS GIS from R
+# Start GRASS GIS from R
 initGRASS(home = tempdir(),
           SG = r, 
           override = TRUE)
@@ -199,15 +204,14 @@ library(rgrass)
 ```
 
 We start GRASS GIS from within R or RStudio using the `initGRASS()` function. 
-Since we want to start GRASS GIS in a specific project and mapset, we need to specify 
-them.
+Since we want to start GRASS GIS in a specific project and mapset, we need to
+specify them.
 
 ```{r}
 #| label: grass_init
 #| message: false
-#| panel: tabset
 
-# start GRASS GIS from R
+# Start GRASS GIS from R
 initGRASS(gisDbase = path.expand("~/grassdata/"),
           location = "nc_basic_spm_grass7",
           mapset = "PERMANENT",
@@ -223,12 +227,12 @@ mentioned above.
 Let's then list our GRASS raster and vector maps:
 
 ```{r}
-# list GRASS raster maps
+# List GRASS raster maps
 execGRASS("g.list", type="raster")
 ```
 
 ```{r}
-# list GRASS vector maps
+# List GRASS vector maps
 execGRASS("g.list", type="vector")
 ```
 
@@ -237,13 +241,13 @@ in case we want to import several but not all raster maps, for example. Let's
 see how to do that.
 
 ```{r}
-# save map list in an object
+# Save map list in an object
 rast_list <- execGRASS("g.list", type="raster")
 
-# retrieve only the map list from standard output
+# Retrieve only the map list from standard output
 rast_list <- attributes(rast_list)$resOut
 
-# import elevation and landuse
+# Import elevation and landuse
 to_import <- c("elevation", "landuse") # optionally, by position: rast_list[c(3,7)]
 
 maplist <- list()
@@ -388,7 +392,20 @@ and location: nc_basic_spm_grass7
 > 
 ```
 
+**Enjoy!** {{< fa rocket >}}
+
+
 ## References
 
-- Bivand R (2024). _rgrass: Interface Between 'GRASS' Geographical Information System and 'R'_. 
+- Bivand R (2024).
+_rgrass: Interface Between 'GRASS' Geographical Information System and 'R'_. 
 R package version 0.4-1, <https://CRAN.R-project.org/package=rgrass>.
+
+
+***
+
+:::{.smaller}
+The development of this tutorial was funded by the US 
+[National Science Foundation (NSF)](https://www.nsf.gov/), 
+award [2303651](https://www.nsf.gov/awardsearch/showAward?AWD_ID=2303651).
+:::

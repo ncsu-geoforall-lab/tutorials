@@ -2,7 +2,12 @@
 title: "GRASS GIS in Google Colab"
 author: "Veronica Andreo"
 date: today
-format: html
+format: 
+  html:
+    toc: true
+    code-tools: true
+    code-copy: true
+    code-fold: false
 engine: knitr
 execute: 
   eval: false
@@ -109,7 +114,7 @@ We unzip the downloaded file within the grassdata folder in /root
 and finally check it is indeed there:
 
 ```{python}
-# list files within grassdata
+# List files within grassdata
 os.listdir(grassdata)
 ```
 
@@ -120,18 +125,18 @@ GRASS python packages to PATH to be able to import the `grass.script` and
 `grass.jupyter` libraries.
 
 ```{python}
-# import standard Python packages we need
+# Import standard Python packages we need
 import sys
 import subprocess
 
-# ask GRASS GIS where its Python packages are to be able to run it from the notebook
+# Ask GRASS GIS where its Python packages are to be able to run it from the notebook
 sys.path.append(
     subprocess.check_output(["grass", "--config", "python_path"], text=True).strip()
 )
 ```
 
 ```{python}
-# import the GRASS GIS packages
+# Import the GRASS GIS packages
 import grass.script as gs
 import grass.jupyter as gj
 ```
@@ -210,9 +215,16 @@ gs.create_project("/content/drive/MyDrive/grassdata/latlong_wgs84", epsg="4326")
 
 Either if you just created the project and want to start GRASS GIS there or if 
 you already have your GRASS projects in GDrive, you just need to start GRASS 
-wherever the project(s) is as shown above, given that GRASS GIS has been 
+wherever the project is, as shown above, given that GRASS GIS has been 
 installed in the Colab session and libraries imported.
 
-Cool, ah?! Enjoy!
+**Cool, ah?! Enjoy!** {{< fa rocket >}}
 
 
+***
+
+:::{.smaller}
+The development of this tutorial was funded by the US 
+[National Science Foundation (NSF)](https://www.nsf.gov/), 
+award [2303651](https://www.nsf.gov/awardsearch/showAward?AWD_ID=2303651).
+:::

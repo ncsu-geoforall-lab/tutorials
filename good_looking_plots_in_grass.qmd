@@ -2,7 +2,12 @@
 title: "Making plots with GRASS GIS"
 author: "Veronica Andreo"
 date: today
-format: html
+format: 
+  html:
+    toc: true
+    code-tools: true
+    code-copy: true
+    code-fold: false
 engine: knitr
 execute: 
   eval: false
@@ -112,12 +117,21 @@ bands = gs.list_grouped(type="raster", pattern="lsat7_2000*", exclude="*6*,*8*")
 labels = ["band1", "band2", "band3", "band4", "band5", "band7"]
 
 gs.run_command("r.mask", raster="landclass96", maskcats="1")
-gs.run_command("r.series.boxplot", map=bands, bxcolor="grey", text_labels=labels, output="r.series.boxplot_developed.png")
+gs.run_command("r.series.boxplot", 
+              map=bands, 
+              bxcolor="grey", 
+              text_labels=labels, 
+              output="r.series.boxplot_developed.png")
 
 gs.run_command("r.mask", flags="r")
 
 gs.run_command("r.mask", raster="landclass96", maskcats="5")
-gs.run_command("r.series.boxplot", map=bands, bxcolor="grey", text_labels=labels, output="r.series.boxplot_forested.png")
+
+gs.run_command("r.series.boxplot", 
+              map=bands, 
+              bxcolor="grey", 
+              text_labels=labels, 
+              output="r.series.boxplot_forested.png")
 ```
 :::
 
@@ -150,7 +164,13 @@ v.boxplot -o -r map=bridges column=WIDTH group_by=YEAR_BUILT where="YEAR_BUILT <
 gs.run_command("g.extension", extension="v.histogram")
 
 gs.run_command("v.boxplot",
-map="bridges", column="WIDTH", group_by="YEAR_BUILT", where="YEAR_BUILT < '1920'", order="ascending", plot_output="boxplot_bridges_width_per_year.png", flags="or")
+              map="bridges", 
+              column="WIDTH", 
+              group_by="YEAR_BUILT", 
+              where="YEAR_BUILT < '1920'", 
+              order="ascending", 
+              plot_output="boxplot_bridges_width_per_year.png", 
+              flags="or")
 ```
 :::
 
@@ -182,7 +202,16 @@ v.scatterplot map=bridges x=YEAR_BUILT y=WIDTH trendline=polynomial degree=1 lin
 ```{python}
 gs.run_command("g.extension", extension="v.scatterplot")
 
-gs.run_command("v.scatterplot", map="bridges", x="YEAR_BUILT", y="WIDTH", trendline="polynomial", degree=1, line_color="red", type="density", bins="10,10", file_name="scatterplot_bridges_width_vs_year.png")
+gs.run_command("v.scatterplot", 
+              map="bridges", 
+              x="YEAR_BUILT", 
+              y="WIDTH", 
+              trendline="polynomial", 
+              degree=1, 
+              line_color="red", 
+              type="density", 
+              bins="10,10", 
+              file_name="scatterplot_bridges_width_vs_year.png")
 ```
 :::
 
@@ -208,7 +237,11 @@ v.histogram map=bridges column=WIDTH where="YEAR_BUILT < '1940'" plot_output=his
 ```{python}
 gs.run_command("g.extension", extension="v.histogram")
 
-gs.run_command("v.histogram", map="bridges", column="WIDTH", where="YEAR_BUILT < '1940'", plot_output="histogram_bridges_width.png")
+gs.run_command("v.histogram", 
+              map="bridges", 
+              column="WIDTH", 
+              where="YEAR_BUILT < '1940'", 
+              plot_output="histogram_bridges_width.png")
 ```
 :::
 
@@ -237,29 +270,21 @@ g.gui.tplot -l strds=LST_Day_monthly coordinates=413831,196000 xlabel="Time" yla
 # Python
 
 ```{python}
-gs.read_command("g.region", raster="MOD11B3.A2015001.h11v05.single_LST_Day_6km")
-gs.run_command("g.gui.tplot", strds="LST_Day_monthly", coordinates="413831,196000", xlabel="Time", ylabel="LST (K*50)", output="LST_plot.png", size="1000,800", flags="l")
+gs.read_command("g.region", 
+                raster="MOD11B3.A2015001.h11v05.single_LST_Day_6km")
+                
+gs.run_command("g.gui.tplot", 
+              strds="LST_Day_monthly", 
+              coordinates="413831,196000", 
+              xlabel="Time", 
+              ylabel="LST (K*50)", 
+              output="LST_plot.png", 
+              size="1000,800", 
+              flags="l")
 ```
 :::
 
 ![](img/LST_plot.png)
-
-
-<!-- ::: {.panel-tabset} -->
-<!-- # GRASS -->
-
-<!-- ```{bash} -->
-<!-- t.vect.observe.strds input=schools strds=LST_Day_monthly output=LST_schools vector_output=LST_schools columns=LST -->
-
-<!-- ``` -->
-
-<!-- # Python -->
-
-<!-- ```{python} -->
-
-<!-- ``` -->
-
-<!-- ::: -->
 
 
 ### [t.rast.boxplot](https://grass.osgeo.org/grass-stable/manuals/addons/t.rast.boxplot.html)
@@ -283,9 +308,21 @@ t.rast.boxplot -o input=LST_Day_monthly dpi=300 rotate_labels=90 font_size=11 da
 
 ```{python}
 gs.run_command("g.extension", extension="t.rast.boxplot")
+
 gs.read_command("g.region", vector="boundary_county", align="MOD11B3.A2015001.h11v05.single_LST_Day_6km")
+
 gs.run_command("r.mask", vector="boundary_county")
-gs.run_command("t.rast.boxplot", input="LST_Day_monthly", dpi="300", rotate_labels=90, font_size=11, date_format="%Y-%m", bx_width=0.7, bx_color="195:194:194:255", flier_color="77:77:77:255", flags="o")
+
+gs.run_command("t.rast.boxplot", 
+              input="LST_Day_monthly", 
+              dpi="300", 
+              rotate_labels=90, 
+              font_size=11, 
+              date_format="%Y-%m", 
+              bx_width=0.7, 
+              bx_color="195:194:194:255", 
+              flier_color="77:77:77:255", 
+              flags="o")
 ```
 :::
 
@@ -312,12 +349,32 @@ t.rast.boxplot -o input=LST_Day_monthly dpi=300 rotate_labels=90 font_size=11 da
 
 ```{python}
 gs.run_command("r.mask", vector="geology", where="GEO_NAME LIKE '%Zat%'")
-gs.run_command("t.rast.boxplot", input="LST_Day_monthly", dpi=300, rotate_labels=90, font_size=11, date_format="%Y-%m", bx_width=0.7, bx_color="195:194:194:255", flier_color="77:77:77:255", flags="o")
+
+gs.run_command("t.rast.boxplot", 
+              input="LST_Day_monthly", 
+              dpi=300, 
+              rotate_labels=90, 
+              font_size=11, 
+              date_format="%Y-%m", 
+              bx_width=0.7, 
+              bx_color="195:194:194:255", 
+              flier_color="77:77:77:255", 
+              flags="o")
 
 gs.run_command("r.mask", flags="r")
 
 gs.run_command("r.mask", vector="geology", where="GEO_NAME LIKE '%Qp%'")
-gs.run_command("t.rast.boxplot", input="LST_Day_monthly", dpi=300, rotate_labels=90, font_size=11, date_format="%Y-%m", bx_width=0.7, bx_color="195:194:194:255", flier_color="77:77:77:255", flags="o")
+
+gs.run_command("t.rast.boxplot", 
+              input="LST_Day_monthly", 
+              dpi=300, 
+              rotate_labels=90, 
+              font_size=11, 
+              date_format="%Y-%m", 
+              bx_width=0.7, 
+              bx_color="195:194:194:255", 
+              flier_color="77:77:77:255", 
+              flags="o")
 ```
 :::
 
@@ -339,7 +396,12 @@ t.rast.line input=LST_Day_monthly zones=boundary_county_500m y_label="LST (K*50)
 
 ```{python}
 gs.run_command("g.extension", extension="t.rast.line")
-gs.run_command("t.rast.line", input="LST_Day_monthly", zones="boundary_county_500m", y_label="LST (K*50)", date_format="%Y-%m")
+
+gs.run_command("t.rast.line", 
+              input="LST_Day_monthly", 
+              zones="boundary_county_500m", 
+              y_label="LST (K*50)", 
+              date_format="%Y-%m")
 ```
 :::
 
