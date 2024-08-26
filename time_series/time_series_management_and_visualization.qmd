@@ -32,11 +32,14 @@ we call them:
   - Space time vector datasets (**STVDS**)
 - These STDS objects will then be inputs and (optionally) outputs of temporal tools
 
+
 ### How to specify time
+
 - Time can be defined as **intervals** (start and end time) or **instances**
 (only start time)
 - Time can be **absolute** (e.g., 2017-04-06 22:39:49) or **relative**
 (e.g., 4 years, 90 days)
+
 
 ### Temporal tools
 
@@ -53,12 +56,13 @@ scheme. In this way, we have:
 
 ![](img/tgrass_flowchart.png){width="70%" fig-align="center"}
 
-::: {.callout-note title="Setup note"}
+::: {.callout-note title="Setup"}
 To run this tutorial locally or in Google Colab, you should install
 GRASS GIS 8.4+, and download the 
 [daily MODIS LST project](https://zenodo.org/records/3564515).
 This project contains average daily MODIS LST data reconstructed by
-[mundialis GmbH & Co. KG](https://www.mundialis.de/en/) based on @metz_new_2017.
+[mundialis GmbH & Co. KG](https://www.mundialis.de/en/) based on
+Metz et al (2017).
 
 Follow the [Fast track to GRASS GIS]() and [GRASS in Colab]() tutorials to
 get you started.
@@ -99,6 +103,7 @@ Now we are ready to start a GRASS GIS session in the downloaded project:
 
 ```{python}
 path_to_project = "eu_laea/italy_LST_daily"
+
 # Start the GRASS GIS Session
 session = gj.init(path_to_project)
 ```
@@ -170,11 +175,13 @@ is empty, i.e., there is no metadata to show.
 To actually fill our time series object with the LST maps, we need to assign time
 stamps to these maps. For this we use the 
 [t.register](https://grass.osgeo.org/grass-stable/manuals/t.register.html) tool. 
-There are different ways of registering maps. We can either pass a sorted list of maps or a text file with one map per line and optionally start 
+There are different ways of registering maps. We can either pass a sorted list 
+of maps or a text file with one map per line and optionally start 
 and end dates, and semantic labels. It is also important to understand if our 
-data represent time intervals (e.g. precipitation over a period of time) or time instances (events), and in the case of intervals, 
-if they are regular (e.g., monthly) or irregular, as all these will determine different 
-`t.register` usage possibilities.  
+data represent time intervals (e.g. precipitation over a period of time) or time
+instances (events), and in the case of intervals, if they are regular (e.g.,
+monthly) or irregular, as all these will determine different `t.register` usage
+possibilities.  
 
 Here, we will exemplify the use of a list of maps and, 
 since our data represent regular time intervals, we will use the start and 
@@ -255,7 +262,7 @@ names and start time only. Tools like
 [i.sentinel.import](https://grass.osgeo.org/grass-stable/manuals/addons/i.sentinel.import.html) or
 [i.landsat.import](https://grass.osgeo.org/grass-stable/manuals/addons/i.landsat.import.html) 
 can create this file for you when you import data into GRASS GIS. 
-<!-- https://training.gismentors.eu/grass-gis-irsae-winter-course-2018/_static/scripts/sentinel-timestamp.py -->
+
 
 ::: {.callout-note}
 Have a look at the 
@@ -412,8 +419,7 @@ pd.DataFrame(gs.parse_command("t.rast.list",
 ```
 
 Most tools within the temporal framework have the `where` option. So, the
-same filtering can be applied
-in tools to determine maps that will be processed.
+same filtering can be applied in tools to determine maps that will be processed.
 
 
 ### Descriptive statistics
@@ -464,6 +470,8 @@ lst.plot.line(0, [1,2,3], subplots=False);
 
 ## References
 
+- Metz, M., Andreo, V., Neteler, M. 2017. _A New Fully Gap-Free Time Series of Land Surface Temperature from MODIS LST Data._ 
+Remote Sensing 9(12), 1333. [DOI](https://doi.org/10.3390/rs9121333).
 - Gebbert, S., Pebesma, E. 2014.
 _TGRASS: A temporal GIS for field based environmental modeling._
 Environmental Modelling & Software 53, 1-12. 

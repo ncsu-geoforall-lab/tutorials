@@ -22,7 +22,7 @@ find patterns of change both in space and time.
 
 ::: {.callout-note title="Setup"}
 This tutorial can be run locally or in Google Colab. However, make sure you
-install GRASS GIS 8.3+, download the sample data and set up your project
+install GRASS GIS 8.4+, download the sample data and set up your project
 as explained in the [first part](time_series_management_and_visualization.qmd) 
 of these time series tutorials.
 :::
@@ -63,7 +63,9 @@ session = gj.init(grassdata, project, mapset);
 
 ## Aggregation with granularity 
 
-To perform time series aggregation with granularity, we use 
+**Granularity** is the greatest common divisor of the temporal extents 
+(and possible gaps) of all maps in a space-time dataset. To perform time
+series aggregation with granularity, we use 
 [t.rast.aggregate](https://grass.osgeo.org/grass-stable/manuals/t.rast.aggregate.html).
 This tool allows us to aggregate our time series into larger granularities, i.e.,
 from hourly to daily, from daily to weekly, monthly, etc. It also permits to 
@@ -131,7 +133,7 @@ Let's compare the granularities using the timeline plot...
 !g.gui.timeline lst_monthly,lst_seasonal
 ```
 
-![]()
+![](img/timeline_plot_lst_monthly_and_seasonal.png)
 
 and use `grass.jupyter` to create a nice animation of the seasonal time series:
 
@@ -219,7 +221,7 @@ spring_warming.d_legend(color="black", at=(10,40,2,6))
 spring_warming.show()
 ```
 
-:::{.callout-note collapse="true"}
+:::{.callout-caution title="Question" collapse="true"}
 How would you obtain the average spring warming over the whole time series?
 
 ```{python}
@@ -230,10 +232,10 @@ gs.run_command("t.rast.series",
                method="average")
                
 # Display raster map with interactive class
-auc_map = gj.InteractiveMap(width = 500, use_region=True, tiles="CartoDark")
-auc_map.add_raster("avg_spring_warming")
-auc_map.add_layer_control(position = "bottomright")
-auc_map.show()
+spw_map = gj.InteractiveMap(width = 500, use_region=True, tiles="CartoDark")
+spw_map.add_raster("avg_spring_warming")
+spw_map.add_layer_control(position = "bottomright")
+spw_map.show()
 ```
 :::
 
@@ -325,9 +327,7 @@ map_list = gs.list_grouped(type="raster",
 print(map_list)
 ```
 
-::: {.callout-note}
-Why didn't we list with t.rast.list?
-:::
+Let's create an animation of the long term average LST.
 
 ```{python}
 # List of average maps
@@ -339,6 +339,11 @@ series.add_rasters(map_list)
 series.d_barscale()
 series.show()
 ```
+
+::: {.callout-caution title="Question"}
+Why didn't we list with t.rast.list?
+:::
+
 
 ### Bioclimatic variables
 
@@ -361,9 +366,9 @@ gs.run_command("g.extension",
 
 ```{python}
 # Get lists of maps needed
-tmin=gs.list_grouped(type="raster", pattern="lst_minimum_??")['italy_LST_daily']
-tmax=gs.list_grouped(type="raster", pattern="lst_maximum_??")['italy_LST_daily']
-tavg=gs.list_grouped(type="raster", pattern="lst_average_??")['italy_LST_daily']
+tmin=gs.list_grouped(type="raster", pattern="lst_minimum_??")["italy_LST_daily"]
+tmax=gs.list_grouped(type="raster", pattern="lst_maximum_??")["italy_LST_daily"]
+tavg=gs.list_grouped(type="raster", pattern="lst_average_??")["italy_LST_daily"]
 
 print(tmin,tmax,tavg)
 ```
@@ -379,7 +384,7 @@ gs.run_command("r.bioclim",
 
 ```{python}
 # List output maps
-gs.list_grouped(type="raster", pattern="worldclim*")['italy_LST_daily']
+gs.list_grouped(type="raster", pattern="worldclim*")["italy_LST_daily"]
 ```
 
 Let's have a look at some of the maps we just created

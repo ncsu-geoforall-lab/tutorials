@@ -29,7 +29,7 @@ Specifically, we'll show how to reconstruct missing data using:
 
 ::: {.callout-note title="Setup"}
 This tutorial can be run locally or in Google Colab. However, make sure you
-install GRASS GIS 8.3+, download the LST sample data and set up your project
+install GRASS GIS 8.4+, download the LST sample data and set up your project
 as explained in the [first part](time_series_management_and_visualization.qmd) 
 of these time series tutorials.
 :::
@@ -75,8 +75,11 @@ For the case of full maps missing, GRASS GIS offers simple linear interpolation
 in time through the 
 [t.rast.gapfill](https://grass.osgeo.org/grass-stable/manuals/t.rast.gapfill.html) 
 tool. Let's see an example: we will first aggregate our daily LST time series
-with a monthly granularity, then make a copy of it, remove a couple of maps here
-and there, apply a temporal linear interpolation with t.rast.gapfill and compare
+with a monthly granularity, then make a copy of it using
+[t.copy](https://grass.osgeo.org/grass-stable/manuals/t.copy.html), 
+unregister a couple of maps here and there with
+[t.unregister](https://grass.osgeo.org/grass-stable/manuals/t.unregister.html), 
+apply a temporal linear interpolation with *t.rast.gapfill* and compare
 the results.
 
 ```{python}
@@ -137,6 +140,13 @@ gs.run_command("t.rast.list",
 
 ![Linear interpolation of LST time series](img/trento_gapfilled.png)
 
+:::{.callout-note}
+[t.unregister](https://grass.osgeo.org/grass-stable/manuals/t.unregister.html) 
+allows us to remove maps from the temporal database or from 
+a STRDS without actually removing them from the mapset, i.e., we only remove
+their timestamp and hence their record in the STRDS object.
+:::
+
 
 ## Maps with holes
 
@@ -192,7 +202,7 @@ maps = list(maps.keys())
 Finally, we actually use 4 random polygons to create holes in each map of the
 monthly LST time series. Basically, for each map of the series, we apply an
 inverse mask of 4 random polygons, we overwrite the maps to actually get the 
-holes (i.e., MASK is otherwise virtual), and we remove the mask.
+holes (i.e., *MASK* is otherwise virtual), and we remove the mask.
 
 ```{python}
 import random
@@ -294,7 +304,7 @@ print(gs.read_command("t.info",
                       input="lst_monthly_hants"))
 ```
 
-Let's see a plot
+Let's see a plot.
 
 ```{python}
 !g.gui.tplot strds=lst_monthly_hants,lst_monthly \
@@ -305,10 +315,16 @@ Let's see a plot
 
 ![HANTS interpolation of LST time series](img/trento_hants.png)
 
+Something important to highlight is that *r.hants* will fit a single model to
+the whole input time series. For multiple years, that might not be the best
+option because there won't be any variation. So, for the case of multiple years,
+it is recommended to do multiple runs and then temporally patch the results. 
+
+
 :::{.callout-note}
-r.hants will reconstruct all cells within the input maps, wheter they have gaps
+*r.hants* will reconstruct all cells within the input maps, whether they have gaps
 or not. If we want to keep the original values, we could patch the original 
-series with the r.hants result. That could be done as follows:
+series with the reconstructed result. That could be done as follows:
 
 ```{python}
 # Patching
@@ -319,13 +335,6 @@ for i,j in zip(maps,hants_maps):
                    input=[i, j],
                    output=out)
 ```
-:::
-
-:::{.callout-note}
-Something important to highlight is that r.hants will fit a single model to
-the whole input time series. For multiple years, that might not be the best
-option because there won't be any variation. So, for the case of multiple years,
-it is recommended to do multiple runs and then temporally patch the results. 
 :::
 
 
@@ -375,7 +384,7 @@ gs.run_command("r.series.lwr",
 ```
 
 :::{.callout-note}
-Other *r.hants* options and flags that can be used to adjust the fit can be found
+Other *r.series.lwr* options and flags that can be used to adjust the fit can be found
 at the tool manual page: 
 <https://grass.osgeo.org/grass-stable/manuals/addons/r.series.lwr.html>. 
 :::
@@ -427,8 +436,9 @@ print(gs.read_command("t.info",
 :::{.callout-note}
 Note that there's an overshoot towards negative values because of missing data 
 in the first date. Extrapolation can be avoided by using the `i` flag for 
-interpolation only.
+*interpolation only*.
 :::
+
 
 ### Comparison of r.hants and r.series.lwr results
 

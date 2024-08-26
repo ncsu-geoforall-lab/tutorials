@@ -27,7 +27,7 @@ We will focus on the raster oriented tools in this tutorial.
 
 ::: {.callout-note title="Setup"}
 This tutorial can be run locally or in Google Colab. However, make sure you
-install GRASS GIS 8.3+, download the LST sample data and set up your project
+install GRASS GIS 8.4+, download the LST sample data and set up your project
 as explained in the [first part](time_series_management_and_visualization.qmd) 
 of these time series tutorials.
 :::
@@ -161,7 +161,8 @@ gs.run_command("t.rast.algebra",
                nprocs=6)
 ```
 
-We set the *differences* color palette and then create an animation. 
+We set the *differences* color palette for the whole time series and then
+create an animation. 
 
 ```{python}
 # Set difference color table
@@ -181,7 +182,7 @@ anomalies.show()
 
 ### Month with maximum LST
 
-We will use `t.rast.mapcalc` to obtain the month when the maximum LST occurred
+We will use *t.rast.mapcalc* to obtain the month when the maximum LST occurred
 during our study period. We already estimated the map with the maximum LST
 in the previous tutorial, but let's refresh our memories:
 
@@ -193,7 +194,7 @@ gs.run_command("t.rast.series",
                nprocs=4)
 ```
 
-Then, we use t.rast.mapcalc to compare all maps in lst_daily with the lst_maximum
+Then, we use *t.rast.mapcalc* to compare all maps in lst_daily with the lst_maximum
 map and save the month only when there's a match. The result will probably be a
 very sparse time series.
 
@@ -227,12 +228,19 @@ gs.run_command("t.rast.series",
                output="max_lst_date")
 ```
 
-Remover la STRDS intermedia y los mapas que contiene:
+We remove the intermediate time series as we were only interested in the
+resulting aggregated map. For that we use the tool
+[t.remove]() 
+that allow us to control what to remove depending on the combination of flags
+we use. In this case, we want to remove both the time series and maps
+within it, so we use `d` to remove thestrds, unregister maps from temporal
+database and delete them from mapset, and `f` to actually *force* the
+removal.
 
 ```{python}
-# Remove month_max_lst strds; we were only interested in the resulting aggregated map
+# Remove month_max_lst strds
 gs.run_command("t.remove",
-               flags="rfd", # recursive, force, delete
+               flags="df",
                inputs="month_max_lst")
                
 # Check it's gone
@@ -252,7 +260,7 @@ mm.d_text(text="Month of maximum LST", color="black", font="sans", size=4, bgcol
 mm.show()
 ```
 
-::: {.callout-note}
+::: {.callout-caution title="Question"}
 How could we have done the same in one single step? 
 Hint: `t.rast.algebra ... method=during`.
 
@@ -277,24 +285,33 @@ gs.raster_info("result")
 
 :::
 
-
-:::{.callout-caution}
 What if we are interested in knowing the week number in which the annual maximum 
 LST occurs each year? How would you do that? Can we also know if there's any 
 trend in the week number? i.e., does it tend to happen earlier or later?
 
 ```{python}
 # Estimate annual max LST
-!t.rast.aggregate input=lst_daily output=lst_max_annual basename=lst_max method=maximum granularity="1 years" suffix=gran
+gs.run_command("t.rast.aggregate",
+              input="lst_daily",
+              output="lst_max_annual",
+              basename="lst_max",
+              method="maximum",
+              granularity="1 years",
+              suffix=gran)
 
 # Week number
-!t.rast.algebra expression="week_lst_max_annual = if({contains}, lst_max_annual == lst_daily, start_week(lst_daily))" basename=week_lst_max_annual suffix=gran 
+exp="week_lst_max_annual = if({contains}, lst_max_annual == lst_daily, start_week(lst_daily))"
+gs.run_command("t.rast.algebra",
+              expression=exp,
+              basename="week_lst_max_annual",
+              suffix="gran") 
 
 # Is there a trend?
-!t.rast.series input=week_lst_max_annual method=slope output=slope_week_lst_max_annual
+gs.run_command("t.rast.series",
+              input="week_lst_max_annual",
+              method="slope",
+              output="slope_week_lst_max_annual")
 ```
-
-:::
 
 
 ### Number of days with LST >= 20 and <= 30
@@ -353,7 +370,7 @@ h20_map.add_layer_control(position = "bottomright")
 h20_map.show()
 ```
 
-::: {.callout-note}
+::: {.callout-caution title="Question"}
 How would you check if the median number of days with lst >= 20 and <= 30 
 is changing along the years?
 :::

@@ -24,7 +24,7 @@ tools.
 
 ::: {.callout-note title="Setup"}
 This tutorial can be run locally or in Google Colab. However, make sure you
-install GRASS GIS 8.3+, download the LST sample data and set up your project
+install GRASS GIS 8.4+, download the LST sample data and set up your project
 as explained in the [first part](time_series_management_and_visualization.qmd) 
 of these time series tutorials.
 :::
@@ -161,7 +161,7 @@ gs.run_command("t.rast.list",
                 columns="id,min,max")
 ```
 
-Following Neteler et al (2015), if the 1350 DD are achieved on or before August 
+Following Neteler et al (2013), if the 1350 DD are achieved on or before August 
 1st, a place is considered highly suitable for *Aedes albopictus*, while if the
 condition is met after October 1st, the place is not suitable. 
 Everything in between is defined as a linear function of DOY. Once again, we use
@@ -354,13 +354,19 @@ gs.run_command("t.list",
                 where="name LIKE '%gen%'", 
                 output="to_remove.txt")
 gs.run_command("t.remove", 
-                flags="rfd", 
+                flags="df", 
                 file="to_remove.txt")
 ```
 
 
 ## References
 
+- Neteler, M., Metz, M., Rocchini, D., Rizzoli, A., Flacio, E., et al. 2013. 
+_Is Switzerland Suitable for the Invasion ofAedes albopictus?_ PLOS ONE 8(12).
+[DOI](https://doi.org/10.1371/journal.pone.0082090).
+- Kobayashi, M., Nihei, N., Kurihara, T. 2002. 
+_Analysis of Northern Distribution of *Aedes albopictus* (Diptera: Culicidae) in Japan by Geographical Information System._ 
+Journal of Medical Entomology 39(1), 4–11. [DOI](https://doi.org/10.1603/0022-2585-39.1.4).
 - Gebbert, S., Pebesma, E. 2014.
 _TGRASS: A temporal GIS for field based environmental modeling._
 Environmental Modelling & Software 53, 1-12. 

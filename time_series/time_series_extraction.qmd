@@ -24,7 +24,7 @@ series subset, import and export.
 ::: {.callout-note title="Setup"}
 This tutorial can be run locally or in Google Colab. However, make sure you
 install GRASS GIS 8.4+, download the 
-[LST sample project]() 
+[LST sample project](https://zenodo.org/records/3564515) 
 and set up your project as explained in the 
 [first part](time_series_management_and_visualization.qmd) of these time
 series tutorials.
@@ -83,7 +83,7 @@ gs.run_command("t.rast.extract",
 
 If you remember, we went through several listing examples in the "Time series
 management and visualization" tutorial. 
-<!-- add link -->
+<!-- add link: time_series_management_and_visualization.qmd -->
 A way of checking the subset will actually give us what we want, is running 
 [t.rast.list](https://grass.osgeo.org/grass-stable/manuals/t.rast.list.html) 
 with the same `where` condition than above.
@@ -130,10 +130,9 @@ gs.run_command("t.rast.list",
                columns="name,min,max")
 ```
 
-What tools would you use now if you wanted to know how many 
-summer days had temperatures above 25 degrees each year and
-how does the maximum number of days with LST > 25 varies
-regionaly? 
+What tools would you use now if you wanted to know how many summer days had
+temperatures above 25 degrees each year and how does the maximum number of days
+with LST > 25 varies regionally? 
 
 **Small hint?** Go back to the time series aggregation tutorial.
 

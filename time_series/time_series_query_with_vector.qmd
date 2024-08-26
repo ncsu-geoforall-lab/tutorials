@@ -1,6 +1,6 @@
 ---
-title: Time series querying
-author: Veronica Andreo
+title: "Time series querying"
+author: "Veronica Andreo"
 date: today
 format:
   html:
@@ -12,9 +12,6 @@ engine: knitr
 execute:
   eval: false
   keep-ipynb: true
-editor:
-  markdown:
-    wrap: 80
 jupyter: python3
 ---
 
@@ -30,7 +27,7 @@ comparisons:
 ::: {.callout-note title="Setup"}
 This tutorial can be run locally or in Google Colab. However, make sure you
 install GRASS GIS 8.4+, download the 
-[LST sample project]() 
+[LST sample project](https://zenodo.org/records/3564515) 
 and set up your project as explained in the 
 [first part](time_series_management_and_visualization.qmd) of these time
 series tutorials.
@@ -232,7 +229,7 @@ data = gs.parse_command("v.db.select",
 pd.DataFrame(data['records'])
 ```
 
-:::{.callout-note title="Question"}
+:::{.callout-caution title="Question"}
 What would be the result if we use the monthly time series?
 :::
 
@@ -309,6 +306,24 @@ gs.run_command("t.vect.db.select",
 As expected, results are exactly the same! So, if you are constrained by disk
 space for example, you don't need to aggregate your entire strds if you only
 need aggregated values for a set of points.
+
+:::{.callout-note}
+We could have also used 
+[t.sample](https://grass.osgeo.org/grass84/manuals/t.sample.html)
+to check which maps from `lst_daily` would be aggregated in the
+new column `lst_new` above. 
+
+See for yourself and try with different sampling methods:
+
+```{python}
+gs.run_command("t.sample", 
+              input="lst_daily",
+              sample="sp_lst_monthly",
+              intype="strds",
+              samtype="stvds",
+              method="start")
+```
+:::
 
 
 ## Vector tools

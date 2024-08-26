@@ -11,7 +11,7 @@
   - visualizations
 
 - Part 2: 
-  - aggregations + bioclim --> **move granularity definition here**
+  - aggregations + bioclim
   - visualizations
 
 - Part 3: Phenology + seasonality
@@ -28,7 +28,7 @@
   - visualizations
 
 - Part 6:
-  - querying with vectors: t.rast.what, t.vect.observe.strds, t.vect.what.strds, t.rast.what.aggr, v.what.strds.timestamps --> **explain t.sample when I use t.vect.what.strds**
+  - querying with vectors: t.rast.what, t.vect.observe.strds, t.vect.what.strds, t.rast.what.aggr, v.what.strds.timestamps
   - zonal stats: v.strds.stats
 
 - Part 7:
@@ -41,7 +41,7 @@
 
 - Part 8:
   - topology: t.topology, t.shift, t.snap, t.merge, t.select, t.sample
-  - t.copy, t.remove, t.unregister --> **check if I used them, if yes, include explanations where they were used**
+  - t.copy, t.remove, t.unregister
   - t.support
 
 - Part 9:
