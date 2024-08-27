@@ -1,13 +1,14 @@
 ---
 title: "Running GRASS in Jupyter Notebooks in Windows with OSGeo4W"
 author: "Caitlin Haedrich"
-date: today
+date-modified: today
 format:
   html:
     toc: true
     code-tools: true
     code-copy: true
     code-fold: false
+categories: [GRASS GIS, Python, Jypyter, Windows, Basic]
 engine: knitr
 execute:
   eval: false

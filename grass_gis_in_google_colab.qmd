@@ -1,13 +1,14 @@
 ---
 title: "GRASS GIS in Google Colab"
 author: "Veronica Andreo"
-date: today
+date-modified: today
 format: 
   html:
     toc: true
     code-tools: true
     code-copy: true
     code-fold: false
+categories: [GRASS GIS, Python, Jupyter, Google Colab, Intermediate]
 engine: knitr
 execute: 
   eval: false

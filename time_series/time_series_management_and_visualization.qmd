@@ -1,17 +1,17 @@
 ---
-title: Time series management and visualization
-author: Verónica Andreo
-date: today
+title: "Time series management and visualization"
+author: "Verónica Andreo"
+date-modified: today
 format:
   html:
     toc: true
     code-tools: true
     code-copy: true
     code-fold: false
+categories: [GRASS GIS, Time series, raster, Basic, Python]
 engine: knitr
 execute:
   eval: false
-  keep-ipynb: true
 jupyter: python3
 ---
 

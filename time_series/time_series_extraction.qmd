@@ -1,20 +1,17 @@
 ---
-title: 'Time series: Subset, import and export'
-author: Veronica Andreo
-date: today
+title: "Time series: Subset, import and export"
+author: "Veronica Andreo"
+date-modified: today
 format:
   html:
     toc: true
     code-tools: true
     code-copy: true
     code-fold: false
+categories: [GRASS GIS, Time series, raster, Intermediate, Python]
 engine: knitr
 execute:
   eval: false
-  keep-ipynb: true
-editor:
-  markdown:
-    wrap: 80
 jupyter: python3
 ---
 

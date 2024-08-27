@@ -1,16 +1,18 @@
 ---
-title: Fast track to GRASS & Python in Jupyter Notebooks
+title: "Fast track to GRASS & Python in Jupyter Notebooks"
 author: "Veronica Andreo"
-date: today
+date-modified: today
 format: 
   html:
     toc: true
     code-tools: true
     code-copy: true
     code-fold: false
-jupyter: python3
-execute: 
+categories: [GRASS GIS, Python, Jupyter, Intermediate] 
+engine: knitr
+execute:
   eval: false
+jupyter: python3
 ---
 
 Python, a widely used general-purpose, high-level programming language provides

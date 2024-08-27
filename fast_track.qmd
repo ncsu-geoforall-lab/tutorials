@@ -1,13 +1,14 @@
 ---
 title: "Fast track to get you started with GRASS GIS"
 author: "Veronica Andreo"
-date: today
+date-modified: today
 format: 
   html:
     toc: true
     code-tools: true
     code-copy: true
     code-fold: false
+categories: [GRASS GIS, Basic, Get started, Install, Import]
 execute: 
   eval: false
 ---
