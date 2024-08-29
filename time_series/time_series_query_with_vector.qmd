@@ -1,6 +1,7 @@
 ---
 title: "Time series querying"
 author: "Veronica Andreo"
+date: 2024-08-14
 date-modified: today
 format:
   html:

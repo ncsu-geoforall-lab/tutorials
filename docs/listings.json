@@ -1,0 +1,21 @@
+[
+  {
+    "listing": "/index.html",
+    "items": [
+      "/time_series/time_series_extraction.html",
+      "/time_series/time_series_query_with_vector.html",
+      "/time_series/time_series_gap_filling.html",
+      "/time_series/time_series_accumulations.html",
+      "/time_series/time_series_algebra.html",
+      "/time_series/time_series_aggregations.html",
+      "/time_series/time_series_management_and_visualization.html",
+      "/JupyterOnWindows_OSGeo4W_Tutorial.html",
+      "/good_looking_plots_in_grass.html",
+      "/grass_gis_in_google_colab.html",
+      "/quick_comparison_r_vs_python_grass_interfaces.html",
+      "/fast_track_grass_and_R.html",
+      "/fast_track_grass_and_python.html",
+      "/fast_track.html"
+    ]
+  }
+]

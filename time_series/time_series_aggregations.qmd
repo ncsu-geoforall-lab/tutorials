@@ -1,6 +1,7 @@
 ---
 title: "Time series aggregation"
 author: "Verónica Andreo"
+date: 2024-07-23
 date-modified: today
 format:
   html:

@@ -1,6 +1,7 @@
 ---
 title: "Time series algebra"
 author: "Verónica Andreo"
+date: 2024-07-24
 date-modified: today
 format:
   html:

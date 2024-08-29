@@ -1,6 +1,7 @@
 ---
 title: "Fast track to GRASS with R: the rgrass package"
 author: "Veronica Andreo"
+date: 2024-03-29
 date-modified: today
 format: 
   html:

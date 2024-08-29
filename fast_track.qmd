@@ -1,6 +1,7 @@
 ---
 title: "Fast track to get you started with GRASS GIS"
 author: "Veronica Andreo"
+date: 2024-03-19
 date-modified: today
 format: 
   html:

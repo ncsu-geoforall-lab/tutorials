@@ -1,6 +1,7 @@
 ---
 title: "Time series accumulations"
 author: "Veronica Andreo"
+date: 2024-07-26
 date-modified: today
 format:
   html:

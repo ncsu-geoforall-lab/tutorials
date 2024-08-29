@@ -1,6 +1,7 @@
 ---
 title: "Time series: Subset, import and export"
 author: "Veronica Andreo"
+date: 2024-08-19
 date-modified: today
 format:
   html:

@@ -1,0 +1,12 @@
+---
+title: "GRASS Tutorials"
+listing:
+    contents: 
+        - time_series
+        - .
+    sort: "date desc"
+    type: default
+    categories: true
+page-layout: full
+title-block-banner: false
+---

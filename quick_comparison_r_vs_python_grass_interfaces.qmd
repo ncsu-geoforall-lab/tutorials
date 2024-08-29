@@ -1,6 +1,7 @@
 ---
 title: "Quick comparison: R and Python GRASS packages"
 author: "Veronica Andreo"
+date: 2024-04-01
 date-modified: today
 format: 
   html:
