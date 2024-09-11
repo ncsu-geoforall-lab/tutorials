@@ -120,7 +120,7 @@ same extent and resolution of the map provided.
 If you wish to change the computational region later on, you can use the 
 `g.region` GRASS tool with `execGRASS("g.region --h")`.
 
-Optionally, we can specify which GRASS binary to use with `grassBin`. This might
+Optionally, we can specify which GRASS binary to use with `gisBase`. This might
 be useful in case we have several GRASS versions on our system. If not provided,
 `initGRASS()` will attempt to find it in default locations depending on your
 operating system.
@@ -179,6 +179,8 @@ further analysis or write them into other raster formats, in which case we use
 ```{r}
 plot(grass_maps)
 ```
+
+![](img/R_aspect_slope.png){.preview-image width=60%}
 
 ```{r}
 writeRaster(grass_maps, "grass_maps.tif", overwrite=TRUE)

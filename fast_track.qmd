@@ -71,7 +71,7 @@ simple **Python console** where you can use the GRASS Python API.
 ::: {.callout-note}
 See this example of the GRASS GIS single window GUI with multiple map displays:
 
-![](img/grass_gui_multiple_map_displays.png){width=50%}
+![](img/grass_gui_multiple_map_displays.png){.preview-image width=50%}
 :::
 
 ## Step 3: Create a project
