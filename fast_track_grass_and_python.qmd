@@ -205,7 +205,7 @@ m.show()
 ```
 
 Next step is to do some **processing or analysis** with the imported data.
-Since, we'll be creating new raster maps, we first
+Since we'll be creating new raster maps, we first
 need to set our *computational region* to the extent and resolution of one of our
 imported bands.
 
