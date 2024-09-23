@@ -10,20 +10,20 @@ format:
     code-copy: true
     code-fold: false
 categories: [GRASS GIS, Time series, raster, Intermediate, Python]
-engine: knitr
+engine: jupyter
 execute:
   eval: false
 jupyter: python3
 ---
 
-In this seventh part of the time series tutorials, we will go through time
+In this seventh time series tutorial, we will go through time
 series subset, import and export.
 
 ::: {.callout-note title="Setup"}
 This tutorial can be run locally or in Google Colab. However, make sure you
-install GRASS GIS 8.4+, download the 
-[LST sample project](https://zenodo.org/records/3564515) 
-and set up your project as explained in the 
+install GRASS GIS 8.4+, download the
+[LST sample project](https://zenodo.org/doi/10.5281/zenodo.3564514)
+and set up your project as explained in the
 [first part](time_series_management_and_visualization.qmd) of these time
 series tutorials.
 :::
@@ -35,33 +35,25 @@ import os
 import sys
 import subprocess
 
-# GRASS GIS database variables
-grassbin = "grass-dev"
-grassdata = os.path.join(os.path.expanduser('~'), "grassdata")
-project = "eu_laea"
-mapset = "italy_LST_daily"
-
+# Ask GRASS GIS where its Python packages are
 sys.path.append(
-    subprocess.check_output([grassbin, "--config", "python_path"], text=True).strip()
+    subprocess.check_output(["grass", "--config", "python_path"], text=True).strip()
 )
-```
-
-```{python}
-#| echo: false
-
 # Import the GRASS GIS packages we need
 import grass.script as gs
 import grass.jupyter as gj
 
+path_to_project = "italy_eu_laea/italy_LST_daily"
+
 # Start the GRASS GIS Session
-session = gj.init(grassdata, project, mapset);
+session = gj.init(path_to_project)
 ```
 
 ## Subset
 
-For extracting a subset from a strds, we use 
+For extracting a subset from a strds, we use
 [t.rast.extract](https://grass.osgeo.org/grass-stable/manuals/t.rast.mapcalc.html).
-The subset is based on temporal variables like `start_time`, `start_doy`, 
+The subset is based on temporal variables like `start_time`, `start_doy`,
 `end_week`, etc.
 This tool outputs a new strds and offers the possibility to apply a
 mapcalc operation on the fly. If no *r.mapcalc* expression is defined,
@@ -69,8 +61,8 @@ the selected maps are simply registered in the new created output strds
 to avoid data duplication.
 
 Let's see a couple of examples. Suppose we are only interested in summer months,
-i.e., June, July, August. The maps matching the where condition will be  
-registered in the new output strds. 
+i.e., June, July, August. The maps matching the where condition will be
+registered in the new output strds.
 
 ```{python}
 gs.run_command("t.rast.extract",
@@ -79,12 +71,11 @@ gs.run_command("t.rast.extract",
                where="strftime('%m',start_time)='06' or strftime('%m',start_time)='07' or strftime('%m', start_time)='08'")
 ```
 
-If you remember, we went through several listing examples in the "Time series
-management and visualization" tutorial. 
-<!-- add link: time_series_management_and_visualization.qmd -->
-A way of checking the subset will actually give us what we want, is running 
-[t.rast.list](https://grass.osgeo.org/grass-stable/manuals/t.rast.list.html) 
-with the same `where` condition than above.
+If you remember, we went through several listing examples in the
+[Time series management and visualization](time_series_management_and_visualization.qmd) tutorial.
+To check the subset will actually give us what we want, we can run
+[t.rast.list](https://grass.osgeo.org/grass-stable/manuals/t.rast.list.html)
+with the same `where` condition as above.
 
 ```{python}
 #| scrolled: true
@@ -93,7 +84,7 @@ gs.run_command("t.rast.list",
                columns="name,min,max")
 ```
 
-To check whether a map is registered in different stds, we can use 
+To check whether a map is registered in different stds, we can use
 [t.info](https://grass.osgeo.org/grass-stable/manuals/t.info.html).
 
 ```{python}
@@ -102,12 +93,12 @@ gs.run_command("t.info",
                type="raster")
 ```
 
-Let's see now an example including a mapcalc operation. We still want the daily 
+Let's see now an example including a mapcalc operation. We still want the daily
 maps of summer, but we are only interested in areas where LST was higher than
 25 degrees.
-Note that in this second case, we created a new strds, i.e., we modified the 
+Note that in this second case, we created a new strds, i.e., we modified the
 original with the mapcalc expression, so we need to provide basename and suffix
-for the newly created maps. 
+for the newly created maps.
 
 ```{python}
 gs.run_command("t.rast.extract",
@@ -130,7 +121,7 @@ gs.run_command("t.rast.list",
 
 What tools would you use now if you wanted to know how many summer days had
 temperatures above 25 degrees each year and how does the maximum number of days
-with LST > 25 varies regionally? 
+with LST > 25 varies regionally?
 
 **Small hint?** Go back to the time series aggregation tutorial.
 
@@ -155,7 +146,7 @@ gs.run_command("t.rast.series",
 
 ```{python}
 # Mask zero values
-gs.run_command("r.mask", 
+gs.run_command("r.mask",
                raster="max_count_summer_days_lst_higher_25",
                maskcats=0,
                flags="i")
@@ -163,13 +154,12 @@ gs.run_command("r.mask",
 
 ```{python}
 # Visualize the result
-max_count = gj.InteractiveMap(width = 500, use_region=True, tiles="CartoDB.DarkMatter")
+max_count = gj.InteractiveMap(tiles="CartoDB.DarkMatter")
 max_count.add_raster("max_count_summer_days_lst_higher_25")
-max_count.add_layer_control(position = "bottomright")
 max_count.show()
 ```
 
-## Export 
+## Export
 
 There are three tools to export raster time series in different formats.
 
@@ -181,14 +171,14 @@ Let's see some examples.
 
 ```{python}
 # Export strds as an archive
-gs.run_command("t.rast.export", 
-               input="lst_daily_summer", 
+gs.run_command("t.rast.export",
+               input="lst_daily_summer",
                output="lst_daily_summer_2014.tar.bzip2",
                where="start_time < '2015-01-01'")
 ```
 
 ```{python}
-!tar xvjf lst_daily_summer_2014.tar.bzip2
+!tar tjf lst_daily_summer_2014.tar.bzip2
 ```
 
 ```
@@ -216,8 +206,7 @@ The tool *t.rast.out.xyz* is an addon, so we first need to install it with *g.ex
 
 ```{python}
 # Install extension
-gs.run_command("g.extension",
-               extension="t.rast.out.xyz")
+gs.run_command("g.extension", extension="t.rast.out.xyz")
 ```
 
 ```{python}
@@ -234,6 +223,7 @@ gs.run_command("t.rast.out.xyz",
 ## Import
 
 There are two tools to import raster time series into GRASS GIS:
+
 * [t.rast.import](https://grass.osgeo.org/grass-stable/manuals/t.rast.import.html) imports strds that were exported with *t.rast.export*. It allows to create a new GRASS project with the imported data CRS and set the computational region to the raster maps imported.
 * [t.rast.import.netcdf](https://grass.osgeo.org/grass-stable/manuals/addons/t.rast.import.netcdf.html) imports the content of one or more netCDF files that adhere to the CF convention into a strds. Data can be imported or linked via [r.external](https://grass.osgeo.org/grass-stable/manuals/r.external.html).
 
@@ -266,10 +256,10 @@ While not covered in this tutorial, there are also dedicated tools for subsettin
 
 - Gebbert, S., Pebesma, E. 2014.
 _TGRASS: A temporal GIS for field based environmental modeling._
-Environmental Modelling & Software 53, 1-12. 
+Environmental Modelling & Software 53, 1-12.
 [DOI](http://dx.doi.org/10.1016/j.envsoft.2013.11.001).
 - Gebbert, S., Pebesma, E. 2017. _The GRASS GIS temporal framework._
-International Journal of Geographical Information Science 31, 1273-1292. 
+International Journal of Geographical Information Science 31, 1273-1292.
 [DOI](http://dx.doi.org/10.1080/13658816.2017.1306862).
 - [Temporal data processing](https://grasswiki.osgeo.org/wiki/Temporal_data_processing) wiki page.
 
@@ -277,8 +267,8 @@ International Journal of Geographical Information Science 31, 1273-1292.
 ***
 
 :::{.smaller}
-The development of this tutorial was funded by the US 
-[National Science Foundation (NSF)](https://www.nsf.gov/), 
+The development of this tutorial was funded by the US
+[National Science Foundation (NSF)](https://www.nsf.gov/),
 award [2303651](https://www.nsf.gov/awardsearch/showAward?AWD_ID=2303651).
 :::
 
