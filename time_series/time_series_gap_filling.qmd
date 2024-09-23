@@ -50,7 +50,7 @@ sys.path.append(
 import grass.script as gs
 import grass.jupyter as gj
 
-path_to_project = "eu_laea/italy_LST_daily"
+path_to_project = "italy_eu_laea/italy_LST_daily"
 
 # Start the GRASS GIS Session
 session = gj.init(path_to_project)
