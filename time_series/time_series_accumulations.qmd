@@ -45,7 +45,7 @@ sys.path.append(
 import grass.script as gs
 import grass.jupyter as gj
 
-path_to_project = "eu_laea/italy_LST_daily"
+path_to_project = "italy_eu_laea/italy_LST_daily"
 
 # Start the GRASS GIS Session
 session = gj.init(path_to_project)
@@ -199,7 +199,7 @@ print(f"The increase in suitable area was {change: .1f} %")
 ## [t.rast.accdetect](https://grass.osgeo.org/grass-stable/manuals/t.rast.accdetect.html)
 
 *t.rast.accdetect* is used to detect accumulation patterns in temporally
-accumulated STDRS created by t.rast.accumulate. The start and end time do not
+accumulated STDRS created by *t.rast.accumulate*. The start and end time do not
 need to be the same but the cycle and offset options must be exactly the same
 that were used in the accumulation process that generated the input STRDS.
 Minimum and maximum values for pattern detection can be set either by using
