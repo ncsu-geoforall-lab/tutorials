@@ -10,26 +10,26 @@ format:
     code-copy: true
     code-fold: false
 categories: [GRASS GIS, Time series, raster, vector, Advanced, Python]
-engine: knitr
+engine: jupyter
 execute:
   eval: false
 jupyter: python3
 ---
 
-In this sixth part of the time series tutorials, we will go through time series
-querying and compare and contrast the different tools available according to 
-their inputs, outputs and other options. 
-We will split tools into two groups according to their name to facilitate 
+In this sixth time series tutorial, we will go through time series
+querying and compare and contrast the different tools available according to
+their inputs, outputs and other options.
+We will split tools into two groups according to their name to facilitate
 comparisons:
 
-- temporal tools: [t.rast.what](https://grass.osgeo.org/grass-stable/manuals/t.rast.what.html), [t.rast.what.aggr](https://grass.osgeo.org/grass-stable/manuals/addons/t.rast.what.aggr.html),[t.vect.observe.strds](https://grass.osgeo.org/grass-stable/manuals/t.vect.observe.strds.html), [t.vect.what.strds](https://grass.osgeo.org/grass-stable/manuals/t.vect.what.strds.html) and, 
+- temporal tools: [t.rast.what](https://grass.osgeo.org/grass-stable/manuals/t.rast.what.html), [t.rast.what.aggr](https://grass.osgeo.org/grass-stable/manuals/addons/t.rast.what.aggr.html),[t.vect.observe.strds](https://grass.osgeo.org/grass-stable/manuals/t.vect.observe.strds.html), [t.vect.what.strds](https://grass.osgeo.org/grass-stable/manuals/t.vect.what.strds.html) and,
 - vector tools: [v.what.strds](https://grass.osgeo.org/grass-stable/manuals/v.what.strds.html), [v.what.strds.timestamp](https://grass.osgeo.org/grass-stable/manuals/addons/v.what.strds.timestamp.html), [v.strds.stats](https://grass.osgeo.org/grass-stable/manuals/addons/v.strds.stats.html).
 
 ::: {.callout-note title="Setup"}
 This tutorial can be run locally or in Google Colab. However, make sure you
-install GRASS GIS 8.4+, download the 
-[LST sample project](https://zenodo.org/records/3564515) 
-and set up your project as explained in the 
+install GRASS GIS 8.4+, download the
+[LST sample project](https://zenodo.org/doi/10.5281/zenodo.3564514)
+and set up your project as explained in the
 [first part](time_series_management_and_visualization.qmd) of these time
 series tutorials.
 :::
@@ -41,38 +41,30 @@ import os
 import sys
 import subprocess
 
-# GRASS GIS database variables
-grassbin = "grass-dev"
-grassdata = os.path.join(os.path.expanduser('~'), "grassdata")
-project = "eu_laea"
-mapset = "italy_LST_daily"
-
+# Ask GRASS GIS where its Python packages are
 sys.path.append(
-    subprocess.check_output([grassbin, "--config", "python_path"], text=True).strip()
+    subprocess.check_output(["grass", "--config", "python_path"], text=True).strip()
 )
-```
-
-```{python}
-#| echo: false
-
 # Import the GRASS GIS packages we need
 import grass.script as gs
 import grass.jupyter as gj
 
+path_to_project = "italy_eu_laea/italy_LST_daily"
+
 # Start the GRASS GIS Session
-session = gj.init(grassdata, project, mapset);
+session = gj.init(path_to_project)
 ```
 
 ## Temporal tools
 
-All the temporal tools that allow to query raster time series take either 
-coordinates or a point vector map as inputs to sample one or various STRDS. 
+All the temporal tools that allow to query raster time series take either
+coordinates or a point vector map as inputs to sample one or various STRDS.
 Regarding outputs, the *t.rast.\** tools retrieve values to stdout, write
-them in plain text files or update the vector attribute table. In contrast, 
+them in plain text files or update the vector attribute table. In contrast,
 the *t.vect.\** tools output vector time series. Only two of these tools
-allow to do queries with temporal aggregation of the raster data either 
+allow to do queries with temporal aggregation of the raster data either
 according to a fixed date or a date column in the case of
-*t.rast.what.aggr* or with temporal topology relations in the case of 
+*t.rast.what.aggr* or with temporal topology relations in the case of
 *t.vect.what.strds*.
 
 
@@ -89,13 +81,13 @@ according to a fixed date or a date column in the case of
 | temporal aggr |  | yes |  | yes |
 | example | t.rast.what -n strds=A points=points output=result.txt layout=row | t.rast.what.aggr input=points strds=A date="2015-05-01" granularity="2 months" | t.vect.observe.strds input=points strds=A output=points_stvds vector_output=points_vector columns=A_values | t.vect.what.strds input=points strds=A column=A_values method=average |
 
-Let's see some examples. We will first randomly extract the centroids of 15 
+Let's see some examples. We will first randomly extract the centroids of 15
 Italian regions in our study area and save them as a point vector map to
 query the raster time series afterwards.
 
 ```{python}
 # Create 15 random points and add attr table
-gs.run_command("v.random", 
+gs.run_command("v.random",
                output="sampling_points",
                npoints=15,
                restrict="italy_borders_2_clip",
@@ -107,7 +99,7 @@ gs.run_command("v.db.addtable",
 
 ```{python}
 # Display polygons and points
-points = gj.Map(height = 500)
+points = gj.Map()
 points.d_vect(map="italy_borders_2_clip", type="boundary")
 points.d_vect(map="sampling_points", icon="basic/circle", size=8)
 points.d_barscale()
@@ -123,8 +115,8 @@ points.save("points.png")
 
 ```{python}
 # Calculate monthly LST time series
-gs.run_command("t.rast.aggregate", 
-               input="lst_daily", 
+gs.run_command("t.rast.aggregate",
+               input="lst_daily",
                output="lst_monthly",
                basename="lst_monthly",
                granularity="1 month",
@@ -163,16 +155,16 @@ x|y|start|end|value
 ```
 
 ::: {.callout-note title="Layouts"}
-Users can then play around with the different output layouts, i.e., 
+Users can then play around with the different output layouts, i.e.,
 *row, column, timerow*, to find the one that better suits their data
-pipelines. 
+pipelines.
 :::
 
 Now, to exemplify the use of *t.rast.what.aggr* imagine we did some mosquito
-trappings in two different dates and we need to know which was the average
+trappings at the 15 sites at two different dates and we need to know which was the average
 LST the two months before the trappings. Since the dates are different, we
-actually need to aggregate different days. This is done on the fly (i.e., 
-without the need to aggregate the whole raster time series) by the extension 
+actually need to aggregate different days. This is done on the fly (i.e.,
+without the need to aggregate the whole raster time series) by the extension
 *t.rast.what.aggr*. Let's install it and add dates to our point vector map.
 
 ```{python}
@@ -182,13 +174,13 @@ gs.run_command("g.extension", extension="t.rast.what.aggr")
 
 ```{python}
 # Add a new date type column
-gs.run_command("v.db.addcolumn", 
+gs.run_command("v.db.addcolumn",
                map="sampling_points",
                column="sampling_date date")
-               
+
 # Add values to the date column
-gs.run_command("v.db.update", 
-               map="sampling_points", 
+gs.run_command("v.db.update",
+               map="sampling_points",
                column="sampling_date",
                value="2018-07-01")
 gs.run_command("v.db.update",
@@ -203,30 +195,30 @@ gs.run_command("v.db.update",
 gs.vector_db_select("sampling_points")
 ```
 
-We will use the daily time series in this case to get the aggregation 
+We will use the daily time series in this case to get the aggregation
 period right.
 
 ```{python}
 # Get aggregated LST values
-gs.run_command("t.rast.what.aggr", 
-               input="sampling_points", 
-               strds="lst_daily", 
+gs.run_command("t.rast.what.aggr",
+               input="sampling_points",
+               strds="lst_daily",
                date_column="sampling_date",
                granularity="2 months",
                method="average",
                flags="c")
 ```
 
-Let's display the result by converting the attribute table into a Pandas 
+Let's display the result by converting the attribute table into a Pandas
 DataFrame.
 
 ```{python}
 import pandas as pd
 
-data = gs.parse_command("v.db.select", 
-                        map="sampling_points", 
+data = gs.parse_command("v.db.select",
+                        map="sampling_points",
                         format="json")
-                        
+
 pd.DataFrame(data['records'])
 ```
 
@@ -234,15 +226,15 @@ pd.DataFrame(data['records'])
 What would be the result if we use the monthly time series?
 :::
 
-Let's demonstrate now the use of *t.vect.observe.strds* and 
-*t.vect.what.strds*. These tools, as mentioned above, output a vector 
-time series or stvds. Vector time series in GRASS GIS can be created either 
-from a series of vector maps (especially if features/geometries vary in time) 
-or from layers added to a single vector map (i.e., features are always the 
+Let's demonstrate now the use of *t.vect.observe.strds* and
+*t.vect.what.strds*. These tools, as mentioned above, output a vector
+time series or stvds. Vector time series in GRASS GIS can be created either
+from a series of vector maps (especially if features/geometries vary in time)
+or from layers added to a single vector map (i.e., features are always the
 same, as in the case of meteorological stations).
 
-We start with *t.vect.observe.strds*. It will create a new vector map with 
-as many layers as raster maps there are in the strds we are querying and it 
+We start with *t.vect.observe.strds*. It will create a new vector map with
+as many layers as raster maps there are in the strds we are querying and it
 will register these in a stvds.
 
 ```{python}
@@ -279,22 +271,22 @@ gs.run_command("t.vect.db.select",
 ```
 
 Let's now compare the values obtained by querying the monthly LST time series
-with those resulting from aggregating the daily LST time series. They should 
-be the same. For that we need to specify the sampling relation. The temporal 
+with those resulting from aggregating the daily LST time series. They should
+be the same. For that we need to specify the sampling relation. The temporal
 tool that allows to specify sampling relations and do temporal aggregation is
-*t.vect.what.strds*. It requires a stvds as input, so we'll use the one we 
-just obtained above. We also specify the *start* relation, so all maps in the 
-strds which start time matches the stvds will be aggregated. Let's see this 
+*t.vect.what.strds*. It requires a stvds as input, so we'll use the one we
+just obtained above. We also specify the *start* relation, so all maps in the
+strds which start time matches the stvds will be aggregated. Let's see this
 graphically before running the tool.
 
 ![](img/comparison_of_granularities.png)
 
 ```{python}
-gs.run_command("t.vect.what.strds", 
-               input="sp_lst_monthly", 
-               strds="lst_daily", 
-               column="lst_new", 
-               method="average", 
+gs.run_command("t.vect.what.strds",
+               input="sp_lst_monthly",
+               strds="lst_daily",
+               column="lst_new",
+               method="average",
                sampling="start")
 ```
 
@@ -309,15 +301,15 @@ space for example, you don't need to aggregate your entire strds if you only
 need aggregated values for a set of points.
 
 :::{.callout-note}
-We could have also used 
+We could have also used
 [t.sample](https://grass.osgeo.org/grass84/manuals/t.sample.html)
 to check which maps from `lst_daily` would be aggregated in the
-new column `lst_new` above. 
+new column `lst_new` above.
 
 See for yourself and try with different sampling methods:
 
 ```{python}
-gs.run_command("t.sample", 
+gs.run_command("t.sample",
               input="lst_daily",
               sample="sp_lst_monthly",
               intype="strds",
@@ -331,10 +323,10 @@ gs.run_command("t.sample",
 
 The main difference between temporal and vector tools to query raster time
 series is that vector tools can update the attribute table of the input vector
-without creating more layers. Regarding inputs, both *v.what.strds* and 
+without creating more layers. Regarding inputs, both *v.what.strds* and
 *v.what.strds.timestamp* take a point vector map as input, while *v.strds.stats*
-takes a line or polygon vector map and performs spatial aggregation, 
-i.e. zonal stats over the full or a part of the strds. 
+takes a line or polygon vector map and performs spatial aggregation,
+i.e. zonal stats over the full or a part of the strds.
 The extension *v.what.strds.timestamp*, somehow similar to *t.rast.what.aggr*,
 offers the possibility of reading input points' date information from a column
 in the attribute table and only performs the query for the dates that match. It
@@ -357,7 +349,7 @@ also offers spatial interpolation of the four nearest pixels.
 
 
 Let's go through the usage of the vector tools to query raster time series now.
-When we run *v.what.strds* to query strds we can either save the results in 
+When we run *v.what.strds* to query strds we can either save the results in
 a new vector map or update the input vector attribute table by setting the
 `u` flag. In this case, we'll create a new vector map and do a temporal
 selection.
@@ -371,20 +363,20 @@ gs.run_command("v.what.strds",
                t_where="start_time <= '2015-01-01'")
 ```
 
-Let's check the new vector created. It contains a new column per map in the 
+Let's check the new vector created. It contains a new column per map in the
 queried strds.
 
 ```{python}
-data = gs.parse_command("v.db.select", 
-                        map="sp_lst_monthly_2014", 
+data = gs.parse_command("v.db.select",
+                        map="sp_lst_monthly_2014",
                         format="json")
-                        
+
 pd.DataFrame(data['records'])
 ```
 
 The tool *v.what.strds.timestamp* is an extension so we need to install it first.
-It will by default update the input vector attribute table with a column that 
-needs to be specified by the user. Furthermore, it offers spatial interpolation 
+It will by default update the input vector attribute table with a column that
+needs to be specified by the user. Furthermore, it offers spatial interpolation
 of the four nearest cells via the `i` flag. Let's compare the results with and
 without it.
 
@@ -400,7 +392,7 @@ gs.run_command("v.what.strds.timestamp",
                column="lst_sampling_date_i",
                strds="lst_daily",
                flags="i")
-               
+
 # without spatial interp of neighbor cells
 gs.run_command("v.what.strds.timestamp",
                input="sampling_points",
@@ -412,16 +404,16 @@ gs.run_command("v.what.strds.timestamp",
 Let's check the results.
 
 ```{python}
-data = gs.parse_command("v.db.select", 
-                        map="sampling_points", 
+data = gs.parse_command("v.db.select",
+                        map="sampling_points",
                         format="json")
-                        
+
 pd.DataFrame(data['records'])
 ```
 
 Finally, we'll extract zonal statistics of a raster time series. For this, we
 need either a line or polygon vector map as input. We'll use the map of
-italian municipalities and demonstrate the use of spatial (`where`) and temporal 
+italian municipalities and demonstrate the use of spatial (`where`) and temporal
 (`t_where`) selection.
 
 ```{python}
@@ -444,14 +436,14 @@ gs.run_command("v.strds.stats",
 gs.vector_db_select("milano_lst_august")["values"]
 ```
 
-Let's now try to find out which municipality in northern Italy had the highest 
-August average temperature each year? 
+Let's now try to find out which municipality in northern Italy had the highest
+August average temperature each year?
 
 ```{python}
 # Clip municipalities to computational region
-gs.run_command("v.clip", 
-               input="italy_borders_3", 
-               output="italy_borders_3_clip", 
+gs.run_command("v.clip",
+               input="italy_borders_3",
+               output="italy_borders_3_clip",
                flags="r")
 ```
 
@@ -467,10 +459,10 @@ gs.run_command("v.strds.stats",
 
 ```{python}
 # Check the output table
-data = gs.parse_command("v.db.select", 
-                        map="municip_lst_august", 
+data = gs.parse_command("v.db.select",
+                        map="municip_lst_august",
                         format="json")
-                        
+
 table = pd.DataFrame(data['records'])
 table
 ```
@@ -485,13 +477,13 @@ results = {}
 for col in cols:
     # Find the maximum value in the column
     max_value = table[col].max()
-    
+
     # Find the index of the row with the maximum value
     max_index = table[col].idxmax()
-    
+
     # Find the corresponding value in column 'D'
     municipality = table.loc[max_index, "NAME_3"]
-    
+
     # Store the results
     results[col] = {'max_value': max_value, 'municipality': municipality}
 
@@ -500,7 +492,6 @@ for col, res in results.items():
     print(f"Column '{col}':")
     print(f"  Maximum value: {res['max_value']}")
     print(f"  Municipality name: {res['municipality']}")
-    print()
 ```
 
 The highest average temperature in August varied among years and municipalities, however, Campi Bisenzio in the province of Florence, had the highest value both in 2016 and 2017.
@@ -510,10 +501,10 @@ The highest average temperature in August varied among years and municipalities,
 
 - Gebbert, S., Pebesma, E. 2014.
 _TGRASS: A temporal GIS for field based environmental modeling._
-Environmental Modelling & Software 53, 1-12. 
+Environmental Modelling & Software 53, 1-12.
 [DOI](http://dx.doi.org/10.1016/j.envsoft.2013.11.001).
 - Gebbert, S., Pebesma, E. 2017. _The GRASS GIS temporal framework._
-International Journal of Geographical Information Science 31, 1273-1292. 
+International Journal of Geographical Information Science 31, 1273-1292.
 [DOI](http://dx.doi.org/10.1080/13658816.2017.1306862).
 - [Temporal data processing](https://grasswiki.osgeo.org/wiki/Temporal_data_processing) wiki page.
 
@@ -521,8 +512,8 @@ International Journal of Geographical Information Science 31, 1273-1292.
 ***
 
 :::{.smaller}
-The development of this tutorial was funded by the US 
-[National Science Foundation (NSF)](https://www.nsf.gov/), 
+The development of this tutorial was funded by the US
+[National Science Foundation (NSF)](https://www.nsf.gov/),
 award [2303651](https://www.nsf.gov/awardsearch/showAward?AWD_ID=2303651).
 :::
 
