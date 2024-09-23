@@ -10,7 +10,7 @@ format:
     code-copy: true
     code-fold: false
 categories: [GRASS GIS, Time series, raster, Basic, Python]
-engine: knitr
+engine: jupyter
 execute:
   eval: false
 jupyter: python3
@@ -61,9 +61,9 @@ scheme. In this way, we have:
 To run this tutorial locally or in Google Colab, you should install
 GRASS GIS 8.4+, and download the 
 [daily MODIS LST project](https://zenodo.org/records/3564515).
-This project contains average daily MODIS LST data reconstructed by
-[mundialis GmbH & Co. KG](https://www.mundialis.de/en/) based on
-Metz et al (2017).
+This project contains average daily MODIS LST (Land Surface Temperature) data
+reconstructed by [mundialis GmbH & Co. KG](https://www.mundialis.de/en/)
+based on Metz et al (2017).
 
 Follow the [Fast track to GRASS GIS]() and [GRASS in Colab]() tutorials to
 get you started.
