@@ -28,7 +28,7 @@ comparisons:
 ::: {.callout-note title="Setup"}
 This tutorial can be run locally or in Google Colab. However, make sure you
 install GRASS GIS 8.4+, download the
-[LST sample project](https://zenodo.org/records/3564515)
+[LST sample project](https://zenodo.org/doi/10.5281/zenodo.3564514)
 and set up your project as explained in the
 [first part](time_series_management_and_visualization.qmd) of these time
 series tutorials.
@@ -49,7 +49,7 @@ sys.path.append(
 import grass.script as gs
 import grass.jupyter as gj
 
-path_to_project = "eu_laea/italy_LST_daily"
+path_to_project = "italy_eu_laea/italy_LST_daily"
 
 # Start the GRASS GIS Session
 session = gj.init(path_to_project)
